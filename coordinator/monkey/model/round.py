@@ -8,3 +8,4 @@ class Round(db.Base):
 
     id = sa.Column(sa.Integer, primary_key=True)
     task_id = sa.Column(sa.Integer, index=True, nullable=False)
+    round_id = sa.Column(sa.Integer, nullable=False)

@@ -32,8 +32,6 @@ MANIFEST
 # vscode
 .vscode
 
-db*/
-storage*/
-config_files/
-data*/
+config/
 whls/
+db/

@@ -6,4 +6,4 @@ COPY whls /app/whls
 
 RUN pip install --no-cache-dir whls/*.whl &&  rm -rf whls
 
-CMD [ "coordinator_start" ]
+ENTRYPOINT [ "coordinator_start" ]

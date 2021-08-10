@@ -35,18 +35,17 @@ setup(
     include_package_data=True,
     exclude_package_data={"": [".gitignore"]},
     install_requires=[
-        'pydantic==1.8.2',
-        'SQLAlchemy==1.4.21',
-        'uvicorn==0.14.0',
         'pytest==6.2.4',
-        'fastapi==0.68.0',
+        'SQLAlchemy==1.4.21',
+        'grpcio==1.39.0',
         'PyYAML==5.4.1',
+        'protobuf==3.17.3',
     ],
     tests_require=["pytest"],
     cmdclass={"test": PyTest},
     test_suite="tests",
     entry_points={
-        'console_scripts': ['coordinator_start=coordinator.app:main']
+        'console_scripts': ['coordinator_start=coordinator.main:main']
     },
     zip_safe=False,
     author="miaohong",

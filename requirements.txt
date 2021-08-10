@@ -1,6 +1,5 @@
-pydantic==1.8.2
-SQLAlchemy==1.4.21
-uvicorn==0.14.0
 pytest==6.2.4
-fastapi==0.68.0
+SQLAlchemy==1.4.21
+grpcio==1.39.0
 PyYAML==5.4.1
+protobuf==3.17.3
