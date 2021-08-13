@@ -4,7 +4,7 @@ import grpc
 from tenacity import (retry, retry_if_exception_type, stop_after_attempt,
                       wait_fixed)
 
-from ..event import Event
+from ..utils import Event
 from . import mpc_pb2, mpc_pb2_grpc
 
 

@@ -9,3 +9,9 @@ class Event(object):
     task_id: int = 0
     epoch: int = 0
     key: str = ""
+
+
+@dataclass
+class Node(object):
+    id: str
+    url: str

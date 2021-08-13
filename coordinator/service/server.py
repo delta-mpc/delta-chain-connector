@@ -20,6 +20,28 @@ _logger = logging.getLogger(__name__)
 
 
 class Servicer(chain_pb2_grpc.ChainServicer):
+    def GetNodes(self, request, context):
+        page = request.page
+        page_size = request.page_size
+        if page == 0:
+            page = 1
+        if page_size == 0:
+            page_size = 20
+
+        try:
+            nodes = impl.get_nodes(page, page_size)
+            res = [chain_pb2.Node(id=node.id, url=node.url) for node in nodes]
+            return chain_pb2.NodesResp(nodes=res)
+        except ValueError as e:
+            _logger.exception(e)
+            context.abort(grpc.StatusCode.INTERNAL, str(e))
+        except Exception as e:
+            _logger.exception(e)
+            context.abort(grpc.StatusCode.INTERNAL, str(e))
+
+
+
+
     def RegisterNode(self, request, context):
         url = request.url
         try:

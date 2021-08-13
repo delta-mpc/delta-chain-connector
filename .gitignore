@@ -34,4 +34,4 @@ MANIFEST
 
 config/
 whls/
-db/
+db/*.db

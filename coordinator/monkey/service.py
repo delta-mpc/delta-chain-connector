@@ -1,13 +1,12 @@
 from collections import defaultdict
 from queue import Queue
-from typing import Iterable, DefaultDict
+from typing import DefaultDict, Iterable, List
 
 from sqlalchemy.orm import Session
-from sqlalchemy.sql.expression import desc, select
+from sqlalchemy.sql.expression import desc
 
+from ..utils import Event, Node
 from . import db, model
-from ..event import Event
-
 
 _event_queues: DefaultDict[str, Queue] = defaultdict(Queue)
 
@@ -15,6 +14,20 @@ _event_queues: DefaultDict[str, Queue] = defaultdict(Queue)
 def _publish_event(event: Event):
     for q in _event_queues.values():
         q.put(event)
+
+
+@db.with_session
+def get_nodes(page: int = 1, page_size: int = 20, *, session: Session = None) -> List[Node]:
+    assert session is not None
+    nodes = (
+        session.query(model.Node)
+        .order_by(model.Node.id)
+        .limit(page_size)
+        .offset((page - 1) * page_size)
+        .all()
+    )
+    res = [Node(id=str(node.id), url=node.url) for node in nodes]
+    return res
 
 
 @db.with_session

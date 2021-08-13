@@ -1,4 +1,5 @@
 from .service import (
+    get_nodes,
     register_node,
     create_task,
     join_task,

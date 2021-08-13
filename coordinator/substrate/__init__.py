@@ -1,7 +1,7 @@
-from typing import Optional, Iterable
+from typing import List, Optional, Iterable
 from .client import Client
 from .. import config
-from ..event import Event
+from ..utils import Event, Node
 
 _client: Optional[Client] = None
 
@@ -9,6 +9,10 @@ _client: Optional[Client] = None
 def init():
     global _client
     _client = Client(config.substrate_address)
+
+
+def get_nodes(page: int = 1, page_size: int = 20) -> List[Node]:
+    return []
 
 
 def register_node(url: str) -> str:
