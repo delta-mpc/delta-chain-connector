@@ -1,6 +1,8 @@
 from collections import defaultdict
-from queue import Queue
+from queue import Queue, Empty
 from typing import DefaultDict, Iterable, List
+import logging
+import threading
 
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.expression import desc
@@ -8,16 +10,23 @@ from sqlalchemy.sql.expression import desc
 from ..utils import Event, Node
 from . import db, model
 
-_event_queues: DefaultDict[str, Queue] = defaultdict(Queue)
+_logger = logging.getLogger(__name__)
+
+_subscribe_queues: DefaultDict[str, Queue] = defaultdict(Queue)
+_subscribe_cancel_events: DefaultDict[str, threading.Event] = defaultdict(
+    threading.Event
+)
 
 
 def _publish_event(event: Event):
-    for q in _event_queues.values():
+    for q in _subscribe_queues.values():
         q.put(event)
 
 
 @db.with_session
-def get_nodes(page: int = 1, page_size: int = 20, *, session: Session = None) -> List[Node]:
+def get_nodes(
+    page: int = 1, page_size: int = 20, *, session: Session = None
+) -> List[Node]:
     assert session is not None
     nodes = (
         session.query(model.Node)
@@ -156,11 +165,21 @@ def publish_pub_key(
     return True
 
 
-def events(node_id: str) -> Iterable[Event]:
-    q = _event_queues[node_id]
-    try:
-        while True:
-            event = q.get(block=True, timeout=None)
+def subscribe(node_id: str) -> Iterable[Event]:
+    q = _subscribe_queues[node_id]
+    cancel_event = _subscribe_cancel_events[node_id]
+
+    while not cancel_event.is_set():
+        try:
+            event = q.get(block=True, timeout=0.1)
             yield event
-    finally:
-        _event_queues.pop(node_id)
+        except Empty:
+            continue
+
+
+def unsubscribe(node_id: str):
+    cancel_event = _subscribe_cancel_events[node_id]
+    cancel_event.set()
+
+    _subscribe_queues.pop(node_id)
+    _subscribe_cancel_events.pop(node_id)

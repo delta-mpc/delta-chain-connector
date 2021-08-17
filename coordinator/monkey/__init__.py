@@ -5,7 +5,8 @@ from .service import (
     join_task,
     start_round,
     publish_pub_key,
-    events,
+    subscribe,
+    unsubscribe
 )
 from . import db
 

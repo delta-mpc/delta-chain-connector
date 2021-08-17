@@ -115,9 +115,15 @@ class Servicer(chain_pb2_grpc.ChainServicer):
 
     def Events(self, request, context):
         node_id = request.node_id
+        
+        def on_end():
+            _logger.info(f"node {node_id} unsubscribe events")
+            impl.unsubscribe(node_id)
+        context.add_callback(on_end)
+
         try:
             _logger.info(f"node {node_id} subscribes events")
-            for event in impl.events(node_id):
+            for event in impl.subscribe(node_id):
                 yield chain_pb2.EventResp(
                     name=event.name,
                     address=event.address,

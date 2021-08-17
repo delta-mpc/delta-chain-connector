@@ -18,6 +18,8 @@ class Client(object):
         channel = grpc.insecure_channel(address)
         self._stub = mpc_pb2_grpc.MpcStub(channel)
 
+        self._subscribe_futures = {}
+
     @retry(
         wait=wait_fixed(2),
         stop=stop_after_attempt(3),
@@ -94,11 +96,14 @@ class Client(object):
         if e is None:
             raise NoneRespError
         return e.taskId == task_id and e.epoch == round_id and e.key == pub_key  # type: ignore
-
-    def events(self, node_id: str) -> Iterable[Event]:
+    
+    def subscribe(self, node_id: str) -> Iterable[Event]:
         req = mpc_pb2.EventRequest()
 
-        for e in self._stub.event(req):
+        fut = self._stub.event(req)
+        self._subscribe_futures[node_id] = fut
+
+        for e in fut:
             event = Event(
                 name=e.name,
                 address=e.address,
@@ -108,3 +113,9 @@ class Client(object):
                 key=e.key,
             )
             yield event
+    
+    def unsubscribe(self, node_id: str):
+        if node_id in self._subscribe_futures:
+            fut = self._subscribe_futures[node_id]
+            fut.cancel()
+
