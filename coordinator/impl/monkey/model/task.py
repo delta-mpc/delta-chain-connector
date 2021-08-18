@@ -8,4 +8,4 @@ class Task(db.Base):
 
     id = sa.Column(sa.Integer, primary_key=True)
     name = sa.Column(sa.String)
-    creator = sa.Column(sa.Integer, nullable=False, index=True)  # creator node id
+    creator = sa.Column(sa.String, nullable=False, index=True)  # creator node address

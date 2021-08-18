@@ -4,11 +4,10 @@ from contextlib import contextmanager
 from functools import wraps
 from typing import Generator
 
+from coordinator import config
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, Session
-
-from ... import config
+from sqlalchemy.orm import Session, sessionmaker
 
 __all__ = ["Base", "session_scope", "get_session", "close", "with_session", "init_db"]
 

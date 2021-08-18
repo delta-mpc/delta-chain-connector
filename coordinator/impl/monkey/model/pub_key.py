@@ -9,5 +9,5 @@ class PubKey(db.Base):
     id = sa.Column(sa.Integer, primary_key=True)
     task_id = sa.Column(sa.Integer, index=True, nullable=False)
     round_id = sa.Column(sa.Integer, index=True, nullable=False)
-    node_id = sa.Column(sa.Integer, index=True, nullable=False)
+    node_id = sa.Column(sa.String, index=True, nullable=False)  # node address
     key = sa.Column(sa.String, index=True, nullable=False)

@@ -1,13 +1,13 @@
-from collections import defaultdict
-from queue import Queue, Empty
-from typing import DefaultDict, Iterable, List
 import logging
 import threading
+from collections import defaultdict
+from queue import Empty, Queue
+from typing import DefaultDict, Iterable, List
 
+from coordinator.impl.utils import Event, Node, NodesResp
 from sqlalchemy.orm import Session
-from sqlalchemy.sql.expression import desc
+from sqlalchemy import desc, func
 
-from ..utils import Event, Node
 from . import db, model
 
 _logger = logging.getLogger(__name__)
@@ -26,7 +26,7 @@ def _publish_event(event: Event):
 @db.with_session
 def get_nodes(
     page: int = 1, page_size: int = 20, *, session: Session = None
-) -> List[Node]:
+) -> NodesResp:
     assert session is not None
     nodes = (
         session.query(model.Node)
@@ -35,8 +35,11 @@ def get_nodes(
         .offset((page - 1) * page_size)
         .all()
     )
-    res = [Node(id=str(node.id), url=node.url) for node in nodes]
-    return res
+    node_list = [Node(id=node.address, url=node.url, name=node.name) for node in nodes]
+    count = session.query(func.count(model.Task.id)).scalar()
+    total_pages = (count + page_size - 1) // page_size + 1
+    resp = NodesResp(nodes=node_list, total_pages=total_pages)
+    return resp
 
 
 @db.with_session
@@ -50,19 +53,22 @@ def register_node(url: str, *, session: Session = None) -> str:
     session.add(node)
     session.commit()
     session.refresh(node)
-    return str(node.id)
+    address = node.generate_address()
+    node.generate_name()
+    session.add(node)
+    session.commit()
+    return address
 
 
 @db.with_session
 def create_task(node_id: str, name: str, *, session: Session = None) -> int:
     assert session is not None
-    node_index = int(node_id)
-    node = session.query(model.Node).filter(model.Node.id == node_index).one_or_none()
+    node = session.query(model.Node).filter(model.Node.address == node_id).one_or_none()
     if node is None:
         raise ValueError(f"node {node_id} does not exist")
 
     # create task
-    task = model.Task(name=name, creator=node_index)
+    task = model.Task(name=name, creator=node_id)
     session.add(task)
     session.commit()
     session.refresh(task)
@@ -76,9 +82,8 @@ def create_task(node_id: str, name: str, *, session: Session = None) -> int:
 @db.with_session
 def join_task(node_id: str, task_id: int, *, session: Session = None) -> bool:
     assert session is not None
-    node_index = int(node_id)
     # check if node existed
-    q = session.query(model.Node).filter(model.Node.id == node_index)
+    q = session.query(model.Node).filter(model.Node.address == node_id)
     existed = session.query(q.exists()).scalar()
     if not existed:
         raise ValueError(f"node {node_id} does not exist")
@@ -86,13 +91,13 @@ def join_task(node_id: str, task_id: int, *, session: Session = None) -> bool:
     q = (
         session.query(model.TaskMember)
         .filter(model.TaskMember.task_id == task_id)
-        .filter(model.TaskMember.member_id == node_index)
+        .filter(model.TaskMember.member_id == node_id)
     )
     existed = session.query(q.exists()).scalar()
     if existed:
         raise ValueError(f"node {node_id} has already participate in the task")
     # change member status
-    member = model.TaskMember(task_id=task_id, member_id=node_index)
+    member = model.TaskMember(task_id=task_id, member_id=node_id)
     session.add(member)
     session.commit()
     event = Event(name="Join", task_id=task_id, address=node_id)
@@ -103,12 +108,11 @@ def join_task(node_id: str, task_id: int, *, session: Session = None) -> bool:
 @db.with_session
 def start_round(node_id: str, task_id: int, *, session: Session = None) -> int:
     assert session is not None
-    node_index = int(node_id)
     # check if task exists
     task = session.query(model.Task).filter(model.Task.id == task_id).one_or_none()
     if task is None:
         raise ValueError(f"task {task_id} does not exist")
-    if task.creator != node_index:
+    if task.creator != node_id:
         raise ValueError(f"Unauthorized. Only task creator can start a round")
     # find last round
     last_round = (
@@ -134,12 +138,11 @@ def publish_pub_key(
     node_id: str, task_id: int, round_id: int, key: str, *, session: Session = None
 ) -> bool:
     assert session is not None
-    node_index = int(node_id)
     # check if node is a member of the task
     member = (
         session.query(model.TaskMember)
         .filter(model.TaskMember.task_id == task_id)
-        .filter(model.TaskMember.member_id == node_index)
+        .filter(model.TaskMember.member_id == node_id)
         .one_or_none()
     )
 
@@ -153,9 +156,7 @@ def publish_pub_key(
     if member is None:
         raise ValueError(400, f"{node_id} is not in task {task_id}'s member list")
 
-    pub_key = model.PubKey(
-        task_id=task_id, round_id=round_id, node_id=node_index, key=key
-    )
+    pub_key = model.PubKey(task_id=task_id, round_id=round_id, node_id=node_id, key=key)
     session.add(pub_key)
     session.commit()
     event = Event(
@@ -178,8 +179,9 @@ def subscribe(node_id: str) -> Iterable[Event]:
 
 
 def unsubscribe(node_id: str):
-    cancel_event = _subscribe_cancel_events[node_id]
-    cancel_event.set()
+    if node_id in _subscribe_cancel_events:
+        cancel_event = _subscribe_cancel_events[node_id]
+        cancel_event.set()
 
-    _subscribe_queues.pop(node_id)
-    _subscribe_cancel_events.pop(node_id)
+        _subscribe_queues.pop(node_id)
+        _subscribe_cancel_events.pop(node_id)

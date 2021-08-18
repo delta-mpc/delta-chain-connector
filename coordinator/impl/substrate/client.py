@@ -1,10 +1,9 @@
 from typing import Iterable, Optional
 
 import grpc
-from tenacity import (retry, retry_if_exception_type, stop_after_attempt,
-                      wait_fixed)
+from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_fixed
 
-from ..utils import Event
+from coordinator.impl.utils import Event
 from . import mpc_pb2, mpc_pb2_grpc
 
 
@@ -96,7 +95,7 @@ class Client(object):
         if e is None:
             raise NoneRespError
         return e.taskId == task_id and e.epoch == round_id and e.key == pub_key  # type: ignore
-    
+
     def subscribe(self, node_id: str) -> Iterable[Event]:
         req = mpc_pb2.EventRequest()
 
@@ -113,9 +112,8 @@ class Client(object):
                 key=e.key,
             )
             yield event
-    
+
     def unsubscribe(self, node_id: str):
         if node_id in self._subscribe_futures:
             fut = self._subscribe_futures[node_id]
             fut.cancel()
-

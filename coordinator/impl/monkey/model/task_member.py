@@ -8,4 +8,4 @@ class TaskMember(db.Base):
 
     id = sa.Column(sa.Integer, primary_key=True)
     task_id = sa.Column(sa.Integer, nullable=False, index=True)
-    member_id = sa.Column(sa.Integer, nullable=False, index=True)
+    member_id = sa.Column(sa.String, nullable=False, index=True)  # member node address

@@ -3,20 +3,13 @@ from concurrent import futures
 from typing import Optional
 
 import grpc
+from coordinator import config, impl
 
-from .. import config
 from . import chain_pb2, chain_pb2_grpc
 
-if config.impl == "monkey":
-    from .. import monkey as impl
-elif config.impl == "substrate":
-    from .. import substrate as impl
-else:
-    raise ImportError(f"unknown implement {config.impl}")
+_logger = logging.getLogger(__name__)
 
 impl.init()
-
-_logger = logging.getLogger(__name__)
 
 
 class Servicer(chain_pb2_grpc.ChainServicer):
@@ -29,18 +22,19 @@ class Servicer(chain_pb2_grpc.ChainServicer):
             page_size = 20
 
         try:
-            nodes = impl.get_nodes(page, page_size)
-            res = [chain_pb2.Node(id=node.id, url=node.url) for node in nodes]
-            return chain_pb2.NodesResp(nodes=res)
+            node_resp = impl.get_nodes(page, page_size)
+            node_list = [
+                chain_pb2.Node(id=node.id, url=node.url, name=node.name) for node in node_resp.nodes
+            ]
+            return chain_pb2.NodesResp(
+                nodes=node_list, total_pages=node_resp.total_pages
+            )
         except ValueError as e:
             _logger.exception(e)
             context.abort(grpc.StatusCode.INTERNAL, str(e))
         except Exception as e:
             _logger.exception(e)
             context.abort(grpc.StatusCode.INTERNAL, str(e))
-
-
-
 
     def RegisterNode(self, request, context):
         url = request.url
@@ -104,7 +98,9 @@ class Servicer(chain_pb2_grpc.ChainServicer):
         key = request.key
         try:
             impl.publish_pub_key(node_id, task_id, round_id, key)
-            _logger.info(f"node {node_id} publish public key {key} of task {task_id} in round {round_id}")
+            _logger.info(
+                f"node {node_id} publish public key {key} of task {task_id} in round {round_id}"
+            )
             return chain_pb2.KeyResp(success=True)
         except ValueError as e:
             _logger.exception(e)
@@ -115,10 +111,12 @@ class Servicer(chain_pb2_grpc.ChainServicer):
 
     def Events(self, request, context):
         node_id = request.node_id
-        
+        impl.unsubscribe(node_id)
+
         def on_end():
             _logger.info(f"node {node_id} unsubscribe events")
             impl.unsubscribe(node_id)
+
         context.add_callback(on_end)
 
         try:
@@ -145,7 +143,7 @@ class Server(object):
         self._server = grpc.server(futures.ThreadPoolExecutor())
         self._server.add_insecure_port(address)
         chain_pb2_grpc.add_ChainServicer_to_server(Servicer(), self._server)
-    
+
     def start(self):
         self._server.start()
 
@@ -154,5 +152,3 @@ class Server(object):
 
     def stop(self):
         self._server.stop(True)
-
-

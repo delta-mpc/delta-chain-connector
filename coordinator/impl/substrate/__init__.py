@@ -1,7 +1,9 @@
-from typing import List, Optional, Iterable
+from typing import Iterable, List, Optional
+
+from coordinator import config
+from coordinator.impl.utils import Event, NodesResp
+
 from .client import Client
-from .. import config
-from ..utils import Event, Node
 
 _client: Optional[Client] = None
 
@@ -11,8 +13,8 @@ def init():
     _client = Client(config.substrate_address)
 
 
-def get_nodes(page: int = 1, page_size: int = 20) -> List[Node]:
-    return []
+def get_nodes(page: int = 1, page_size: int = 20) -> NodesResp:
+    return NodesResp(nodes=[], total_pages=0)
 
 
 def register_node(url: str) -> str:
