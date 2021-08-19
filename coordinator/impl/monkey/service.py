@@ -47,7 +47,7 @@ def register_node(url: str, *, session: Session = None) -> str:
     assert session is not None
     node = session.query(model.Node).filter(model.Node.url == url).first()
     if node is not None:
-        return str(node.id)
+        return node.address
     # create node
     node = model.Node(url=url)
     session.add(node)

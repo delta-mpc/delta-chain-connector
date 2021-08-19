@@ -40,6 +40,7 @@ setup(
         'grpcio==1.39.0',
         'PyYAML==5.4.1',
         'protobuf==3.17.3',
+        'tenacity==8.0.1'
     ],
     tests_require=["pytest"],
     cmdclass={"test": PyTest},
