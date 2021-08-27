@@ -37,7 +37,7 @@ def get_nodes(
     )
     node_list = [Node(id=node.address, url=node.url, name=node.name) for node in nodes]
     count = session.query(func.count(model.Task.id)).scalar()
-    total_pages = (count + page_size - 1) // page_size + 1
+    total_pages = (count + page_size - 1) // page_size
     resp = NodesResp(nodes=node_list, total_pages=total_pages)
     return resp
 
