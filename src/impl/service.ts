@@ -1,4 +1,4 @@
-import { Writable } from "stream";
+import { Readable } from "stream";
 
 export enum RoundStatus {
   Started,
@@ -36,7 +36,7 @@ export interface SecretShareData {
   secretKeyCommitment?: string;
 }
 
-export interface Service {
+export interface Impl {
   init(): Promise<void>;
   join(url: string, name: string): Promise<string>;
   updateUrl(address: string, url: string): Promise<void>;
@@ -82,6 +82,6 @@ export interface Service {
     receiver: string
   ): Promise<SecretShareData>;
   endRound(address: string, taskID: string, round: number): Promise<void>;
-  subscribe(dst: Writable): void;
-  unsubscribe(dst: Writable): void;
+  subscribe(): Readable;
+  unsubscribe(stream: Readable): void;
 }

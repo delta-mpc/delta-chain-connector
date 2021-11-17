@@ -237,6 +237,6 @@ service Chain {
     rpc UploadSecretKey(Share) returns (Empty) {}
     rpc GetSecretShareData(SecretShareReq) returns (SecretShareResp) {}
     rpc EndRound(EndRoundReq) returns (Empty) {}
-    rpc subscribe(EventReq) returns (stream Event) {}
+    rpc Subscribe(EventReq) returns (stream Event) {}
 }
 

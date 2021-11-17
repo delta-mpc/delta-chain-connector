@@ -682,6 +682,25 @@ export interface ChainClient extends grpc.Client {
     callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
   ): grpc.ClientUnaryCall;
 
+  Subscribe(
+    argument: _chain_EventReq,
+    metadata: grpc.Metadata,
+    options?: grpc.CallOptions
+  ): grpc.ClientReadableStream<_chain_Event__Output>;
+  Subscribe(
+    argument: _chain_EventReq,
+    options?: grpc.CallOptions
+  ): grpc.ClientReadableStream<_chain_Event__Output>;
+  subscribe(
+    argument: _chain_EventReq,
+    metadata: grpc.Metadata,
+    options?: grpc.CallOptions
+  ): grpc.ClientReadableStream<_chain_Event__Output>;
+  subscribe(
+    argument: _chain_EventReq,
+    options?: grpc.CallOptions
+  ): grpc.ClientReadableStream<_chain_Event__Output>;
+
   UpdateName(
     argument: _chain_UpdateNameReq,
     metadata: grpc.Metadata,
@@ -968,25 +987,6 @@ export interface ChainClient extends grpc.Client {
     argument: _chain_ShareCommitment,
     callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
   ): grpc.ClientUnaryCall;
-
-  subscribe(
-    argument: _chain_EventReq,
-    metadata: grpc.Metadata,
-    options?: grpc.CallOptions
-  ): grpc.ClientReadableStream<_chain_Event__Output>;
-  subscribe(
-    argument: _chain_EventReq,
-    options?: grpc.CallOptions
-  ): grpc.ClientReadableStream<_chain_Event__Output>;
-  subscribe(
-    argument: _chain_EventReq,
-    metadata: grpc.Metadata,
-    options?: grpc.CallOptions
-  ): grpc.ClientReadableStream<_chain_Event__Output>;
-  subscribe(
-    argument: _chain_EventReq,
-    options?: grpc.CallOptions
-  ): grpc.ClientReadableStream<_chain_Event__Output>;
 }
 
 export interface ChainHandlers extends grpc.UntypedServiceImplementation {
@@ -1018,6 +1018,8 @@ export interface ChainHandlers extends grpc.UntypedServiceImplementation {
 
   StartRound: grpc.handleUnaryCall<_chain_StartRoundReq__Output, _chain_Empty>;
 
+  Subscribe: grpc.handleServerStreamingCall<_chain_EventReq__Output, _chain_Event>;
+
   UpdateName: grpc.handleUnaryCall<_chain_UpdateNameReq__Output, _chain_Empty>;
 
   UpdateUrl: grpc.handleUnaryCall<_chain_UpdateUrlReq__Output, _chain_Empty>;
@@ -1031,8 +1033,6 @@ export interface ChainHandlers extends grpc.UntypedServiceImplementation {
   UploadSeed: grpc.handleUnaryCall<_chain_Share__Output, _chain_Empty>;
 
   UploadSeedCommitment: grpc.handleUnaryCall<_chain_ShareCommitment__Output, _chain_Empty>;
-
-  subscribe: grpc.handleServerStreamingCall<_chain_EventReq__Output, _chain_Event>;
 }
 
 export interface ChainDefinition extends grpc.ServiceDefinition {
@@ -1110,6 +1110,7 @@ export interface ChainDefinition extends grpc.ServiceDefinition {
     _chain_StartRoundReq__Output,
     _chain_Empty__Output
   >;
+  Subscribe: MethodDefinition<_chain_EventReq, _chain_Event, _chain_EventReq__Output, _chain_Event__Output>;
   UpdateName: MethodDefinition<
     _chain_UpdateNameReq,
     _chain_Empty,
@@ -1142,5 +1143,4 @@ export interface ChainDefinition extends grpc.ServiceDefinition {
     _chain_ShareCommitment__Output,
     _chain_Empty__Output
   >;
-  subscribe: MethodDefinition<_chain_EventReq, _chain_Event, _chain_EventReq__Output, _chain_Event__Output>;
 }
