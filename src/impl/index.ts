@@ -1,14 +1,14 @@
 import { config } from "src/config";
-import { Service } from "./service";
+import { Impl } from "./service";
 import * as monkey from "./monkey";
 
-let service: Service;
+let impl: Impl;
 
 if (config.impl === "monkey") {
-  service = monkey.service;
+  impl = monkey.impl;
 } else {
   throw Error(`unknown implementation ${config.impl}`);
 }
 
-export { service };
+export { impl };
 export * from "./event";

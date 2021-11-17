@@ -1,4 +1,4 @@
-import { Writable } from "stream";
+import { PassThrough, Readable } from "stream";
 
 export interface TaskCreatedEvent {
   type: "TaskCreated";
@@ -51,22 +51,22 @@ export type Event =
   | RoundEndedEvent;
 
 export class Subscriber {
-  readonly streams: Writable[] = [];
+  private streams: PassThrough[] = [];
+
+  subscribe(): Readable {
+    const stream = new PassThrough({ objectMode: true });
+    this.streams.push(stream);
+    return stream;
+  }
+
+  unsubscribe(stream: Readable): void {
+    const i = this.streams.indexOf(stream as PassThrough);
+    this.streams.splice(i);
+  }
 
   publish(event: Event): void {
     for (const stream of this.streams) {
       stream.write(event);
-    }
-  }
-
-  subscribe(dst: Writable): void {
-    this.streams.push(dst);
-  }
-
-  unsubscribe(dst: Writable): void {
-    const i = this.streams.indexOf(dst);
-    if (i > -1) {
-      this.streams.splice(i);
     }
   }
 }

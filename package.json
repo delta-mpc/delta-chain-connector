@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build:proto": "$(npm bin)/proto-loader-gen-types --defaults --oneofs --grpcLib=@grpc/grpc-js -O src/service src/service/*.proto",
-    "serve": "ts-node --cwd-mode src/main.ts",
+    "serve": "ts-node --cwd-mode src/server.ts",
     "test": "mocha -r ts-node/register 'src/**/*.test.ts'",
     "test:debug": "mocha --inspect -r ts-node/register 'src/**/*.test.ts'",
     "format": "prettier -w 'src/**/*.ts'"

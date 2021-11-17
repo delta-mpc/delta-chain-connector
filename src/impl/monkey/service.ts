@@ -1,21 +1,13 @@
-import { Writable } from "stream";
+import { Readable } from "stream";
 import { Event } from "..";
 import { Subscriber } from "../event";
-import {
-  KeyType,
-  NodeInfo,
-  RoundStatus,
-  SecretShareData,
-  Service,
-  ShareType,
-  TaskRoundInfo,
-} from "../service";
+import { Impl, KeyType, NodeInfo, RoundStatus, SecretShareData, ShareType, TaskRoundInfo } from "../service";
 import * as db from "./db";
 import dbConfig from "./db/config";
 import * as entity from "./entity";
 import { Key, RoundMember } from "./entity";
 
-class _Service implements Service {
+class _Impl implements Impl {
   private subscriber = new Subscriber();
 
   async init(cfg = dbConfig): Promise<void> {
@@ -596,13 +588,13 @@ class _Service implements Service {
     this.subscriber.publish(event);
   }
 
-  subscribe(dst: Writable) {
-    this.subscriber.subscribe(dst);
+  subscribe(): Readable {
+    return this.subscriber.subscribe();
   }
 
-  unsubscribe(dst: Writable) {
-    this.subscriber.unsubscribe(dst);
+  unsubscribe(stream: Readable) {
+    this.subscriber.unsubscribe(stream);
   }
 }
 
-export const service = new _Service();
+export const impl = new _Impl();

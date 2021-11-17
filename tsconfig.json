@@ -4,8 +4,8 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "outDir": "dist",
-    "baseUrl": ".",
-},
+    "baseUrl": "."
+  },
   "include": ["src"],
   "exclude": ["node_modules", "**/*.spec.ts"],
   "ts-node": {

@@ -2,7 +2,7 @@ import { Options } from "@mikro-orm/core";
 import * as chai from "chai";
 import chaiAsPromised from "chai-as-promised";
 import * as crypto from "crypto";
-import { service } from ".";
+import { impl } from ".";
 import { KeyType, RoundStatus, ShareType } from "../service";
 import * as db from "./db";
 import * as entity from "./entity";
@@ -19,7 +19,7 @@ describe("monkey service", function () {
       entities: ["dist/impl/monkey/entity/**.js"],
       entitiesTs: ["src/impl/monkey/entity/**.ts"],
     };
-    await service.init(dbConfig);
+    await impl.init(dbConfig);
 
     const generator = db.getORM().getSchemaGenerator();
     await generator.createSchema();
@@ -39,10 +39,10 @@ describe("monkey service", function () {
 
   describe("join", function () {
     it("join four nodes", async function () {
-      address1 = await service.join("127.0.0.1:6700", "1");
-      address2 = await service.join("127.0.0.1:6800", "2");
-      address3 = await service.join("127.0.0.1:6900", "3");
-      address4 = await service.join("127.0.0.1:7000", "4");
+      address1 = await impl.join("127.0.0.1:6700", "1");
+      address2 = await impl.join("127.0.0.1:6800", "2");
+      address3 = await impl.join("127.0.0.1:6900", "3");
+      address4 = await impl.join("127.0.0.1:7000", "4");
 
       assert.lengthOf(address1, 96);
       assert.lengthOf(address2, 96);
@@ -69,7 +69,7 @@ describe("monkey service", function () {
 
   describe("updateUrl", function () {
     it("update node4 url", async function () {
-      await service.updateUrl(address4, "127.0.0.1:7001");
+      await impl.updateUrl(address4, "127.0.0.1:7001");
 
       const em = db.getEntityManager();
       const node = await em.findOne(entity.Node, { address: address4 });
@@ -80,7 +80,7 @@ describe("monkey service", function () {
 
   describe("updateName", function () {
     it("update node4 name", async function () {
-      await service.updateName(address4, "44");
+      await impl.updateName(address4, "44");
 
       const em = db.getEntityManager();
       const node = await em.findOne(entity.Node, { address: address4 });
@@ -91,7 +91,7 @@ describe("monkey service", function () {
 
   describe("leave", function () {
     it("leave node4", async function () {
-      await service.leave(address4);
+      await impl.leave(address4);
 
       const em = db.getEntityManager();
       const node = await em.findOne(entity.Node, { address: address4 });
@@ -102,7 +102,7 @@ describe("monkey service", function () {
 
   describe("getNodeInfo", function () {
     it("get node1 info", async function () {
-      const info = await service.getNodeInfo(address1);
+      const info = await impl.getNodeInfo(address1);
 
       assert.strictEqual(info.name, "1");
       assert.strictEqual(info.url, "127.0.0.1:6700");
@@ -114,7 +114,7 @@ describe("monkey service", function () {
   const taskCommitment = crypto.randomBytes(32).toString("hex");
   describe("createTask", function () {
     it("node1 create task1", async function () {
-      taskID = await service.createTask(address1, dataset, taskCommitment);
+      taskID = await impl.createTask(address1, dataset, taskCommitment);
 
       assert.lengthOf(taskID, 64);
 
@@ -130,7 +130,7 @@ describe("monkey service", function () {
   const round = 1;
   describe("startRound", function () {
     it("node1 start round1 of task1", async function () {
-      await service.startRound(address1, taskID, round);
+      await impl.startRound(address1, taskID, round);
 
       const em = db.getEntityManager();
       const roundEntity = await em.findOne(entity.Round, { task: { outID: taskID }, round: round });
@@ -147,9 +147,9 @@ describe("monkey service", function () {
   const pk32 = crypto.randomBytes(32).toString("hex");
   describe("joinRound", function () {
     it("node1,2,3 join round1", async function () {
-      await service.joinRound(address1, taskID, round, pk11, pk12);
-      await service.joinRound(address2, taskID, round, pk21, pk22);
-      await service.joinRound(address3, taskID, round, pk31, pk32);
+      await impl.joinRound(address1, taskID, round, pk11, pk12);
+      await impl.joinRound(address2, taskID, round, pk21, pk22);
+      await impl.joinRound(address3, taskID, round, pk31, pk32);
 
       const em = db.getEntityManager();
       const roundEntity = await em.findOne(entity.Round, { task: { outID: taskID }, round: round });
@@ -168,7 +168,7 @@ describe("monkey service", function () {
 
   describe("getTaskRound", function () {
     it("get round1 of task1", async function () {
-      const info = await service.getTaskRound(taskID, round);
+      const info = await impl.getTaskRound(taskID, round);
 
       assert.strictEqual(info.round, round);
       assert.strictEqual(info.status, RoundStatus.Started);
@@ -181,7 +181,7 @@ describe("monkey service", function () {
 
   describe("selectCandidates", function () {
     it("select node2 and node3", async function () {
-      await service.selectCandidates(address1, taskID, round, [address2, address3]);
+      await impl.selectCandidates(address1, taskID, round, [address2, address3]);
 
       const em = db.getEntityManager();
       const roundEntity = await em.findOne(entity.Round, { task: { outID: taskID }, round: round }, [
@@ -205,10 +205,10 @@ describe("monkey service", function () {
   const seedShareCommitment33 = crypto.randomBytes(32).toString("hex");
   describe("uploadSeedCommitment", function () {
     it("node2,3 uploadSeedCommitment", async function () {
-      await service.uploadSeedCommitment(address2, taskID, round, address2, seedShareCommitment22);
-      await service.uploadSeedCommitment(address2, taskID, round, address3, seedShareCommitment23);
-      await service.uploadSeedCommitment(address3, taskID, round, address2, seedShareCommitment32);
-      await service.uploadSeedCommitment(address3, taskID, round, address3, seedShareCommitment33);
+      await impl.uploadSeedCommitment(address2, taskID, round, address2, seedShareCommitment22);
+      await impl.uploadSeedCommitment(address2, taskID, round, address3, seedShareCommitment23);
+      await impl.uploadSeedCommitment(address3, taskID, round, address2, seedShareCommitment32);
+      await impl.uploadSeedCommitment(address3, taskID, round, address3, seedShareCommitment33);
 
       const em = db.getEntityManager();
       const member2 = await em.findOne(entity.RoundMember, {
@@ -244,10 +244,10 @@ describe("monkey service", function () {
   const skShareCommitment33 = crypto.randomBytes(33).toString("hex");
   describe("uploadSecretKeyCommitment", function () {
     it("node2,3 uploadSecretKeyCommitment", async function () {
-      await service.uploadSecretKeyCommitment(address2, taskID, round, address2, skShareCommitment22);
-      await service.uploadSecretKeyCommitment(address2, taskID, round, address3, skShareCommitment23);
-      await service.uploadSecretKeyCommitment(address3, taskID, round, address2, skShareCommitment32);
-      await service.uploadSecretKeyCommitment(address3, taskID, round, address3, skShareCommitment33);
+      await impl.uploadSecretKeyCommitment(address2, taskID, round, address2, skShareCommitment22);
+      await impl.uploadSecretKeyCommitment(address2, taskID, round, address3, skShareCommitment23);
+      await impl.uploadSecretKeyCommitment(address3, taskID, round, address2, skShareCommitment32);
+      await impl.uploadSecretKeyCommitment(address3, taskID, round, address3, skShareCommitment33);
 
       const em = db.getEntityManager();
       const member2 = await em.findOne(entity.RoundMember, {
@@ -278,8 +278,8 @@ describe("monkey service", function () {
 
   describe("getClientPublickKeys", function () {
     it("get node2,3 public keys", async function () {
-      const [pk21_, pk22_] = await service.getClientPublickKeys(taskID, round, address2);
-      const [pk31_, pk32_] = await service.getClientPublickKeys(taskID, round, address3);
+      const [pk21_, pk22_] = await impl.getClientPublickKeys(taskID, round, address2);
+      const [pk31_, pk32_] = await impl.getClientPublickKeys(taskID, round, address3);
 
       assert.strictEqual(pk21_, pk21);
       assert.strictEqual(pk22_, pk22);
@@ -290,7 +290,7 @@ describe("monkey service", function () {
 
   describe("startCalculation", function () {
     it("node2,3 start calculation", async function () {
-      await service.startCalculation(address1, taskID, round, [address2, address3]);
+      await impl.startCalculation(address1, taskID, round, [address2, address3]);
 
       const em = db.getEntityManager();
       const roundEntity = await em.findOne(entity.Round, { task: { outID: taskID }, round: round });
@@ -309,17 +309,17 @@ describe("monkey service", function () {
   const resultCommitment2 = crypto.randomBytes(32).toString("hex");
   describe("uploadResultCommitment and getResultCommitment", function () {
     it("node2 upload result commitment", async function () {
-      await service.uploadResultCommitment(address2, taskID, round, resultCommitment2);
+      await impl.uploadResultCommitment(address2, taskID, round, resultCommitment2);
 
-      const resultCommitment2_ = await service.getResultCommitment(taskID, round, address2);
+      const resultCommitment2_ = await impl.getResultCommitment(taskID, round, address2);
       assert.strictEqual(resultCommitment2, resultCommitment2_);
-      assert.isRejected(service.getResultCommitment(taskID, round, address3), Error);
+      assert.isRejected(impl.getResultCommitment(taskID, round, address3), Error);
     });
   });
 
   describe("startAggregation", function () {
     it("node2 startAggregation", async function () {
-      await service.startAggregation(address1, taskID, round, [address2]);
+      await impl.startAggregation(address1, taskID, round, [address2]);
 
       const em = db.getEntityManager();
       const roundEntity = await em.findOne(entity.Round, { task: { outID: taskID }, round: round });
@@ -338,9 +338,9 @@ describe("monkey service", function () {
   const seedShare22 = crypto.randomBytes(32).toString("hex");
   describe("uploadSeed and getSecretShareData", function () {
     it("node2 upload node2 seed", async function () {
-      await service.uploadSeed(address2, taskID, round, address2, seedShare22);
+      await impl.uploadSeed(address2, taskID, round, address2, seedShare22);
 
-      const data = await service.getSecretShareData(taskID, round, address2, address2);
+      const data = await impl.getSecretShareData(taskID, round, address2, address2);
       assert.notExists(data.secretKey);
       assert.notExists(data.secretKeyCommitment);
       assert.strictEqual(data.seed, seedShare22);
@@ -351,9 +351,9 @@ describe("monkey service", function () {
   const skShare32 = crypto.randomBytes(32).toString("hex");
   describe("uploadSecretKey and getSecretShareData", function () {
     it("node2 upload node3 sk", async function () {
-      await service.uploadSecretKey(address2, taskID, round, address3, skShare32);
+      await impl.uploadSecretKey(address2, taskID, round, address3, skShare32);
 
-      const data = await service.getSecretShareData(taskID, round, address3, address2);
+      const data = await impl.getSecretShareData(taskID, round, address3, address2);
       assert.notExists(data.seed);
       assert.notExists(data.seedCommitment);
       assert.strictEqual(data.secretKey, skShare32);
@@ -363,7 +363,7 @@ describe("monkey service", function () {
 
   describe("endRound", function () {
     it("endRound", async function () {
-      await service.endRound(address1, taskID, round);
+      await impl.endRound(address1, taskID, round);
 
       const em = db.getEntityManager();
       const roundEntity = await em.findOne(entity.Round, {
