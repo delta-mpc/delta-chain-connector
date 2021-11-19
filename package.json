@@ -1,0 +1,117 @@
+{
+  "name": "delta-chain-connector",
+  "version": "0.0.1",
+  "description": "The centralized replacement of Blockchain to run Delta tasks faster and easier for demonstration purposes or in the environment where decentralized trust is not required..",
+  "main": "index.js",
+  "scripts": {
+    "build:proto": "$(npm bin)/proto-loader-gen-types --defaults --oneofs --grpcLib=@grpc/grpc-js -O src/service src/service/*.proto",
+    "serve": "ts-node --cwd-mode src/server.ts | bunyan",
+    "test": "mocha -r ts-node/register 'src/**/*.test.ts'",
+    "test:debug": "mocha --inspect -r ts-node/register 'src/**/*.test.ts'",
+    "format": "prettier -w 'src/**/*.ts'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/delta-mpc/delta-chain-connector.git"
+  },
+  "keywords": [
+    "blockchain"
+  ],
+  "author": "miaohong",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/delta-mpc/delta-chain-connector/issues"
+  },
+  "homepage": "https://github.com/delta-mpc/delta-chain-connector#readme",
+  "devDependencies": {
+    "@tsconfig/node16": "^1.0.2",
+    "@types/bunyan": "^1.8.8",
+    "@types/chai": "^4.2.22",
+    "@types/chai-as-promised": "^7.1.4",
+    "@types/mocha": "^9.0.0",
+    "@types/node": "^16.10.1",
+    "@typescript-eslint/eslint-plugin": "^4.31.2",
+    "@typescript-eslint/parser": "^4.31.2",
+    "chai": "^4.3.4",
+    "chai-as-promised": "^7.1.1",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "mocha": "^9.1.3",
+    "prettier": "^2.4.1",
+    "ts-node": "^10.4.0",
+    "tsconfig-paths": "^3.11.0",
+    "typescript": "^4.4.3"
+  },
+  "dependencies": {
+    "@ethereumjs/common": "^2.6.0",
+    "@ethereumjs/tx": "^3.4.0",
+    "@grpc/grpc-js": "^1.4.1",
+    "@grpc/proto-loader": "^0.6.6",
+    "@mikro-orm/cli": "^4.5.9",
+    "@mikro-orm/core": "^4.5.9",
+    "@mikro-orm/sqlite": "^4.5.9",
+    "bunyan": "^1.8.15",
+    "hi-base32": "^0.5.1",
+    "reflect-metadata": "^0.1.13",
+    "web3": "^1.6.1",
+    "web3-core": "^1.6.1",
+    "web3-eth": "^1.6.1",
+    "web3-eth-contract": "^1.6.1",
+    "web3-utils": "^1.6.1"
+  },
+  "prettier": {
+    "tabWidth": 2,
+    "printWidth": 110,
+    "useTabs": false,
+    "semi": true
+  },
+  "eslintConfig": {
+    "ignorePatterns": [
+      "**/*.js",
+      "src/service/chain/**.ts",
+      "src/service/chain.ts"
+    ],
+    "parser": "@typescript-eslint/parser",
+    "env": {
+      "browser": false,
+      "es6": true,
+      "node": true
+    },
+    "extends": [
+      "plugin:@typescript-eslint/recommended"
+    ],
+    "parserOptions": {
+      "ecmaVersion": 2021,
+      "sourceType": "module"
+    },
+    "rules": {
+      "semi": [
+        "error",
+        "always"
+      ],
+      "quotes": [
+        "error",
+        "double"
+      ],
+      "@typescript-eslint/explicit-function-return-type": "off",
+      "@typescript-eslint/no-explicit-any": 0,
+      "@typescript-eslint/no-inferrable-types": [
+        "warn",
+        {
+          "ignoreParameters": true
+        }
+      ],
+      "@typescript-eslint/no-unused-vars": "warn",
+      "@typescript-eslint/no-non-null-assertion": 0
+    }
+  },
+  "mikro-orm": {
+    "useTsNode": true,
+    "configPaths": [
+      "./src/impl/monkey/db/config.ts",
+      "./dist/impl/monkey/db/config.js"
+    ]
+  }
+}
