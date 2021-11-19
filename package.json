@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build:proto": "$(npm bin)/proto-loader-gen-types --defaults --oneofs --grpcLib=@grpc/grpc-js -O src/service src/service/*.proto",
-    "serve": "ts-node --cwd-mode src/server.ts",
+    "serve": "ts-node --cwd-mode src/server.ts | bunyan",
     "test": "mocha -r ts-node/register 'src/**/*.test.ts'",
     "test:debug": "mocha --inspect -r ts-node/register 'src/**/*.test.ts'",
     "format": "prettier -w 'src/**/*.ts'"
@@ -25,6 +25,7 @@
   "homepage": "https://github.com/delta-mpc/delta-chain-connector#readme",
   "devDependencies": {
     "@tsconfig/node16": "^1.0.2",
+    "@types/bunyan": "^1.8.8",
     "@types/chai": "^4.2.22",
     "@types/chai-as-promised": "^7.1.4",
     "@types/mocha": "^9.0.0",
@@ -44,13 +45,21 @@
     "typescript": "^4.4.3"
   },
   "dependencies": {
+    "@ethereumjs/common": "^2.6.0",
+    "@ethereumjs/tx": "^3.4.0",
     "@grpc/grpc-js": "^1.4.1",
     "@grpc/proto-loader": "^0.6.6",
     "@mikro-orm/cli": "^4.5.9",
     "@mikro-orm/core": "^4.5.9",
     "@mikro-orm/sqlite": "^4.5.9",
+    "bunyan": "^1.8.15",
     "hi-base32": "^0.5.1",
-    "reflect-metadata": "^0.1.13"
+    "reflect-metadata": "^0.1.13",
+    "web3": "^1.6.1",
+    "web3-core": "^1.6.1",
+    "web3-eth": "^1.6.1",
+    "web3-eth-contract": "^1.6.1",
+    "web3-utils": "^1.6.1"
   },
   "prettier": {
     "tabWidth": 2,

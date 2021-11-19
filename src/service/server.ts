@@ -3,6 +3,7 @@ import * as grpc from "@grpc/grpc-js";
 import { ProtoGrpcType } from "./chain";
 import { chainService } from "./service";
 import { impl } from "src/impl";
+import log from "src/log";
 
 export function run(host: string, port: number): void {
   const definition = protoloader.loadSync(__dirname + "/./chain.proto", {
@@ -14,19 +15,19 @@ export function run(host: string, port: number): void {
   server.addService(proto.chain.Chain.service, chainService);
   server.bindAsync(`${host}:${port}`, grpc.ServerCredentials.createInsecure(), (err, p) => {
     if (err) {
-      console.error(`Server error: ${err.message}`);
+      log.error(`Server error: ${err.message}`);
     } else {
-      console.log(`Server bind on port ${p}`);
-      console.log("service init");
+      log.info(`Server bind on port ${p}`);
+      log.info("service init");
       impl
         .init()
         .then(() => {
-          console.log("service init finished");
-          console.log("server start");
+          log.info("service init finished");
+          log.info("server start");
           server.start();
         })
         .catch((err: Error) => {
-          console.log(`service init error ${err.message}`);
+          log.info(`service init error ${err.message}`);
         });
     }
   });

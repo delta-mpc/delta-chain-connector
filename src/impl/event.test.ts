@@ -1,29 +1,8 @@
-import { Writable } from "stream";
-import { Event, Subscriber } from "./event";
 import { assert } from "chai";
-
-class TestStream extends Writable {
-  private _events: Event[];
-
-  get events(): Event[] {
-    return this._events;
-  }
-
-  constructor() {
-    super({ objectMode: true });
-    this._events = [];
-  }
-
-  _write(chunk: any, encoding: BufferEncoding, callback: (error?: Error | null) => void) {
-    this._events.push(chunk as Event);
-    callback();
-  }
-
-}
+import { Event, Subscriber } from "./event";
 
 describe("Subscriber", function () {
   it("subscribe and publish", function () {
-    const testStream = new TestStream();
     const subscriber = new Subscriber();
 
     const events: Event[] = [
@@ -66,16 +45,18 @@ describe("Subscriber", function () {
     ];
 
     const stream = subscriber.subscribe();
-    stream.pipe(testStream);
+    const subEvents: Event[] = [];
+    stream.on("data", (e: Event) => {
+      subEvents.push(e);
+    });
     for (const event of events) {
       subscriber.publish(event);
     }
 
-    assert.lengthOf(testStream.events, events.length);
+    assert.lengthOf(subEvents, events.length);
     for (let i = 0; i < events.length; i++) {
-      assert.deepStrictEqual(testStream.events[i], events[i]);
+      assert.deepStrictEqual(subEvents[i], events[i]);
     }
     subscriber.unsubscribe(stream);
-    testStream.end();
   });
 });

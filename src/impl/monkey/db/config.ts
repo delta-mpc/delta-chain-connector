@@ -3,17 +3,17 @@ import { Options } from "@mikro-orm/core";
 
 let dbConfig: Options = {};
 
-if (config.db.type == "sqlite") {
+if (config.monkey.db.type == "sqlite") {
   dbConfig = {
     type: "sqlite",
-    dbName: config.db.url,
+    dbName: config.monkey.db.url,
     entities: ["dist/impl/monkey/entity/**.js"],
     entitiesTs: ["src/impl/monkey/entity/**.ts"],
   };
-} else if (config.db.type == "mysql") {
+} else if (config.monkey.db.type == "mysql") {
   dbConfig = {
     type: "mysql",
-    clientUrl: config.db.url,
+    clientUrl: config.monkey.db.url,
     entities: ["dist/impl/monkey/entity/**.js"],
     entitiesTs: ["src/impl/monkey/entity/**.ts"],
   };
