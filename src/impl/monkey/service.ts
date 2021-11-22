@@ -1,3 +1,4 @@
+import { Options } from "@mikro-orm/core";
 import { Readable } from "stream";
 import { Event } from "..";
 import { Subscriber } from "../event";
@@ -7,10 +8,14 @@ import dbConfig from "./db/config";
 import * as entity from "./entity";
 import { Key, RoundMember } from "./entity";
 
+export interface ImplOption extends Options {
+  dev?: boolean;
+}
+
 class _Impl implements Impl {
   private subscriber = new Subscriber();
 
-  async init(cfg = dbConfig): Promise<void> {
+  async init(cfg: ImplOption = dbConfig): Promise<void> {
     await db.init(cfg);
   }
 

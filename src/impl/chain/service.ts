@@ -5,12 +5,27 @@ import { config } from "src/config";
 import log from "src/log";
 import { Readable } from "stream";
 import Web3 from "web3";
+import { sha3 } from "web3-utils";
 import { Log, provider } from "web3-core";
 import { TransactionReceipt } from "web3-eth";
 import { Contract, EventData } from "web3-eth-contract";
 import { AbiItem } from "web3-utils";
 import { Event, Subscriber } from "..";
 import { Impl, NodeInfo, SecretShareData, TaskRoundInfo } from "../service";
+
+export interface ImplOption {
+  contractAddress: string;
+  nodeAddress: string;
+  privateKey: string;
+  provider: string;
+  abiFile: string;
+  gasPrice: number;
+  gasLimit: number;
+  chainParam: {
+    name?: string;
+    chainId?: number;
+  };
+}
 
 interface gasOption {
   gasPrice?: number;
@@ -21,35 +36,51 @@ interface Abi extends AbiItem {
   signature?: string;
 }
 
-type Mixed = { [key: string | number]: string } | string;
+type Mixed = { [key: string | number]: string | any } | string;
 
 class _Impl implements Impl {
   private subscriber = new Subscriber();
 
+  private option!: ImplOption;
   private web3: Web3 = new Web3();
   private contract!: Contract;
-  private contractAddress!: string;
-  private abis!: Abi[];
+  private abis: Abi[] = [];
+  private serverUrl = "127.0.0.1:6800";
 
-  async init(): Promise<void> {
-    const provider = await this.connect();
+  async init(opt?: ImplOption): Promise<void> {
+    this.option = opt || config.chain;
+    if (this.option.privateKey.startsWith("0x")) {
+      this.option.privateKey = this.option.privateKey.slice(2);
+    }
+    const provider = await this.connect(this.option.provider);
     this.web3.setProvider(provider);
-    const file = await fs.readFile(config.chain.abiFile, { encoding: "utf-8" });
+    const file = await fs.readFile(this.option.abiFile, { encoding: "utf-8" });
     const jsonInterface = JSON.parse(file);
-    this.abis = jsonInterface.abi;
-    this.contractAddress = config.chain.nodeAddress;
-    this.contract = new this.web3.eth.Contract(this.abis, this.contractAddress);
+    const abis: AbiItem[] = jsonInterface.abi;
+    for (const abi of abis) {
+      if (abi.type === "event") {
+        const signature = abi.name + "(" + abi.inputs!.map((input) => input.type).join(",") + ")";
+        const hash = sha3(signature);
+        this.abis.push({ ...abi, signature: hash || undefined });
+      } else {
+        this.abis.push(abi);
+      }
+    }
+    this.contract = new this.web3.eth.Contract(this.abis, this.option.contractAddress);
+    this.listenEvents();
+  }
 
+  listenEvents(): void {
     this.contract.events.allEvents({ fromBlock: "latest" }).on("data", (event: EventData) => {
       const res = event.returnValues;
       let retEvent: Event;
       switch (event.event) {
-        case "AggregatStarted":
+        case "AggregateStarted":
           retEvent = {
             type: "AggregationStarted",
             taskID: res.taskId,
             round: Number(res.round),
-            addrs: JSON.parse(res.addrs),
+            addrs: res.addrs,
           };
           this.subscriber.publish(retEvent);
           break;
@@ -58,7 +89,7 @@ class _Impl implements Impl {
             type: "CalculationStarted",
             taskID: res.taskId,
             round: Number(res.round),
-            addrs: JSON.parse(res.addrs),
+            addrs: res.addrs,
           };
           this.subscriber.publish(retEvent);
           break;
@@ -67,7 +98,7 @@ class _Impl implements Impl {
             type: "PartnerSelected",
             taskID: res.taskId,
             round: Number(res.round),
-            addrs: JSON.parse(res.addrs),
+            addrs: res.addrs,
           };
           this.subscriber.publish(retEvent);
           break;
@@ -102,8 +133,8 @@ class _Impl implements Impl {
     });
   }
 
-  async connect(): Promise<provider> {
-    const provider = new Web3.providers.WebsocketProvider(config.chain.provider, {
+  async connect(url: string): Promise<provider> {
+    const provider = new Web3.providers.WebsocketProvider(url, {
       reconnect: {
         auto: true,
         delay: 5000,
@@ -131,25 +162,25 @@ class _Impl implements Impl {
     const method = this.contract.methods[name](...args);
     const data = method.encodeABI();
 
-    const gasPrice = gasOpt?.gasPrice || config.chain.gasPrice;
-    const gasLimit = gasOpt?.gasLimit || config.chain.gasLimit;
+    const gasPrice = gasOpt?.gasPrice || this.option.gasPrice;
+    const gasLimit = gasOpt?.gasLimit || this.option.gasLimit;
 
     if (nonce === 0) {
-      nonce = await this.web3.eth.getTransactionCount(config.chain.nodeAddress);
+      nonce = await this.web3.eth.getTransactionCount(this.option.nodeAddress);
     }
 
     const tra = {
       data: data,
-      from: config.chain.nodeAddress,
-      to: this.contractAddress,
+      from: this.option.nodeAddress,
+      to: this.option.contractAddress,
       gasPrice: "0x" + gasPrice.toString(16),
       gasLimit: "0x" + gasLimit.toString(16),
       nonce: this.web3.utils.toHex(nonce),
     };
 
-    const key = Buffer.from(config.chain.privateKey, "hex");
+    const key = Buffer.from(this.option.privateKey, "hex");
     const tx = TransactionFactory.fromTxData(tra, {
-      common: common.custom(config.chain.chainParam),
+      common: common.custom(this.option.chainParam),
     });
     const serializedTx = "0x" + tx.sign(key).serialize().toString("hex");
     return new Promise((resolve, reject) => {
@@ -190,7 +221,7 @@ class _Impl implements Impl {
 
   async call(name: string, args: any[] = []): Promise<Mixed> {
     const method = this.contract.methods[name](...args);
-    const res = await method.call({ from: config.chain.nodeAddress });
+    const res = await method.call({ from: this.option.nodeAddress });
     return res;
   }
 
@@ -204,28 +235,28 @@ class _Impl implements Impl {
   }
 
   async updateUrl(address: string, url: string): Promise<void> {
-    if (address !== config.chain.nodeAddress) {
+    if (address !== this.option.nodeAddress) {
       throw new Error(`chain connector node address is not ${address}`);
     }
     await this.method("updateUrl", [url]);
   }
 
   async updateName(address: string, name: string): Promise<void> {
-    if (address !== config.chain.nodeAddress) {
+    if (address !== this.option.nodeAddress) {
       throw new Error(`chain connector node address is not ${address}`);
     }
     await this.method("updateName", [name]);
   }
 
   async leave(address: string): Promise<void> {
-    if (address !== config.chain.nodeAddress) {
+    if (address !== this.option.nodeAddress) {
       throw new Error(`chain connector node address is not ${address}`);
     }
     await this.method("leave");
   }
 
   async getNodeInfo(address: string): Promise<NodeInfo> {
-    if (address !== config.chain.nodeAddress) {
+    if (address !== this.option.nodeAddress) {
       throw new Error(`chain connector node address is not ${address}`);
     }
 
@@ -240,11 +271,11 @@ class _Impl implements Impl {
   }
 
   async createTask(address: string, dataset: string, commitment: string): Promise<string> {
-    if (address !== config.chain.nodeAddress) {
+    if (address !== this.option.nodeAddress) {
       throw new Error(`chain connector node address is not ${address}`);
     }
 
-    const receipt = await this.method("createTask", [dataset, commitment]);
+    const receipt = await this.method("createTask", [this.serverUrl, dataset, commitment]);
     const res = this.decodeLogs(receipt.logs);
     if (!res) {
       throw new Error("createTask has no result");
@@ -253,15 +284,15 @@ class _Impl implements Impl {
   }
 
   async startRound(address: string, taskID: string, round: number): Promise<void> {
-    if (address !== config.chain.nodeAddress) {
+    if (address !== this.option.nodeAddress) {
       throw new Error(`chain connector node address is not ${address}`);
     }
 
-    await this.method("startRound", [taskID, round]);
+    await this.method("startRound", [taskID, round, 100, 1]);
   }
 
   async joinRound(address: string, taskID: string, round: number, pk1: string, pk2: string): Promise<void> {
-    if (address !== config.chain.nodeAddress) {
+    if (address !== this.option.nodeAddress) {
       throw new Error(`chain connector node address is not ${address}`);
     }
 
@@ -277,12 +308,12 @@ class _Impl implements Impl {
     return {
       round: Number(res.currentRound),
       status: Number(res.status),
-      clients: JSON.parse(res.joinedAddrs),
+      clients: res.joinedAddrs,
     };
   }
 
   async selectCandidates(address: string, taskID: string, round: number, clients: string[]): Promise<void> {
-    if (address !== config.chain.nodeAddress) {
+    if (address !== this.option.nodeAddress) {
       throw new Error(`chain connector node address is not ${address}`);
     }
 
@@ -296,7 +327,7 @@ class _Impl implements Impl {
     receiver: string,
     commitment: string
   ): Promise<void> {
-    if (address !== config.chain.nodeAddress) {
+    if (address !== this.option.nodeAddress) {
       throw new Error(`chain connector node address is not ${address}`);
     }
 
@@ -310,7 +341,7 @@ class _Impl implements Impl {
     receiver: string,
     commitment: string
   ): Promise<void> {
-    if (address !== config.chain.nodeAddress) {
+    if (address !== this.option.nodeAddress) {
       throw new Error(`chain connector node address is not ${address}`);
     }
 
@@ -327,7 +358,7 @@ class _Impl implements Impl {
   }
 
   async startCalculation(address: string, taskID: string, round: number, clients: string[]): Promise<void> {
-    if (address !== config.chain.nodeAddress) {
+    if (address !== this.option.nodeAddress) {
       throw new Error(`chain connector node address is not ${address}`);
     }
 
@@ -340,7 +371,7 @@ class _Impl implements Impl {
     round: number,
     commitment: string
   ): Promise<void> {
-    if (address !== config.chain.nodeAddress) {
+    if (address !== this.option.nodeAddress) {
       throw new Error(`chain connector node address is not ${address}`);
     }
 
@@ -357,7 +388,7 @@ class _Impl implements Impl {
   }
 
   async startAggregation(address: string, taskID: string, round: number, clients: string[]): Promise<void> {
-    if (address !== config.chain.nodeAddress) {
+    if (address !== this.option.nodeAddress) {
       throw new Error(`chain connector node address is not ${address}`);
     }
 
@@ -371,7 +402,7 @@ class _Impl implements Impl {
     sender: string,
     seed: string
   ): Promise<void> {
-    if (address !== config.chain.nodeAddress) {
+    if (address !== this.option.nodeAddress) {
       throw new Error(`chain connector node address is not ${address}`);
     }
 
@@ -385,7 +416,7 @@ class _Impl implements Impl {
     sender: string,
     secretKey: string
   ): Promise<void> {
-    if (address !== config.chain.nodeAddress) {
+    if (address !== this.option.nodeAddress) {
       throw new Error(`chain connector node address is not ${address}`);
     }
 
@@ -412,7 +443,7 @@ class _Impl implements Impl {
   }
 
   async endRound(address: string, taskID: string, round: number): Promise<void> {
-    if (address !== config.chain.nodeAddress) {
+    if (address !== this.option.nodeAddress) {
       throw new Error(`chain connector node address is not ${address}`);
     }
 
@@ -428,3 +459,4 @@ class _Impl implements Impl {
   }
 }
 
+export const impl = new _Impl();
