@@ -1,8 +1,7 @@
-import { Options } from "@mikro-orm/core";
 import * as chai from "chai";
 import chaiAsPromised from "chai-as-promised";
 import * as crypto from "crypto";
-import { impl } from ".";
+import { impl, ImplOption } from ".";
 import { KeyType, RoundStatus, ShareType } from "../service";
 import * as db from "./db";
 import * as entity from "./entity";
@@ -13,7 +12,7 @@ const assert = chai.assert;
 
 describe("monkey service", function () {
   before(async function () {
-    const dbConfig: Options = {
+    const dbConfig: ImplOption = {
       type: "sqlite",
       dbName: "db/chain.test.db",
       entities: ["dist/impl/monkey/entity/**.js"],

@@ -29,8 +29,8 @@ interface Config {
     gasPrice: number,
     gasLimit: number,
     chainParam: {
-      name: string,
-      chainId: number,
+      name?: string,
+      chainId?: number,
     }
   }
 }
