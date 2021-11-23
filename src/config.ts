@@ -7,6 +7,20 @@ const file = fs.readFileSync(configFile, { encoding: "utf-8" });
 type LogLevelType = "debug" | "info" | "warn" | "error" | "fatal";
 type DatabaseType = "mysql" | "sqlite";
 
+interface ContractOption {
+  contractAddress: string;
+  nodeAddress: string;
+  privateKey: string;
+  provider: string;
+  abiFile: string;
+  gasPrice: number;
+  gasLimit: number;
+  chainParam: {
+    name?: string;
+    chainId?: number;
+  };
+}
+
 interface Config {
   log: {
     level: LogLevelType;
@@ -19,20 +33,11 @@ interface Config {
       type: DatabaseType;
       url: string;
     };
-  },
+  };
   chain: {
-    contractAddress: string,
-    nodeAddress: string,
-    privateKey: string,
-    provider: string,
-    abiFile: string,
-    gasPrice: number,
-    gasLimit: number,
-    chainParam: {
-      name?: string,
-      chainId?: number,
-    }
-  }
+    identity: ContractOption;
+    delta: ContractOption;
+  };
 }
 
 export const config = JSON.parse(file) as Config;
