@@ -1,7 +1,7 @@
 import { config } from "src/config";
 import { Readable } from "stream";
 import { EventData } from "web3-eth-contract";
-import { Event, Subscriber } from "..";
+import { Event, Subscriber } from "../event";
 import { Impl, NodeInfo, SecretShareData, TaskRoundInfo } from "../service";
 import { ContractHelper } from "./contract";
 

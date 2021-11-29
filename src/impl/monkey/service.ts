@@ -1,7 +1,6 @@
 import { Options } from "@mikro-orm/core";
 import { Readable } from "stream";
-import { Event } from "..";
-import { Subscriber } from "../event";
+import { Event, Subscriber } from "../event";
 import { Impl, KeyType, NodeInfo, RoundStatus, SecretShareData, ShareType, TaskRoundInfo } from "../service";
 import * as db from "./db";
 import dbConfig from "./db/config";

@@ -1,13 +1,14 @@
 import { config } from "src/config";
 import { Impl } from "./service";
 import * as monkey from "./monkey";
+import * as chain from "./chain";
 
 let impl: Impl;
 
 if (config.impl === "monkey") {
   impl = monkey.impl;
 } else {
-  throw Error(`unknown implementation ${config.impl}`);
+  impl = chain.impl;
 }
 
 export { impl };
