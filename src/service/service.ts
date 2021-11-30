@@ -404,19 +404,58 @@ export const chainService: ChainHandlers = {
     stream.on("data", (event: ImplEvent) => {
       switch (event.type) {
         case "TaskCreated":
-          call.write({ taskCreate: event });
+          call.write({
+            taskCreate: {
+              address: event.address,
+              url: event.url,
+              taskId: event.taskID,
+              dataset: event.dataset,
+              commitment: event.commitment,
+            },
+          });
           break;
         case "RoundStarted":
-          call.write({ roundStarted: event });
+          call.write({
+            roundStarted: {
+              taskId: event.taskID,
+              round: event.round,
+            },
+          });
+          break;
+        case "RoundEnded":
+          call.write({
+            roundEnded: {
+              taskId: event.taskID,
+              round: event.round,
+            },
+          });
           break;
         case "PartnerSelected":
-          call.write({ partnerSelected: event });
+          call.write({
+            partnerSelected: {
+              taskId: event.taskID,
+              round: event.round,
+              addrs: event.addrs,
+            },
+          });
           break;
         case "CalculationStarted":
-          call.write({ calculationStarted: event });
+          call.write({
+            calculationStarted: {
+              taskId: event.taskID,
+              round: event.round,
+              addrs: event.addrs,
+            },
+          });
           break;
         case "AggregationStarted":
-          call.write({ aggregationStarted: event });
+          call.write({
+            aggregationStarted: {
+              taskId: event.taskID,
+              round: event.round,
+              addrs: event.addrs,
+            },
+          });
           break;
       }
     });
