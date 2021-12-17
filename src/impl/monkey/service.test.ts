@@ -2,7 +2,7 @@ import * as chai from "chai";
 import chaiAsPromised from "chai-as-promised";
 import * as crypto from "crypto";
 import { impl, ImplOption } from ".";
-import { KeyType, RoundStatus, ShareType } from "../service";
+import { KeyType, RoundStatus } from "../service";
 import * as db from "./db";
 import * as entity from "./entity";
 
@@ -111,9 +111,10 @@ describe("monkey service", function () {
   let taskID: string;
   const dataset = "mnist";
   const taskCommitment = crypto.randomBytes(32).toString("hex");
+  const taskType = "horizontal";
   describe("createTask", function () {
     it("node1 create task1", async function () {
-      taskID = await impl.createTask(address1, dataset, taskCommitment);
+      taskID = await impl.createTask(address1, dataset, taskCommitment, taskType);
 
       assert.lengthOf(taskID, 64);
 
@@ -202,40 +203,6 @@ describe("monkey service", function () {
   const seedShareCommitment23 = crypto.randomBytes(32).toString("hex");
   const seedShareCommitment32 = crypto.randomBytes(32).toString("hex");
   const seedShareCommitment33 = crypto.randomBytes(32).toString("hex");
-  describe("uploadSeedCommitment", function () {
-    it("node2,3 uploadSeedCommitment", async function () {
-      await impl.uploadSeedCommitment(address2, taskID, round, address2, seedShareCommitment22);
-      await impl.uploadSeedCommitment(address2, taskID, round, address3, seedShareCommitment23);
-      await impl.uploadSeedCommitment(address3, taskID, round, address2, seedShareCommitment32);
-      await impl.uploadSeedCommitment(address3, taskID, round, address3, seedShareCommitment33);
-
-      const em = db.getEntityManager();
-      const member2 = await em.findOne(entity.RoundMember, {
-        round: { task: { outID: taskID }, round: round },
-        address: address2,
-      });
-      const member3 = await em.findOne(entity.RoundMember, {
-        round: { task: { outID: taskID }, round: round },
-        address: address3,
-      });
-      assert.exists(member2);
-      assert.exists(member3);
-
-      const cm1 = await em.findOne(entity.ShareCommitment, {
-        sender: member2,
-        receiver: member3,
-        type: ShareType.Seed,
-      });
-      const cm2 = await em.findOne(entity.ShareCommitment, {
-        sender: member3,
-        receiver: member2,
-        type: ShareType.Seed,
-      });
-
-      assert.strictEqual(cm1?.commitment, seedShareCommitment23);
-      assert.strictEqual(cm2?.commitment, seedShareCommitment32);
-    });
-  });
 
   const skShareCommitment22 = crypto.randomBytes(32).toString("hex");
   const skShareCommitment23 = crypto.randomBytes(32).toString("hex");
@@ -243,47 +210,58 @@ describe("monkey service", function () {
   const skShareCommitment33 = crypto.randomBytes(33).toString("hex");
   describe("uploadSecretKeyCommitment", function () {
     it("node2,3 uploadSecretKeyCommitment", async function () {
-      await impl.uploadSecretKeyCommitment(address2, taskID, round, address2, skShareCommitment22);
-      await impl.uploadSecretKeyCommitment(address2, taskID, round, address3, skShareCommitment23);
-      await impl.uploadSecretKeyCommitment(address3, taskID, round, address2, skShareCommitment32);
-      await impl.uploadSecretKeyCommitment(address3, taskID, round, address3, skShareCommitment33);
+      await impl.uploadSeedCommitment(
+        address2,
+        taskID,
+        round,
+        [address2, address3],
+        [seedShareCommitment22, seedShareCommitment23]
+      );
+      await impl.uploadSeedCommitment(
+        address3,
+        taskID,
+        round,
+        [address2, address3],
+        [seedShareCommitment32, seedShareCommitment33]
+      );
+      await impl.uploadSecretKeyCommitment(
+        address2,
+        taskID,
+        round,
+        [address2, address3],
+        [skShareCommitment22, skShareCommitment23]
+      );
+      await impl.uploadSecretKeyCommitment(
+        address3,
+        taskID,
+        round,
+        [address2, address3],
+        [skShareCommitment32, skShareCommitment33]
+      );
 
-      const em = db.getEntityManager();
-      const member2 = await em.findOne(entity.RoundMember, {
-        round: { task: { outID: taskID }, round: round },
-        address: address2,
-      });
-      const member3 = await em.findOne(entity.RoundMember, {
-        round: { task: { outID: taskID }, round: round },
-        address: address3,
-      });
-      assert.exists(member2);
-      assert.exists(member3);
+      const ssDatas2 = await impl.getSecretShareDatas(taskID, round, [address2, address3], address2);
+      const ssDatas3 = await impl.getSecretShareDatas(taskID, round, [address2, address3], address3);
 
-      const cm1 = await em.findOne(entity.ShareCommitment, {
-        sender: member2,
-        receiver: member3,
-        type: ShareType.SecretKey,
-      });
-      const cm2 = await em.findOne(entity.ShareCommitment, {
-        sender: member3,
-        receiver: member2,
-        type: ShareType.SecretKey,
-      });
-      assert.strictEqual(cm1?.commitment, skShareCommitment23);
-      assert.strictEqual(cm2?.commitment, skShareCommitment32);
+      assert.strictEqual(ssDatas2[0].seedCommitment, seedShareCommitment22);
+      assert.strictEqual(ssDatas3[0].seedCommitment, seedShareCommitment23);
+      assert.strictEqual(ssDatas2[1].seedCommitment, seedShareCommitment32);
+      assert.strictEqual(ssDatas3[1].seedCommitment, seedShareCommitment33);
+
+      assert.strictEqual(ssDatas2[0].secretKeyCommitment, skShareCommitment22);
+      assert.strictEqual(ssDatas3[0].secretKeyCommitment, skShareCommitment23);
+      assert.strictEqual(ssDatas2[1].secretKeyCommitment, skShareCommitment32);
+      assert.strictEqual(ssDatas3[1].secretKeyCommitment, skShareCommitment33);
     });
   });
 
   describe("getClientPublickKeys", function () {
     it("get node2,3 public keys", async function () {
-      const [pk21_, pk22_] = await impl.getClientPublickKeys(taskID, round, address2);
-      const [pk31_, pk32_] = await impl.getClientPublickKeys(taskID, round, address3);
+      const pks = await impl.getClientPublickKeys(taskID, round, [address2, address3]);
 
-      assert.strictEqual(pk21_, pk21);
-      assert.strictEqual(pk22_, pk22);
-      assert.strictEqual(pk31_, pk31);
-      assert.strictEqual(pk32_, pk32);
+      assert.strictEqual(pks[0][0], pk21);
+      assert.strictEqual(pks[0][1], pk22);
+      assert.strictEqual(pks[1][0], pk31);
+      assert.strictEqual(pks[1][1], pk32);
     });
   });
 
@@ -337,26 +315,26 @@ describe("monkey service", function () {
   const seedShare22 = crypto.randomBytes(32).toString("hex");
   describe("uploadSeed and getSecretShareData", function () {
     it("node2 upload node2 seed", async function () {
-      await impl.uploadSeed(address2, taskID, round, address2, seedShare22);
+      await impl.uploadSeed(address2, taskID, round, [address2], [seedShare22]);
 
-      const data = await impl.getSecretShareData(taskID, round, address2, address2);
-      assert.notExists(data.secretKey);
-      assert.notExists(data.secretKeyCommitment);
-      assert.strictEqual(data.seed, seedShare22);
-      assert.strictEqual(data.seedCommitment, seedShareCommitment22);
+      const ssDatas = await impl.getSecretShareDatas(taskID, round, [address2], address2);
+      assert.notExists(ssDatas[0].secretKey);
+      assert.exists(ssDatas[0].secretKeyCommitment);
+      assert.strictEqual(ssDatas[0].seed, seedShare22);
+      assert.strictEqual(ssDatas[0].seedCommitment, seedShareCommitment22);
     });
   });
 
   const skShare32 = crypto.randomBytes(32).toString("hex");
   describe("uploadSecretKey and getSecretShareData", function () {
     it("node2 upload node3 sk", async function () {
-      await impl.uploadSecretKey(address2, taskID, round, address3, skShare32);
+      await impl.uploadSecretKey(address2, taskID, round, [address3], [skShare32]);
 
-      const data = await impl.getSecretShareData(taskID, round, address3, address2);
-      assert.notExists(data.seed);
-      assert.notExists(data.seedCommitment);
-      assert.strictEqual(data.secretKey, skShare32);
-      assert.strictEqual(data.secretKeyCommitment, skShareCommitment32);
+      const ssDatas = await impl.getSecretShareDatas(taskID, round, [address3], address2);
+      assert.notExists(ssDatas[0].seed);
+      assert.exists(ssDatas[0].seedCommitment);
+      assert.strictEqual(ssDatas[0].secretKey, skShare32);
+      assert.strictEqual(ssDatas[0].secretKeyCommitment, skShareCommitment32);
     });
   });
 

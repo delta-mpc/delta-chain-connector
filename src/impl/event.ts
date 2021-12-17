@@ -7,6 +7,7 @@ export interface TaskCreatedEvent {
   dataset: string;
   url: string;
   commitment: string;
+  taskType: string;
 }
 
 export interface RoundStartedEvent {

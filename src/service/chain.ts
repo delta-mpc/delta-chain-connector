@@ -33,12 +33,14 @@ export interface ProtoGrpcType {
     PartnerSelectedEvent: MessageTypeDefinition;
     PublicKeyReq: MessageTypeDefinition;
     PublicKeyResp: MessageTypeDefinition;
+    PublicKeys: MessageTypeDefinition;
     ResultCommitment: MessageTypeDefinition;
     ResultCommitmentReq: MessageTypeDefinition;
     ResultCommitmentResp: MessageTypeDefinition;
     RoundEndedEvent: MessageTypeDefinition;
     RoundStartedEvent: MessageTypeDefinition;
     RoundStatus: EnumTypeDefinition;
+    SecretShareData: MessageTypeDefinition;
     SecretShareReq: MessageTypeDefinition;
     SecretShareResp: MessageTypeDefinition;
     Share: MessageTypeDefinition;

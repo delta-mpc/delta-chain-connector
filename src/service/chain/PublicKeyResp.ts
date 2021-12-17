@@ -1,11 +1,14 @@
 // Original file: src/service/chain.proto
 
+import type {
+  PublicKeys as _chain_PublicKeys,
+  PublicKeys__Output as _chain_PublicKeys__Output,
+} from "../chain/PublicKeys";
+
 export interface PublicKeyResp {
-  pk1?: string;
-  pk2?: string;
+  keys?: _chain_PublicKeys[];
 }
 
 export interface PublicKeyResp__Output {
-  pk1: string;
-  pk2: string;
+  keys: _chain_PublicKeys__Output[];
 }

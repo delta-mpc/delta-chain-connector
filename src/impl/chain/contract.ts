@@ -131,7 +131,8 @@ export class ContractHelper {
             const err = `method ${name} tx hash ${receipt.transactionHash} is reverted`;
             reject(err);
           }
-        }).catch((err: Error) => {
+        })
+        .catch((err: Error) => {
           reject(err);
         });
     });

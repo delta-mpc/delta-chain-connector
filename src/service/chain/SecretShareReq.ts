@@ -3,13 +3,13 @@
 export interface SecretShareReq {
   taskId?: string;
   round?: number;
-  sender?: string;
+  senders?: string[];
   receiver?: string;
 }
 
 export interface SecretShareReq__Output {
   taskId: string;
   round: number;
-  sender: string;
+  senders: string[];
   receiver: string;
 }

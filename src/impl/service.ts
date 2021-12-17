@@ -43,7 +43,7 @@ export interface Impl {
   updateName(address: string, name: string): Promise<void>;
   leave(address: string): Promise<void>;
   getNodeInfo(address: string): Promise<NodeInfo>;
-  createTask(address: string, dataset: string, commitment: string): Promise<string>;
+  createTask(address: string, dataset: string, commitment: string, taskType: string): Promise<string>;
   startRound(address: string, taskID: string, round: number): Promise<void>;
   joinRound(address: string, taskID: string, round: number, pk1: string, pk2: string): Promise<void>;
   getTaskRound(taskID: string, round: number): Promise<TaskRoundInfo>;
@@ -52,35 +52,41 @@ export interface Impl {
     address: string,
     taskID: string,
     round: number,
-    receiver: string,
-    commitment: string
+    receivers: string[],
+    commitments: string[]
   ): Promise<void>;
   uploadSecretKeyCommitment(
     address: string,
     taskID: string,
     round: number,
-    receiver: string,
-    commitment: string
+    receivers: string[],
+    commitments: string[]
   ): Promise<void>;
-  getClientPublickKeys(taskID: string, round: number, client: string): Promise<[string, string]>;
+  getClientPublickKeys(taskID: string, round: number, clients: string[]): Promise<[string, string][]>;
   startCalculation(address: string, taskID: string, round: number, clients: string[]): Promise<void>;
   uploadResultCommitment(address: string, taskID: string, round: number, commitment: string): Promise<void>;
   getResultCommitment(taskID: string, round: number, client: string): Promise<string>;
   startAggregation(address: string, taskID: string, round: number, clients: string[]): Promise<void>;
-  uploadSeed(address: string, taskID: string, round: number, sender: string, seed: string): Promise<void>;
+  uploadSeed(
+    address: string,
+    taskID: string,
+    round: number,
+    senders: string[],
+    seeds: string[]
+  ): Promise<void>;
   uploadSecretKey(
     address: string,
     taskID: string,
     round: number,
-    sender: string,
-    secretKey: string
+    senders: string[],
+    secretKeys: string[]
   ): Promise<void>;
-  getSecretShareData(
+  getSecretShareDatas(
     taskID: string,
     round: number,
-    sender: string,
+    senders: string[],
     receiver: string
-  ): Promise<SecretShareData>;
+  ): Promise<SecretShareData[]>;
   endRound(address: string, taskID: string, round: number): Promise<void>;
   subscribe(): Readable;
   unsubscribe(stream: Readable): void;
