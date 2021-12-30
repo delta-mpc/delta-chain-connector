@@ -24,6 +24,7 @@ export interface ProtoGrpcType {
     EndRoundReq: MessageTypeDefinition;
     Event: MessageTypeDefinition;
     EventReq: MessageTypeDefinition;
+    FinishTaskReq: MessageTypeDefinition;
     JoinReq: MessageTypeDefinition;
     JoinResp: MessageTypeDefinition;
     JoinRoundReq: MessageTypeDefinition;
@@ -47,6 +48,9 @@ export interface ProtoGrpcType {
     ShareCommitment: MessageTypeDefinition;
     StartRoundReq: MessageTypeDefinition;
     TaskCreateEvent: MessageTypeDefinition;
+    TaskFinishEvent: MessageTypeDefinition;
+    TaskReq: MessageTypeDefinition;
+    TaskResp: MessageTypeDefinition;
     TaskRoundReq: MessageTypeDefinition;
     TaskRoundResp: MessageTypeDefinition;
     UpdateNameReq: MessageTypeDefinition;

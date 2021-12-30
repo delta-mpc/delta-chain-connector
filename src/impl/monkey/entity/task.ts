@@ -26,6 +26,9 @@ export class Task {
   @Property()
   outID!: string;
 
+  @Property()
+  finished!: boolean;
+
   @OneToMany(() => Round, (round) => round.task)
   rounds = new Collection<Round>(this);
 
@@ -34,6 +37,7 @@ export class Task {
     this.dataset = dataset;
     this.commitment = commitment;
     this.taskType = taskType;
-    this.outID = crypto.randomBytes(32).toString("hex");
+    this.outID = "0x" + crypto.randomBytes(32).toString("hex");
+    this.finished = false;
   }
 }

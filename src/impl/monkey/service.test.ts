@@ -10,18 +10,19 @@ chai.use(chaiAsPromised);
 
 const assert = chai.assert;
 
+function randomBytesString(length: number): string {
+  return "0x" + crypto.randomBytes(length).toString("hex");
+}
+
 describe("monkey service", function () {
   before(async function () {
     const dbConfig: ImplOption = {
       type: "sqlite",
-      dbName: "db/chain.test.db",
+      dbName: "db/test.db",
       entities: ["dist/impl/monkey/entity/**.js"],
       entitiesTs: ["src/impl/monkey/entity/**.ts"],
     };
     await impl.init(dbConfig);
-
-    const generator = db.getORM().getSchemaGenerator();
-    await generator.createSchema();
   });
 
   after(async function () {
@@ -110,13 +111,14 @@ describe("monkey service", function () {
 
   let taskID: string;
   const dataset = "mnist";
-  const taskCommitment = crypto.randomBytes(32).toString("hex");
+  const taskCommitment = randomBytesString(32);
   const taskType = "horizontal";
   describe("createTask", function () {
     it("node1 create task1", async function () {
       taskID = await impl.createTask(address1, dataset, taskCommitment, taskType);
 
-      assert.lengthOf(taskID, 64);
+      assert.lengthOf(taskID, 66);
+      assert.strictEqual(taskID.slice(0, 2), "0x");
 
       const em = db.getEntityManager();
       const task = await em.findOne(entity.Task, { outID: taskID });
@@ -139,12 +141,12 @@ describe("monkey service", function () {
     });
   });
 
-  const pk11 = crypto.randomBytes(32).toString("hex");
-  const pk12 = crypto.randomBytes(32).toString("hex");
-  const pk21 = crypto.randomBytes(32).toString("hex");
-  const pk22 = crypto.randomBytes(32).toString("hex");
-  const pk31 = crypto.randomBytes(32).toString("hex");
-  const pk32 = crypto.randomBytes(32).toString("hex");
+  const pk11 = randomBytesString(32);
+  const pk12 = randomBytesString(32);
+  const pk21 = randomBytesString(32);
+  const pk22 = randomBytesString(32);
+  const pk31 = randomBytesString(32);
+  const pk32 = randomBytesString(32);
   describe("joinRound", function () {
     it("node1,2,3 join round1", async function () {
       await impl.joinRound(address1, taskID, round, pk11, pk12);
@@ -199,15 +201,15 @@ describe("monkey service", function () {
     });
   });
 
-  const seedShareCommitment22 = crypto.randomBytes(32).toString("hex");
-  const seedShareCommitment23 = crypto.randomBytes(32).toString("hex");
-  const seedShareCommitment32 = crypto.randomBytes(32).toString("hex");
-  const seedShareCommitment33 = crypto.randomBytes(32).toString("hex");
+  const seedShareCommitment22 = randomBytesString(32);
+  const seedShareCommitment23 = randomBytesString(32);
+  const seedShareCommitment32 = randomBytesString(32);
+  const seedShareCommitment33 = randomBytesString(32);
 
-  const skShareCommitment22 = crypto.randomBytes(32).toString("hex");
-  const skShareCommitment23 = crypto.randomBytes(32).toString("hex");
-  const skShareCommitment32 = crypto.randomBytes(32).toString("hex");
-  const skShareCommitment33 = crypto.randomBytes(33).toString("hex");
+  const skShareCommitment22 = randomBytesString(32);
+  const skShareCommitment23 = randomBytesString(32);
+  const skShareCommitment32 = randomBytesString(32);
+  const skShareCommitment33 = randomBytesString(33);
   describe("uploadSecretKeyCommitment", function () {
     it("node2,3 uploadSecretKeyCommitment", async function () {
       await impl.uploadSeedCommitment(
@@ -283,7 +285,7 @@ describe("monkey service", function () {
     });
   });
 
-  const resultCommitment2 = crypto.randomBytes(32).toString("hex");
+  const resultCommitment2 = randomBytesString(32);
   describe("uploadResultCommitment and getResultCommitment", function () {
     it("node2 upload result commitment", async function () {
       await impl.uploadResultCommitment(address2, taskID, round, resultCommitment2);
@@ -312,7 +314,7 @@ describe("monkey service", function () {
     });
   });
 
-  const seedShare22 = crypto.randomBytes(32).toString("hex");
+  const seedShare22 = randomBytesString(32);
   describe("uploadSeed and getSecretShareData", function () {
     it("node2 upload node2 seed", async function () {
       await impl.uploadSeed(address2, taskID, round, [address2], [seedShare22]);
@@ -325,7 +327,7 @@ describe("monkey service", function () {
     });
   });
 
-  const skShare32 = crypto.randomBytes(32).toString("hex");
+  const skShare32 = randomBytesString(32);
   describe("uploadSecretKey and getSecretShareData", function () {
     it("node2 upload node3 sk", async function () {
       await impl.uploadSecretKey(address2, taskID, round, [address3], [skShare32]);
@@ -355,6 +357,15 @@ describe("monkey service", function () {
       });
       assert.lengthOf(members, 1);
       assert.strictEqual(members[0].address, address2);
+    });
+  });
+
+  describe("finishTask", function () {
+    it("finishTask", async function () {
+      await impl.finishTask(address1, taskID);
+
+      const taskInfo = await impl.getTask(taskID);
+      assert.isTrue(taskInfo.finished);
     });
   });
 });

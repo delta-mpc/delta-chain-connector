@@ -23,6 +23,16 @@ export interface NodeInfo {
   name: string;
 }
 
+export interface TaskInfo {
+  address: string;
+  url: string;
+  taskID: string;
+  dataset: string;
+  commitment: string;
+  taskType: string;
+  finished: boolean;
+}
+
 export interface TaskRoundInfo {
   round: number;
   status: number;
@@ -44,6 +54,8 @@ export interface Impl {
   leave(address: string): Promise<void>;
   getNodeInfo(address: string): Promise<NodeInfo>;
   createTask(address: string, dataset: string, commitment: string, taskType: string): Promise<string>;
+  finishTask(address: string, taskID: string): Promise<void>;
+  getTask(taskID: string): Promise<TaskInfo>;
   startRound(address: string, taskID: string, round: number): Promise<void>;
   joinRound(address: string, taskID: string, round: number, pk1: string, pk2: string): Promise<void>;
   getTaskRound(taskID: string, round: number): Promise<TaskRoundInfo>;

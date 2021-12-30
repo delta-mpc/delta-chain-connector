@@ -10,6 +10,7 @@ import {
   CalculationStartedEvent,
   AggregationStartedEvent,
   RoundEndedEvent,
+  TaskFinishedEvent,
 } from "..";
 import { Readable } from "stream";
 
@@ -18,38 +19,31 @@ chai.use(chaiAsPromised);
 const assert = chai.assert;
 
 describe("chain service", function () {
-  const nodeAddress = "0xA4Ab535C528A9b64602CC5444606eE589Df99139";
-  const privateKey = "0xad4d4cf5742d76b3bdb02ad0ab3498694ddc1327b9d7d79f24ee7ee8fe9497b1";
+  const nodeAddress = "0xF8EdFc90639d8ffdb39C99A92b6308D1e52D07c7";
+  const privateKey = "0xe395e72229bb071c55b73df9e0ac0dbf2ef906c1307eea61d2e6cae741695aaf";
 
   const identityOpt: ContractOption = {
-    contractAddress: "0x75B4EBF1C19b6dBd0b35b385Ae91E93b7B078324",
-    nodeAddress: nodeAddress,
-    privateKey: privateKey,
-    provider: "http://127.0.0.1:8545",
+    contractAddress: "0x6eb62A6A11BB5a7629C96133BF5267B460EA71Bb",
     abiFile: "IdentityContract.json",
-    gasPrice: 1,
-    gasLimit: 6721975,
-    chainParam: {
-      chainId: 1337,
-    },
   };
 
-  const deltaOpt: ContractOption = {
-    contractAddress: "0xB6fF5691e6c782D4688FA7A5BDa316D4702636cC",
-    nodeAddress: nodeAddress,
-    privateKey: privateKey,
-    provider: "http://127.0.0.1:8545",
+  const hflOpt: ContractOption = {
+    contractAddress: "0x6bCB107d241066923B055b8F7EE5E1C4E340d672",
     abiFile: "HFLContract.json",
-    gasPrice: 1,
-    gasLimit: 6721975,
-    chainParam: {
-      chainId: 1337,
-    },
   };
 
   const opt: ChainOption = {
+    nodeAddress: nodeAddress,
+    privateKey: privateKey,
+    provider: "http://127.0.0.1:8545",
+    gasPrice: 1,
+    gasLimit: 6721975,
+    chainParam: {
+      chainId: 1337,
+    },
+
     identity: identityOpt,
-    delta: deltaOpt,
+    hfl: hflOpt,
   };
 
   let stream: Readable;
@@ -226,9 +220,18 @@ describe("chain service", function () {
     });
   });
 
+  describe("finishTask", function () {
+    it("finishTask", async function () {
+      await impl.finishTask(nodeAddress, taskID);
+
+      const info = await impl.getTask(taskID);
+      assert.isTrue(info.finished);
+    });
+  });
+
   describe("subscribe", function () {
     it("events", function () {
-      assert.lengthOf(events, 6);
+      assert.lengthOf(events, 7);
       assert.strictEqual(events[0].type, "TaskCreated");
       const event0 = events[0] as TaskCreatedEvent;
       assert.strictEqual(event0.address, nodeAddress);
@@ -267,6 +270,10 @@ describe("chain service", function () {
       const event5 = events[5] as RoundEndedEvent;
       assert.strictEqual(event5.taskID, taskID);
       assert.strictEqual(event5.round, round);
+
+      assert.strictEqual(events[6].type, "TaskFinished");
+      const event6 = events[6] as TaskFinishedEvent;
+      assert.strictEqual(event6.taskID, taskID);
     });
   });
 

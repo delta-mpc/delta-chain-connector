@@ -1,7 +1,17 @@
 import { Options } from "@mikro-orm/core";
+import log from "src/log";
 import { Readable } from "stream";
 import { Event, Subscriber } from "../event";
-import { Impl, KeyType, NodeInfo, RoundStatus, SecretShareData, ShareType, TaskRoundInfo } from "../service";
+import {
+  Impl,
+  KeyType,
+  NodeInfo,
+  RoundStatus,
+  SecretShareData,
+  ShareType,
+  TaskInfo,
+  TaskRoundInfo,
+} from "../service";
 import * as db from "./db";
 import dbConfig from "./db/config";
 import * as entity from "./entity";
@@ -21,12 +31,19 @@ class _Impl implements Impl {
   async join(url: string, name: string): Promise<string> {
     const em = db.getEntityManager();
     const node = await em.findOne(entity.Node, { url: url });
-    if (node) {
-      return node.address;
-    } else {
+    log.info(`node joined ${node?.joined}`);
+    if (!node) {
       const node = new entity.Node(url, name);
+      node.joined = true;
       await em.persistAndFlush(node);
       return node.address;
+    } else if (node.joined == false) {
+      // check node.joined explictly. Note: node.joined is a integer in database, so we should use == instead of === to check it.
+      node.joined = true;
+      await em.flush();
+      return node.address;
+    } else {
+      throw new Error(`node ${node.address} has already joined`);
     }
   }
 
@@ -57,7 +74,8 @@ class _Impl implements Impl {
     if (!node) {
       throw new Error(`node of address ${address} doesn't exist`);
     }
-    await em.removeAndFlush(node);
+    node.joined = false;
+    await em.flush();
   }
 
   async getNodeInfo(address: string): Promise<NodeInfo> {
@@ -89,6 +107,50 @@ class _Impl implements Impl {
     };
     this.subscriber.publish(event);
     return task.outID;
+  }
+
+  async finishTask(address: string, taskID: string) {
+    const em = db.getEntityManager();
+    const node = await em.findOne(entity.Node, { address: address });
+    if (!node) {
+      throw new Error(`node of address ${address} doesn't exist`);
+    }
+
+    const task = await em.findOne(entity.Task, { outID: taskID });
+
+    if (!task) {
+      throw new Error(`task ${taskID} doesn't exist`);
+    }
+    task.finished = true;
+    await em.flush();
+    const event: Event = {
+      type: "TaskFinished",
+      taskID: taskID,
+    };
+    this.subscriber.publish(event);
+  }
+
+  async getTask(taskID: string): Promise<TaskInfo> {
+    const em = db.getEntityManager();
+    const task = await em.findOne(entity.Task, { outID: taskID });
+    if (!task) {
+      throw new Error(`task ${taskID} doesn't exist`);
+    }
+
+    const node = await em.findOne(entity.Node, { address: task.address });
+    if (!node) {
+      throw new Error(`node ${task.address} doesn't exist`);
+    }
+
+    return {
+      address: task.address,
+      url: node?.url,
+      taskID: taskID,
+      dataset: task.dataset,
+      commitment: task.commitment,
+      taskType: task.taskType,
+      finished: task.finished,
+    };
   }
 
   async startRound(address: string, taskID: string, round: number): Promise<void> {
@@ -573,7 +635,6 @@ class _Impl implements Impl {
       em.persist(share);
     }
 
-    dst.status = RoundStatus.Finished;
     await em.flush();
   }
 
