@@ -6,6 +6,7 @@ export interface TaskCreateEvent {
   dataset?: string;
   url?: string;
   commitment?: string;
+  taskType?: string;
 }
 
 export interface TaskCreateEvent__Output {
@@ -14,4 +15,5 @@ export interface TaskCreateEvent__Output {
   dataset: string;
   url: string;
   commitment: string;
+  taskType: string;
 }

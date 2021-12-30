@@ -4,14 +4,14 @@ export interface Share {
   address?: string;
   taskId?: string;
   round?: number;
-  sender?: string;
-  share?: string;
+  senders?: string[];
+  shares?: string[];
 }
 
 export interface Share__Output {
   address: string;
   taskId: string;
   round: number;
-  sender: string;
-  share: string;
+  senders: string[];
+  shares: string[];
 }

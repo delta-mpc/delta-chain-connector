@@ -69,14 +69,14 @@ class _Impl implements Impl {
     return { url: node.url, name: node.name };
   }
 
-  async createTask(address: string, dataset: string, commitment: string): Promise<string> {
+  async createTask(address: string, dataset: string, commitment: string, taskType: string): Promise<string> {
     const em = db.getEntityManager();
     const node = await em.findOne(entity.Node, { address: address });
     if (!node) {
       throw new Error(`node of address ${address} doesn't exist`);
     }
 
-    const task = new entity.Task(address, dataset, commitment);
+    const task = new entity.Task(address, dataset, commitment, taskType);
     await em.persistAndFlush(task);
     const event: Event = {
       type: "TaskCreated",
@@ -85,6 +85,7 @@ class _Impl implements Impl {
       dataset: task.dataset,
       url: node.url,
       commitment: task.commitment,
+      taskType: taskType,
     };
     this.subscriber.publish(event);
     return task.outID;
@@ -198,10 +199,13 @@ class _Impl implements Impl {
     address: string,
     taskID: string,
     round: number,
-    receiver: string,
-    commitment: string,
+    receivers: string[],
+    commitments: string[],
     type: ShareType
   ) {
+    if (receivers.length !== commitments.length) {
+      throw new Error(`task ${taskID} round ${round} receivers' length is not equal to commitments' length`);
+    }
     const em = db.getEntityManager();
 
     const roundEntity = await em.findOne(entity.Round, {
@@ -221,67 +225,87 @@ class _Impl implements Impl {
       throw new Error(`task ${taskID} round ${round} member ${address} doesn't exist`);
     }
 
-    const dst = await em.findOne(entity.RoundMember, {
+    const dsts = await em.find(entity.RoundMember, {
       round: roundEntity,
-      address: receiver,
+      address: { $in: receivers },
       status: RoundStatus.Running,
     });
-    if (!dst) {
-      throw new Error(`task ${taskID} round ${round} member ${receiver} doesn't exist`);
+    if (dsts.length !== receivers.length) {
+      throw new Error(`task ${taskID} round ${round} some receivers doesn't exist`);
     }
 
-    const shareCommitment = new entity.ShareCommitment(src, dst, commitment, type);
-    await em.persistAndFlush(shareCommitment);
+    const dstMap = new Map(dsts.map((member) => [member.address, member]));
+    for (let i = 0; i < dsts.length; i++) {
+      const dst = dstMap.get(receivers[i])!;
+      const commitment = commitments[i];
+      const shareCommitment = new entity.ShareCommitment(src, dst, commitment, type);
+      em.persist(shareCommitment);
+    }
+
+    await em.flush();
   }
 
   async uploadSeedCommitment(
     address: string,
     taskID: string,
     round: number,
-    receiver: string,
-    commitment: string
+    receivers: string[],
+    commitments: string[]
   ) {
-    await this.uploadShareCommitment(address, taskID, round, receiver, commitment, ShareType.Seed);
+    await this.uploadShareCommitment(address, taskID, round, receivers, commitments, ShareType.Seed);
   }
 
   async uploadSecretKeyCommitment(
     address: string,
     taskID: string,
     round: number,
-    receiver: string,
-    commitment: string
+    receivers: string[],
+    commitments: string[]
   ) {
-    await this.uploadShareCommitment(address, taskID, round, receiver, commitment, ShareType.SecretKey);
+    await this.uploadShareCommitment(address, taskID, round, receivers, commitments, ShareType.SecretKey);
   }
 
-  async getClientPublickKeys(taskID: string, round: number, client: string): Promise<[string, string]> {
+  async getClientPublickKeys(taskID: string, round: number, clients: string[]): Promise<[string, string][]> {
     const em = db.getEntityManager();
 
-    const member = await em.findOne(entity.RoundMember, {
+    const members = await em.find(entity.RoundMember, {
       round: { task: { outID: taskID }, round: round },
-      address: client,
+      address: { $in: clients },
     });
-    if (!member) {
-      throw new Error(`task ${taskID} round ${round} member ${client} doesn't exist`);
+    if (members.length !== clients.length) {
+      throw new Error(`task ${taskID} round ${round} some member in clients doesn't exist`);
     }
-    if (member.status < RoundStatus.Running) {
-      throw new Error(`member ${client} hasn't join this round`);
-    }
-
-    const pks = await em.find(entity.Key, {
-      member: member,
-    });
-
-    let pk1!: string;
-    let pk2!: string;
-    for (const pk of pks) {
-      if (pk.type == KeyType.PK1) {
-        pk1 = pk.key;
-      } else {
-        pk2 = pk.key;
+    for (const member of members) {
+      if (member.status < RoundStatus.Running) {
+        throw new Error(`member ${member.address} hasn't join this round`);
       }
     }
-    return [pk1, pk2];
+
+    const pk1s = await em.find(entity.Key, {
+      member: { $in: members },
+      type: KeyType.PK1,
+    });
+    if (pk1s.length !== members.length) {
+      throw new Error(`task ${taskID} round ${round} some member doesn't upload pk1`);
+    }
+    const pk2s = await em.find(entity.Key, {
+      member: { $in: members },
+      type: KeyType.PK2,
+    });
+    if (pk2s.length !== members.length) {
+      throw new Error(`task ${taskID} round ${round} some member doesn't upload pk2`);
+    }
+
+    const pk1Map = new Map(pk1s.map((key) => [key.member.address, key.key]));
+    const pk2Map = new Map(pk2s.map((key) => [key.member.address, key.key]));
+
+    const pks: [string, string][] = new Array(clients.length);
+    for (const [i, client] of clients.entries()) {
+      const pk1 = pk1Map.get(client)!;
+      const pk2 = pk2Map.get(client)!;
+      pks[i] = [pk1, pk2];
+    }
+    return pks;
   }
 
   async startCalculation(address: string, taskID: string, round: number, clients: string[]) {
@@ -432,7 +456,11 @@ class _Impl implements Impl {
     this.subscriber.publish(event);
   }
 
-  async uploadSeed(address: string, taskID: string, round: number, sender: string, seed: string) {
+  async uploadSeed(address: string, taskID: string, round: number, senders: string[], seeds: string[]) {
+    if (senders.length !== seeds.length) {
+      throw new Error(`task ${taskID} round ${round} senders' length is not equal to seeds' length`);
+    }
+
     const em = db.getEntityManager();
 
     const roundEntity = await em.findOne(entity.Round, {
@@ -446,13 +474,13 @@ class _Impl implements Impl {
       throw new Error(`round ${round} status is not in aggregationg status`);
     }
 
-    const src = await em.findOne(entity.RoundMember, {
+    const srcs = await em.find(entity.RoundMember, {
       round: roundEntity,
-      address: sender,
+      address: { $in: senders },
       status: RoundStatus.Aggregating,
     });
-    if (!src) {
-      throw new Error(`task ${taskID} round ${round} member ${sender} doesn't exist`);
+    if (srcs.length != senders.length) {
+      throw new Error(`task ${taskID} round ${round} some senders doesn't exist`);
     }
 
     const dst = await em.findOne(entity.RoundMember, {
@@ -464,53 +492,97 @@ class _Impl implements Impl {
       throw new Error(`task ${taskID} round ${round} member ${address} doesn't exist`);
     }
 
-    const share = new entity.Share(src, dst, seed, ShareType.Seed);
-    await em.persistAndFlush(share);
-  }
-
-  async uploadSecretKey(address: string, taskID: string, round: number, sender: string, secretKey: string) {
-    const em = db.getEntityManager();
-
-    const roundEntity = await em.findOne(entity.Round, {
-      task: { outID: taskID },
-      round: round,
+    // check secret key do not exist
+    const skCount = await em.count(entity.Share, {
+      sender: { $in: srcs },
+      receiver: dst,
+      type: ShareType.SecretKey,
     });
-    if (!roundEntity) {
-      throw new Error(`task ${taskID} round ${round} doesn't exist`);
-    }
-    if (roundEntity.status !== RoundStatus.Aggregating) {
-      throw new Error(`round ${round} status is not in aggregationg status`);
+    if (skCount !== 0) {
+      throw new Error(`task ${taskID} round ${round} some senders have upload secret key`);
     }
 
-    const src = await em.findOne(entity.RoundMember, {
-      round: roundEntity,
-      address: sender,
-      status: RoundStatus.Calculating,
-    });
-    if (!src) {
-      throw new Error(`task ${taskID} round ${round} member ${sender} doesn't exist`);
+    const srcMap = new Map(srcs.map((member) => [member.address, member]));
+    for (let i = 0; i < senders.length; i++) {
+      const src = srcMap.get(senders[i])!;
+      const seed = seeds[i];
+      const share = new entity.Share(src, dst, seed, ShareType.Seed);
+      em.persist(share);
     }
 
-    const dst = await em.findOne(entity.RoundMember, {
-      round: roundEntity,
-      address: address,
-      status: RoundStatus.Aggregating,
-    });
-    if (!dst) {
-      throw new Error(`task ${taskID} round ${round} member ${address} doesn't exist`);
-    }
-    dst.status = RoundStatus.Finished;
-    const share = new entity.Share(src, dst, secretKey, ShareType.SecretKey);
-    em.persist(share);
     await em.flush();
   }
 
-  async getSecretShareData(
+  async uploadSecretKey(
+    address: string,
     taskID: string,
     round: number,
-    sender: string,
+    senders: string[],
+    secretKeys: string[]
+  ) {
+    if (senders.length !== secretKeys.length) {
+      throw new Error(`task ${taskID} round ${round} senders' length is not equal to secretKeys' length`);
+    }
+
+    const em = db.getEntityManager();
+
+    const roundEntity = await em.findOne(entity.Round, {
+      task: { outID: taskID },
+      round: round,
+    });
+    if (!roundEntity) {
+      throw new Error(`task ${taskID} round ${round} doesn't exist`);
+    }
+    if (roundEntity.status !== RoundStatus.Aggregating) {
+      throw new Error(`round ${round} status is not in aggregationg status`);
+    }
+
+    const srcs = await em.find(entity.RoundMember, {
+      round: roundEntity,
+      address: { $in: senders },
+      status: RoundStatus.Calculating,
+    });
+    if (srcs.length != senders.length) {
+      throw new Error(`task ${taskID} round ${round} some senders doesn't exist`);
+    }
+
+    const dst = await em.findOne(entity.RoundMember, {
+      round: roundEntity,
+      address: address,
+      status: RoundStatus.Aggregating,
+    });
+    if (!dst) {
+      throw new Error(`task ${taskID} round ${round} member ${address} doesn't exist`);
+    }
+
+    // check seed do not exist
+    const seedCount = await em.count(entity.Share, {
+      sender: { $in: srcs },
+      receiver: dst,
+      type: ShareType.Seed,
+    });
+    if (seedCount !== 0) {
+      throw new Error(`task ${taskID} round ${round} some senders have upload seed`);
+    }
+
+    const srcMap = new Map(srcs.map((member) => [member.address, member]));
+    for (let i = 0; i < senders.length; i++) {
+      const src = srcMap.get(senders[i])!;
+      const secretKey = secretKeys[i];
+      const share = new entity.Share(src, dst, secretKey, ShareType.SecretKey);
+      em.persist(share);
+    }
+
+    dst.status = RoundStatus.Finished;
+    await em.flush();
+  }
+
+  async getSecretShareDatas(
+    taskID: string,
+    round: number,
+    senders: string[],
     receiver: string
-  ): Promise<SecretShareData> {
+  ): Promise<SecretShareData[]> {
     const em = db.getEntityManager();
     const roundEntity = await em.findOne(entity.Round, {
       task: { outID: taskID },
@@ -520,12 +592,12 @@ class _Impl implements Impl {
       throw new Error(`task ${taskID} round ${round} doesn't exist`);
     }
 
-    const src = await em.findOne(entity.RoundMember, {
+    const srcs = await em.find(entity.RoundMember, {
       round: roundEntity,
-      address: sender,
+      address: { $in: senders },
     });
-    if (!src) {
-      throw new Error(`task ${taskID} round ${round} member ${sender} doesn't exist`);
+    if (srcs.length !== senders.length) {
+      throw new Error(`task ${taskID} round ${round} some senders do not exist`);
     }
 
     const dst = await em.findOne(entity.RoundMember, {
@@ -536,35 +608,50 @@ class _Impl implements Impl {
       throw new Error(`task ${taskID} round ${round} member ${receiver} doesn't exist`);
     }
 
-    const shares = await em.find(entity.Share, {
-      sender: src,
+    const seedCommitments = await em.find(entity.ShareCommitment, {
+      sender: { $in: srcs },
       receiver: dst,
+      type: ShareType.Seed,
     });
-    if (shares.length !== 1) {
-      throw new Error(
-        `task ${taskID} round ${round} sender ${sender} receiver ${receiver} has multiple shares`
-      );
+    if (seedCommitments.length !== senders.length) {
+      throw new Error(`task ${taskID} round ${round} some senders do not have seed commitments`);
     }
-    const share = shares[0];
-    const type = share.type;
-
-    const shareCommitment = await em.findOne(entity.ShareCommitment, {
-      sender: src,
+    const skCommitments = await em.find(entity.ShareCommitment, {
+      sender: { $in: srcs },
       receiver: dst,
-      type: type,
+      type: ShareType.SecretKey,
     });
-    if (!shareCommitment) {
-      throw new Error(
-        `task ${taskID} round ${round} sender ${sender} receiver ${receiver} type ${type} commitment doesn't exist`
-      );
+    if (skCommitments.length !== senders.length) {
+      throw new Error(`task ${taskID} round ${round} some senders do not have secret key commitments`);
     }
 
-    return {
-      seed: type === ShareType.Seed ? share.share : undefined,
-      seedCommitment: type === ShareType.Seed ? shareCommitment.commitment : undefined,
-      secretKey: type === ShareType.SecretKey ? share.share : undefined,
-      secretKeyCommitment: type === ShareType.SecretKey ? shareCommitment.commitment : undefined,
-    };
+    const seeds = await em.find(entity.Share, {
+      sender: { $in: srcs },
+      receiver: dst,
+      type: ShareType.Seed,
+    });
+    const sks = await em.find(entity.Share, {
+      sender: { $in: srcs },
+      receiver: dst,
+      type: ShareType.SecretKey,
+    });
+
+    const seedCommitmentMap = new Map(seedCommitments.map((item) => [item.sender.address, item.commitment]));
+    const skCommitmentMap = new Map(skCommitments.map((item) => [item.sender.address, item.commitment]));
+    const seedMap = new Map(seeds.map((item) => [item.sender.address, item.share]));
+    const skMap = new Map(sks.map((item) => [item.sender.address, item.share]));
+
+    const ssDatas: SecretShareData[] = new Array(senders.length);
+    for (const [i, sender] of senders.entries()) {
+      ssDatas[i] = {
+        seed: seedMap.get(sender),
+        seedCommitment: seedCommitmentMap.get(sender),
+        secretKey: skMap.get(sender),
+        secretKeyCommitment: skCommitmentMap.get(sender),
+      };
+    }
+
+    return ssDatas;
   }
 
   async endRound(address: string, taskID: string, round: number) {

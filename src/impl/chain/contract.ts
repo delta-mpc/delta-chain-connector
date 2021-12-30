@@ -123,14 +123,7 @@ export class ContractHelper {
     const serializedTx = "0x" + tx.sign(key).serialize().toString("hex");
     return new Promise((resolve, reject) => {
       this.web3.eth
-        .sendSignedTransaction(serializedTx, (err, txHash) => {
-          if (err) {
-            log.error(err);
-            reject(err);
-          } else {
-            log.info(`method ${name} tx hash ${txHash}`);
-          }
-        })
+        .sendSignedTransaction(serializedTx)
         .then((receipt) => {
           if (receipt.status) {
             resolve(receipt);
@@ -138,6 +131,9 @@ export class ContractHelper {
             const err = `method ${name} tx hash ${receipt.transactionHash} is reverted`;
             reject(err);
           }
+        })
+        .catch((err: Error) => {
+          reject(err);
         });
     });
   }

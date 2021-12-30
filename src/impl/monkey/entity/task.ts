@@ -19,6 +19,9 @@ export class Task {
   @Property()
   commitment!: string;
 
+  @Property()
+  taskType!: string;
+
   //taskID for display
   @Property()
   outID!: string;
@@ -26,10 +29,11 @@ export class Task {
   @OneToMany(() => Round, (round) => round.task)
   rounds = new Collection<Round>(this);
 
-  constructor(address: string, dataset: string, commitment: string) {
+  constructor(address: string, dataset: string, commitment: string, taskType: string) {
     this.address = address;
     this.dataset = dataset;
     this.commitment = commitment;
+    this.taskType = taskType;
     this.outID = crypto.randomBytes(32).toString("hex");
   }
 }

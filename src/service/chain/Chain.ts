@@ -313,43 +313,43 @@ export interface ChainClient extends grpc.Client {
     callback: (error?: grpc.ServiceError, result?: _chain_ResultCommitmentResp__Output) => void
   ): grpc.ClientUnaryCall;
 
-  GetSecretShareData(
+  GetSecretShareDatas(
     argument: _chain_SecretShareReq,
     metadata: grpc.Metadata,
     options: grpc.CallOptions,
     callback: (error?: grpc.ServiceError, result?: _chain_SecretShareResp__Output) => void
   ): grpc.ClientUnaryCall;
-  GetSecretShareData(
+  GetSecretShareDatas(
     argument: _chain_SecretShareReq,
     metadata: grpc.Metadata,
     callback: (error?: grpc.ServiceError, result?: _chain_SecretShareResp__Output) => void
   ): grpc.ClientUnaryCall;
-  GetSecretShareData(
+  GetSecretShareDatas(
     argument: _chain_SecretShareReq,
     options: grpc.CallOptions,
     callback: (error?: grpc.ServiceError, result?: _chain_SecretShareResp__Output) => void
   ): grpc.ClientUnaryCall;
-  GetSecretShareData(
+  GetSecretShareDatas(
     argument: _chain_SecretShareReq,
     callback: (error?: grpc.ServiceError, result?: _chain_SecretShareResp__Output) => void
   ): grpc.ClientUnaryCall;
-  getSecretShareData(
+  getSecretShareDatas(
     argument: _chain_SecretShareReq,
     metadata: grpc.Metadata,
     options: grpc.CallOptions,
     callback: (error?: grpc.ServiceError, result?: _chain_SecretShareResp__Output) => void
   ): grpc.ClientUnaryCall;
-  getSecretShareData(
+  getSecretShareDatas(
     argument: _chain_SecretShareReq,
     metadata: grpc.Metadata,
     callback: (error?: grpc.ServiceError, result?: _chain_SecretShareResp__Output) => void
   ): grpc.ClientUnaryCall;
-  getSecretShareData(
+  getSecretShareDatas(
     argument: _chain_SecretShareReq,
     options: grpc.CallOptions,
     callback: (error?: grpc.ServiceError, result?: _chain_SecretShareResp__Output) => void
   ): grpc.ClientUnaryCall;
-  getSecretShareData(
+  getSecretShareDatas(
     argument: _chain_SecretShareReq,
     callback: (error?: grpc.ServiceError, result?: _chain_SecretShareResp__Output) => void
   ): grpc.ClientUnaryCall;
@@ -1000,7 +1000,7 @@ export interface ChainHandlers extends grpc.UntypedServiceImplementation {
 
   GetResultCommitment: grpc.handleUnaryCall<_chain_ResultCommitmentReq__Output, _chain_ResultCommitmentResp>;
 
-  GetSecretShareData: grpc.handleUnaryCall<_chain_SecretShareReq__Output, _chain_SecretShareResp>;
+  GetSecretShareDatas: grpc.handleUnaryCall<_chain_SecretShareReq__Output, _chain_SecretShareResp>;
 
   GetTaskRound: grpc.handleUnaryCall<_chain_TaskRoundReq__Output, _chain_TaskRoundResp>;
 
@@ -1066,7 +1066,7 @@ export interface ChainDefinition extends grpc.ServiceDefinition {
     _chain_ResultCommitmentReq__Output,
     _chain_ResultCommitmentResp__Output
   >;
-  GetSecretShareData: MethodDefinition<
+  GetSecretShareDatas: MethodDefinition<
     _chain_SecretShareReq,
     _chain_SecretShareResp,
     _chain_SecretShareReq__Output,

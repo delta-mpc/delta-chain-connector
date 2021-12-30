@@ -18,10 +18,13 @@ chai.use(chaiAsPromised);
 const assert = chai.assert;
 
 describe("chain service", function () {
+  const nodeAddress = "0xA4Ab535C528A9b64602CC5444606eE589Df99139";
+  const privateKey = "0xad4d4cf5742d76b3bdb02ad0ab3498694ddc1327b9d7d79f24ee7ee8fe9497b1";
+
   const identityOpt: ContractOption = {
-    contractAddress: "0x8665E1047287352f958dd926391752694D416519",
-    nodeAddress: "0xA3537C2586322A4B443327B2b2e1505fdCa8EADE",
-    privateKey: "0x9ef421a93c8b6c01145147bfbef7444ed6f5b2fe5e99bdbbaaf5f6f21f238c7b",
+    contractAddress: "0x75B4EBF1C19b6dBd0b35b385Ae91E93b7B078324",
+    nodeAddress: nodeAddress,
+    privateKey: privateKey,
     provider: "http://127.0.0.1:8545",
     abiFile: "IdentityContract.json",
     gasPrice: 1,
@@ -32,11 +35,11 @@ describe("chain service", function () {
   };
 
   const deltaOpt: ContractOption = {
-    contractAddress: "0x69AB89d460F8f0F39302D98cb5f71f412259E4D2",
-    nodeAddress: "0xA3537C2586322A4B443327B2b2e1505fdCa8EADE",
-    privateKey: "0x9ef421a93c8b6c01145147bfbef7444ed6f5b2fe5e99bdbbaaf5f6f21f238c7b",
+    contractAddress: "0xB6fF5691e6c782D4688FA7A5BDa316D4702636cC",
+    nodeAddress: nodeAddress,
+    privateKey: privateKey,
     provider: "http://127.0.0.1:8545",
-    abiFile: "DeltaContract.json",
+    abiFile: "HFLContract.json",
     gasPrice: 1,
     gasLimit: 6721975,
     chainParam: {
@@ -48,8 +51,6 @@ describe("chain service", function () {
     identity: identityOpt,
     delta: deltaOpt,
   };
-
-  const nodeAddress = "0xA3537C2586322A4B443327B2b2e1505fdCa8EADE";
 
   let stream: Readable;
   const events: Event[] = [];
@@ -80,9 +81,10 @@ describe("chain service", function () {
 
   let taskID: string;
   const taskCommitment = "0x" + crypto.randomBytes(32).toString("hex");
+  const taskType = "horizontal";
   describe("createTask", function () {
     it("create first task", async function () {
-      taskID = await impl.createTask(nodeAddress, "mnist", taskCommitment);
+      taskID = await impl.createTask(nodeAddress, "mnist", taskCommitment, taskType);
       assert.strictEqual(taskID.slice(0, 2), "0x");
       assert.lengthOf(taskID, 66);
     });
@@ -131,22 +133,23 @@ describe("chain service", function () {
   const seedCommitment = "0x" + crypto.randomBytes(32).toString("hex");
   describe("uploadSeedCommitment", function () {
     it("uploadSeedCommitment", async function () {
-      await impl.uploadSeedCommitment(nodeAddress, taskID, round, nodeAddress, seedCommitment);
+      await impl.uploadSeedCommitment(nodeAddress, taskID, round, [nodeAddress], [seedCommitment]);
     });
   });
 
   const secretKeyCommitment = "0x" + crypto.randomBytes(32).toString("hex");
   describe("uploadSecretKeyCommitment", function () {
     it("uploadSecretKeyCommitment", async function () {
-      await impl.uploadSecretKeyCommitment(nodeAddress, taskID, round, nodeAddress, secretKeyCommitment);
+      await impl.uploadSecretKeyCommitment(nodeAddress, taskID, round, [nodeAddress], [secretKeyCommitment]);
     });
   });
 
   describe("getClientPublickKeys", function () {
     it("getClientPublickKeys", async function () {
-      const [recvPK1, recvPK2] = await impl.getClientPublickKeys(taskID, round, nodeAddress);
-      assert.strictEqual(recvPK1, pk1);
-      assert.strictEqual(recvPK2, pk2);
+      const pks = await impl.getClientPublickKeys(taskID, round, [nodeAddress]);
+      assert.lengthOf(pks, 1);
+      assert.strictEqual(pks[0][0], pk1);
+      assert.strictEqual(pks[0][1], pk2);
     });
   });
 
@@ -192,24 +195,24 @@ describe("chain service", function () {
   const seed = "0x" + crypto.randomBytes(32).toString("hex");
   describe("uploadSeed", function () {
     it("uploadSeed", async function () {
-      await impl.uploadSeed(nodeAddress, taskID, round, nodeAddress, seed);
+      await impl.uploadSeed(nodeAddress, taskID, round, [nodeAddress], [seed]);
     });
   });
 
   const secretKey = "0x" + crypto.randomBytes(32).toString("hex");
   describe("uploadSecretKey", function () {
     it("uploadSecretKey", async function () {
-      await impl.uploadSecretKey(nodeAddress, taskID, round, nodeAddress, secretKey);
+      await impl.uploadSecretKey(nodeAddress, taskID, round, [nodeAddress], [secretKey]);
     });
   });
 
   describe("getSecretShareData", function () {
     it("getSecretShareData", async function () {
-      const data = await impl.getSecretShareData(taskID, round, nodeAddress, nodeAddress);
-      assert.strictEqual(data.seed, seed);
-      assert.strictEqual(data.seedCommitment, seedCommitment);
-      assert.strictEqual(data.secretKey, secretKey);
-      assert.strictEqual(data.secretKeyCommitment, secretKeyCommitment);
+      const datas = await impl.getSecretShareDatas(taskID, round, [nodeAddress], nodeAddress);
+      assert.strictEqual(datas[0].seed, seed);
+      assert.strictEqual(datas[0].seedCommitment, seedCommitment);
+      assert.strictEqual(datas[0].secretKey, secretKey);
+      assert.strictEqual(datas[0].secretKeyCommitment, secretKeyCommitment);
     });
   });
 
@@ -232,6 +235,7 @@ describe("chain service", function () {
       assert.strictEqual(event0.taskID, taskID);
       assert.strictEqual(event0.dataset, "mnist");
       assert.strictEqual(event0.commitment, taskCommitment);
+      assert.strictEqual(event0.taskType, taskType);
 
       assert.strictEqual(events[1].type, "RoundStarted");
       const event1 = events[1] as RoundStartedEvent;

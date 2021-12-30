@@ -119,7 +119,7 @@ export const chainService: ChainHandlers = {
     callback: grpc.sendUnaryData<CreateTaskResp>
   ) {
     impl
-      .createTask(call.request.address, call.request.dataset, call.request.commitment)
+      .createTask(call.request.address, call.request.dataset, call.request.commitment, call.request.taskType)
       .then((taskID) => {
         log.info(`node ${call.request.address} create task ${taskID}`);
         callback(null, { taskId: taskID });
@@ -203,12 +203,12 @@ export const chainService: ChainHandlers = {
         call.request.address,
         call.request.taskId,
         call.request.round,
-        call.request.receiver,
-        call.request.commitment
+        call.request.receivers,
+        call.request.commitments
       )
       .then(() => {
         log.info(`task ${call.request.taskId} round ${call.request.round} seed commitment 
-        ${call.request.address} -> ${call.request.receiver}`);
+        ${call.request.address} -> ${call.request.receivers}`);
         callback(null, {});
       })
       .catch((err: Error) => {
@@ -226,12 +226,12 @@ export const chainService: ChainHandlers = {
         call.request.address,
         call.request.taskId,
         call.request.round,
-        call.request.receiver,
-        call.request.commitment
+        call.request.receivers,
+        call.request.commitments
       )
       .then(() => {
         log.info(`task ${call.request.taskId} round ${call.request.round} secret key commitment 
-        ${call.request.address} -> ${call.request.receiver}`);
+        ${call.request.address} -> ${call.request.receivers}`);
         callback(null, {});
       })
       .catch((err: Error) => {
@@ -245,11 +245,18 @@ export const chainService: ChainHandlers = {
     callback: grpc.sendUnaryData<PublicKeyResp>
   ) {
     impl
-      .getClientPublickKeys(call.request.taskId, call.request.round, call.request.client)
-      .then(([pk1, pk2]) => {
-        log.info(`node ${call.request.taskId} task ${call.request.taskId} round ${call.request.round}
-        pk1 ${pk1} pk2 ${pk2}`);
-        callback(null, { pk1: pk1, pk2: pk2 });
+      .getClientPublickKeys(call.request.taskId, call.request.round, call.request.clients)
+      .then((pks) => {
+        log.info(
+          `task ${call.request.taskId} round ${call.request.round} clients ${call.request.clients} pks`
+        );
+        const keys = pks.map((item) => {
+          return {
+            pk1: item[0],
+            pk2: item[1],
+          };
+        });
+        callback(null, { keys: keys });
       })
       .catch((err: Error) => {
         log.error(err);
@@ -333,12 +340,12 @@ export const chainService: ChainHandlers = {
         call.request.address,
         call.request.taskId,
         call.request.round,
-        call.request.sender,
-        call.request.share
+        call.request.senders,
+        call.request.shares
       )
       .then(() => {
         log.info(`task ${call.request.taskId} round ${call.request.round} seed
-        ${call.request.sender} -> ${call.request.address}`);
+        ${call.request.senders} -> ${call.request.address}`);
         callback(null, {});
       })
       .catch((err: Error) => {
@@ -353,12 +360,12 @@ export const chainService: ChainHandlers = {
         call.request.address,
         call.request.taskId,
         call.request.round,
-        call.request.sender,
-        call.request.share
+        call.request.senders,
+        call.request.shares
       )
       .then(() => {
         log.info(`task ${call.request.taskId} round ${call.request.round} secret key
-        ${call.request.sender} -> ${call.request.address}`);
+        ${call.request.senders} -> ${call.request.address}`);
         callback(null, {});
       })
       .catch((err: Error) => {
@@ -367,16 +374,21 @@ export const chainService: ChainHandlers = {
       });
   },
 
-  GetSecretShareData(
+  GetSecretShareDatas(
     call: grpc.ServerUnaryCall<SecretShareReq__Output, SecretShareResp>,
     callback: grpc.sendUnaryData<SecretShareResp>
   ) {
     impl
-      .getSecretShareData(call.request.taskId, call.request.round, call.request.sender, call.request.receiver)
+      .getSecretShareDatas(
+        call.request.taskId,
+        call.request.round,
+        call.request.senders,
+        call.request.receiver
+      )
       .then((data) => {
         log.info(`get task ${call.request.taskId} round ${call.request.round}
-        ${call.request.sender} -> ${call.request.receiver} secret share data`);
-        callback(null, data);
+        ${call.request.senders} -> ${call.request.receiver} secret share data`);
+        callback(null, { shares: data });
       })
       .catch((err: Error) => {
         log.error(err);
@@ -404,19 +416,59 @@ export const chainService: ChainHandlers = {
     stream.on("data", (event: ImplEvent) => {
       switch (event.type) {
         case "TaskCreated":
-          call.write({ taskCreate: event });
+          call.write({
+            taskCreate: {
+              address: event.address,
+              url: event.url,
+              taskId: event.taskID,
+              dataset: event.dataset,
+              commitment: event.commitment,
+              taskType: event.taskType,
+            },
+          });
           break;
         case "RoundStarted":
-          call.write({ roundStarted: event });
+          call.write({
+            roundStarted: {
+              taskId: event.taskID,
+              round: event.round,
+            },
+          });
+          break;
+        case "RoundEnded":
+          call.write({
+            roundEnded: {
+              taskId: event.taskID,
+              round: event.round,
+            },
+          });
           break;
         case "PartnerSelected":
-          call.write({ partnerSelected: event });
+          call.write({
+            partnerSelected: {
+              taskId: event.taskID,
+              round: event.round,
+              addrs: event.addrs,
+            },
+          });
           break;
         case "CalculationStarted":
-          call.write({ calculationStarted: event });
+          call.write({
+            calculationStarted: {
+              taskId: event.taskID,
+              round: event.round,
+              addrs: event.addrs,
+            },
+          });
           break;
         case "AggregationStarted":
-          call.write({ aggregationStarted: event });
+          call.write({
+            aggregationStarted: {
+              taskId: event.taskID,
+              round: event.round,
+              addrs: event.addrs,
+            },
+          });
           break;
       }
     });

@@ -99,6 +99,7 @@ class _Impl implements Impl {
             dataset: res.dataSet,
             url: res.creatorUrl,
             commitment: res.commitment,
+            taskType: res.taskType,
           };
           this.subscriber.publish(retEvent);
           break;
@@ -164,12 +165,12 @@ class _Impl implements Impl {
     };
   }
 
-  async createTask(address: string, dataset: string, commitment: string): Promise<string> {
+  async createTask(address: string, dataset: string, commitment: string, taskType: string): Promise<string> {
     if (address !== this.option.delta.nodeAddress) {
       throw new Error(`chain connector node address is not ${address}`);
     }
 
-    const receipt = await this.deltaContract.method("createTask", [dataset, commitment]);
+    const receipt = await this.deltaContract.method("createTask", [dataset, commitment, taskType]);
     const res = this.deltaContract.decodeLogs(receipt.logs);
     if (!res) {
       throw new Error("createTask has no result");
@@ -218,37 +219,37 @@ class _Impl implements Impl {
     address: string,
     taskID: string,
     round: number,
-    receiver: string,
-    commitment: string
+    receivers: string[],
+    commitments: string[]
   ): Promise<void> {
     if (address !== this.option.delta.nodeAddress) {
       throw new Error(`chain connector node address is not ${address}`);
     }
 
-    await this.deltaContract.method("uploadSeedCommitment", [taskID, round, receiver, commitment]);
+    await this.deltaContract.method("uploadSeedCommitment", [taskID, round, receivers, commitments]);
   }
 
   async uploadSecretKeyCommitment(
     address: string,
     taskID: string,
     round: number,
-    receiver: string,
-    commitment: string
+    receivers: string[],
+    commitments: string[]
   ): Promise<void> {
     if (address !== this.option.delta.nodeAddress) {
       throw new Error(`chain connector node address is not ${address}`);
     }
 
-    await this.deltaContract.method("uploadSecretKeyCommitment", [taskID, round, receiver, commitment]);
+    await this.deltaContract.method("uploadSecretKeyCommitment", [taskID, round, receivers, commitments]);
   }
 
-  async getClientPublickKeys(taskID: string, round: number, client: string): Promise<[string, string]> {
-    const res = await this.deltaContract.call("getClientPublickeys", [taskID, round, client]);
+  async getClientPublickKeys(taskID: string, round: number, clients: string[]): Promise<[string, string][]> {
+    const res = await this.deltaContract.call("getClientPublickeys", [taskID, round, clients]);
     if (typeof res === "string") {
       throw new Error("getClientPublickeys return type error");
     }
 
-    return [res.pk1, res.pk2];
+    return res.map((item: any) => [item.pk1, item.pk2]);
   }
 
   async startCalculation(address: string, taskID: string, round: number, clients: string[]): Promise<void> {
@@ -293,47 +294,49 @@ class _Impl implements Impl {
     address: string,
     taskID: string,
     round: number,
-    sender: string,
-    seed: string
+    senders: string[],
+    seeds: string[]
   ): Promise<void> {
     if (address !== this.option.delta.nodeAddress) {
       throw new Error(`chain connector node address is not ${address}`);
     }
 
-    await this.deltaContract.method("uploadSeed", [taskID, round, sender, seed]);
+    await this.deltaContract.method("uploadSeed", [taskID, round, senders, seeds]);
   }
 
   async uploadSecretKey(
     address: string,
     taskID: string,
     round: number,
-    sender: string,
-    secretKey: string
+    senders: string[],
+    secretKeys: string[]
   ): Promise<void> {
     if (address !== this.option.delta.nodeAddress) {
       throw new Error(`chain connector node address is not ${address}`);
     }
 
-    await this.deltaContract.method("uploadSecretkeyMask", [taskID, round, sender, secretKey]);
+    await this.deltaContract.method("uploadSecretkeyMask", [taskID, round, senders, secretKeys]);
   }
 
-  async getSecretShareData(
+  async getSecretShareDatas(
     taskID: string,
     round: number,
-    sender: string,
+    senders: string[],
     receiver: string
-  ): Promise<SecretShareData> {
-    const res = await this.deltaContract.call("getSecretSharingData", [taskID, round, sender, receiver]);
+  ): Promise<SecretShareData[]> {
+    const res = await this.deltaContract.call("getSecretSharingDatas", [taskID, round, senders, receiver]);
     if (typeof res === "string") {
-      throw new Error("getSecretShareData return type error");
+      throw new Error("getSecretShareDatas return type error");
     }
 
-    return {
-      seed: res.seedPiece,
-      seedCommitment: res.seedCommitment,
-      secretKey: res.secretKeyPiece,
-      secretKeyCommitment: res.secretKeyMaskCommitment,
-    };
+    return res.map((item: any) => {
+      return {
+        seed: item.seedPiece,
+        seedCommitment: item.seedCommitment,
+        secretKey: item.secretKeyPiece,
+        secretKeyCommitment: item.secretKeyMaskCommitment,
+      };
+    });
   }
 
   async endRound(address: string, taskID: string, round: number): Promise<void> {
