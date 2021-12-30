@@ -15,6 +15,9 @@ export class Node {
   @Property()
   address!: string;
 
+  @Property()
+  joined = false;
+
   constructor(url: string, name: string) {
     this.url = url;
     this.name = name;

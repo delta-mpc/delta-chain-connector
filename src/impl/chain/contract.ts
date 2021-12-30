@@ -14,10 +14,10 @@ interface Abi extends AbiItem {
 
 interface ContractOption {
   contractAddress: string;
+  abiFile: string;
   nodeAddress: string;
   privateKey: string;
   provider: string;
-  abiFile: string;
   gasPrice: number;
   gasLimit: number;
   chainParam: {

@@ -17,6 +17,8 @@ export async function init(cfg = dbConfig): Promise<void> {
     } else {
       throw new Error("db is not connected");
     }
+    const generator = DB.orm.getSchemaGenerator();
+    await generator.updateSchema();
   }
 }
 

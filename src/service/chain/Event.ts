@@ -24,35 +24,43 @@ import type {
   RoundEndedEvent as _chain_RoundEndedEvent,
   RoundEndedEvent__Output as _chain_RoundEndedEvent__Output,
 } from "../chain/RoundEndedEvent";
+import type {
+  TaskFinishEvent as _chain_TaskFinishEvent,
+  TaskFinishEvent__Output as _chain_TaskFinishEvent__Output,
+} from "../chain/TaskFinishEvent";
 
 export interface Event {
-  taskCreate?: _chain_TaskCreateEvent | null;
+  taskCreated?: _chain_TaskCreateEvent | null;
   roundStarted?: _chain_RoundStartedEvent | null;
   partnerSelected?: _chain_PartnerSelectedEvent | null;
   calculationStarted?: _chain_CalculationStartedEvent | null;
   aggregationStarted?: _chain_AggregationStartedEvent | null;
   roundEnded?: _chain_RoundEndedEvent | null;
+  taskFinished?: _chain_TaskFinishEvent | null;
   event?:
-    | "taskCreate"
+    | "taskCreated"
     | "roundStarted"
     | "partnerSelected"
     | "calculationStarted"
     | "aggregationStarted"
-    | "roundEnded";
+    | "roundEnded"
+    | "taskFinished";
 }
 
 export interface Event__Output {
-  taskCreate?: _chain_TaskCreateEvent__Output | null;
+  taskCreated?: _chain_TaskCreateEvent__Output | null;
   roundStarted?: _chain_RoundStartedEvent__Output | null;
   partnerSelected?: _chain_PartnerSelectedEvent__Output | null;
   calculationStarted?: _chain_CalculationStartedEvent__Output | null;
   aggregationStarted?: _chain_AggregationStartedEvent__Output | null;
   roundEnded?: _chain_RoundEndedEvent__Output | null;
+  taskFinished?: _chain_TaskFinishEvent__Output | null;
   event:
-    | "taskCreate"
+    | "taskCreated"
     | "roundStarted"
     | "partnerSelected"
     | "calculationStarted"
     | "aggregationStarted"
-    | "roundEnded";
+    | "roundEnded"
+    | "taskFinished";
 }

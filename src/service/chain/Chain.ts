@@ -32,6 +32,10 @@ import type {
   EventReq as _chain_EventReq,
   EventReq__Output as _chain_EventReq__Output,
 } from "../chain/EventReq";
+import type {
+  FinishTaskReq as _chain_FinishTaskReq,
+  FinishTaskReq__Output as _chain_FinishTaskReq__Output,
+} from "../chain/FinishTaskReq";
 import type { JoinReq as _chain_JoinReq, JoinReq__Output as _chain_JoinReq__Output } from "../chain/JoinReq";
 import type {
   JoinResp as _chain_JoinResp,
@@ -90,6 +94,11 @@ import type {
   StartRoundReq as _chain_StartRoundReq,
   StartRoundReq__Output as _chain_StartRoundReq__Output,
 } from "../chain/StartRoundReq";
+import type { TaskReq as _chain_TaskReq, TaskReq__Output as _chain_TaskReq__Output } from "../chain/TaskReq";
+import type {
+  TaskResp as _chain_TaskResp,
+  TaskResp__Output as _chain_TaskResp__Output,
+} from "../chain/TaskResp";
 import type {
   TaskRoundReq as _chain_TaskRoundReq,
   TaskRoundReq__Output as _chain_TaskRoundReq__Output,
@@ -190,6 +199,47 @@ export interface ChainClient extends grpc.Client {
     callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
   ): grpc.ClientUnaryCall;
 
+  FinishTask(
+    argument: _chain_FinishTaskReq,
+    metadata: grpc.Metadata,
+    options: grpc.CallOptions,
+    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+  ): grpc.ClientUnaryCall;
+  FinishTask(
+    argument: _chain_FinishTaskReq,
+    metadata: grpc.Metadata,
+    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+  ): grpc.ClientUnaryCall;
+  FinishTask(
+    argument: _chain_FinishTaskReq,
+    options: grpc.CallOptions,
+    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+  ): grpc.ClientUnaryCall;
+  FinishTask(
+    argument: _chain_FinishTaskReq,
+    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+  ): grpc.ClientUnaryCall;
+  finishTask(
+    argument: _chain_FinishTaskReq,
+    metadata: grpc.Metadata,
+    options: grpc.CallOptions,
+    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+  ): grpc.ClientUnaryCall;
+  finishTask(
+    argument: _chain_FinishTaskReq,
+    metadata: grpc.Metadata,
+    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+  ): grpc.ClientUnaryCall;
+  finishTask(
+    argument: _chain_FinishTaskReq,
+    options: grpc.CallOptions,
+    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+  ): grpc.ClientUnaryCall;
+  finishTask(
+    argument: _chain_FinishTaskReq,
+    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+  ): grpc.ClientUnaryCall;
+
   GetClientPublickKeys(
     argument: _chain_PublicKeyReq,
     metadata: grpc.Metadata,
@@ -352,6 +402,47 @@ export interface ChainClient extends grpc.Client {
   getSecretShareDatas(
     argument: _chain_SecretShareReq,
     callback: (error?: grpc.ServiceError, result?: _chain_SecretShareResp__Output) => void
+  ): grpc.ClientUnaryCall;
+
+  GetTask(
+    argument: _chain_TaskReq,
+    metadata: grpc.Metadata,
+    options: grpc.CallOptions,
+    callback: (error?: grpc.ServiceError, result?: _chain_TaskResp__Output) => void
+  ): grpc.ClientUnaryCall;
+  GetTask(
+    argument: _chain_TaskReq,
+    metadata: grpc.Metadata,
+    callback: (error?: grpc.ServiceError, result?: _chain_TaskResp__Output) => void
+  ): grpc.ClientUnaryCall;
+  GetTask(
+    argument: _chain_TaskReq,
+    options: grpc.CallOptions,
+    callback: (error?: grpc.ServiceError, result?: _chain_TaskResp__Output) => void
+  ): grpc.ClientUnaryCall;
+  GetTask(
+    argument: _chain_TaskReq,
+    callback: (error?: grpc.ServiceError, result?: _chain_TaskResp__Output) => void
+  ): grpc.ClientUnaryCall;
+  getTask(
+    argument: _chain_TaskReq,
+    metadata: grpc.Metadata,
+    options: grpc.CallOptions,
+    callback: (error?: grpc.ServiceError, result?: _chain_TaskResp__Output) => void
+  ): grpc.ClientUnaryCall;
+  getTask(
+    argument: _chain_TaskReq,
+    metadata: grpc.Metadata,
+    callback: (error?: grpc.ServiceError, result?: _chain_TaskResp__Output) => void
+  ): grpc.ClientUnaryCall;
+  getTask(
+    argument: _chain_TaskReq,
+    options: grpc.CallOptions,
+    callback: (error?: grpc.ServiceError, result?: _chain_TaskResp__Output) => void
+  ): grpc.ClientUnaryCall;
+  getTask(
+    argument: _chain_TaskReq,
+    callback: (error?: grpc.ServiceError, result?: _chain_TaskResp__Output) => void
   ): grpc.ClientUnaryCall;
 
   GetTaskRound(
@@ -994,6 +1085,8 @@ export interface ChainHandlers extends grpc.UntypedServiceImplementation {
 
   EndRound: grpc.handleUnaryCall<_chain_EndRoundReq__Output, _chain_Empty>;
 
+  FinishTask: grpc.handleUnaryCall<_chain_FinishTaskReq__Output, _chain_Empty>;
+
   GetClientPublickKeys: grpc.handleUnaryCall<_chain_PublicKeyReq__Output, _chain_PublicKeyResp>;
 
   GetNodeInfo: grpc.handleUnaryCall<_chain_NodeInfoReq__Output, _chain_NodeInfoResp>;
@@ -1001,6 +1094,8 @@ export interface ChainHandlers extends grpc.UntypedServiceImplementation {
   GetResultCommitment: grpc.handleUnaryCall<_chain_ResultCommitmentReq__Output, _chain_ResultCommitmentResp>;
 
   GetSecretShareDatas: grpc.handleUnaryCall<_chain_SecretShareReq__Output, _chain_SecretShareResp>;
+
+  GetTask: grpc.handleUnaryCall<_chain_TaskReq__Output, _chain_TaskResp>;
 
   GetTaskRound: grpc.handleUnaryCall<_chain_TaskRoundReq__Output, _chain_TaskRoundResp>;
 
@@ -1048,6 +1143,12 @@ export interface ChainDefinition extends grpc.ServiceDefinition {
     _chain_EndRoundReq__Output,
     _chain_Empty__Output
   >;
+  FinishTask: MethodDefinition<
+    _chain_FinishTaskReq,
+    _chain_Empty,
+    _chain_FinishTaskReq__Output,
+    _chain_Empty__Output
+  >;
   GetClientPublickKeys: MethodDefinition<
     _chain_PublicKeyReq,
     _chain_PublicKeyResp,
@@ -1072,6 +1173,7 @@ export interface ChainDefinition extends grpc.ServiceDefinition {
     _chain_SecretShareReq__Output,
     _chain_SecretShareResp__Output
   >;
+  GetTask: MethodDefinition<_chain_TaskReq, _chain_TaskResp, _chain_TaskReq__Output, _chain_TaskResp__Output>;
   GetTaskRound: MethodDefinition<
     _chain_TaskRoundReq,
     _chain_TaskRoundResp,

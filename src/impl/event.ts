@@ -43,13 +43,19 @@ export interface RoundEndedEvent {
   round: number;
 }
 
+export interface TaskFinishedEvent {
+  type: "TaskFinished";
+  taskID: string;
+}
+
 export type Event =
   | TaskCreatedEvent
   | RoundStartedEvent
   | PartnerSelectedEvent
   | CalculationStartedEvent
   | AggregationStartedEvent
-  | RoundEndedEvent;
+  | RoundEndedEvent
+  | TaskFinishedEvent;
 
 export class Subscriber {
   private streams: PassThrough[] = [];

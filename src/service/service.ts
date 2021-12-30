@@ -11,6 +11,7 @@ import { Empty } from "./chain/Empty";
 import { EndRoundReq__Output } from "./chain/EndRoundReq";
 import { Event } from "./chain/Event";
 import { EventReq__Output } from "./chain/EventReq";
+import { FinishTaskReq__Output } from "./chain/FinishTaskReq";
 import { JoinReq__Output } from "./chain/JoinReq";
 import { JoinResp } from "./chain/JoinResp";
 import { JoinRoundReq__Output } from "./chain/JoinRoundReq";
@@ -27,6 +28,8 @@ import { SecretShareResp } from "./chain/SecretShareResp";
 import { Share__Output } from "./chain/Share";
 import { ShareCommitment__Output } from "./chain/ShareCommitment";
 import { StartRoundReq__Output } from "./chain/StartRoundReq";
+import { TaskReq__Output } from "./chain/TaskReq";
+import { TaskResp } from "./chain/TaskResp";
 import { TaskRoundReq__Output } from "./chain/TaskRoundReq";
 import { TaskRoundResp } from "./chain/TaskRoundResp";
 import { UpdateNameReq__Output } from "./chain/UpdateNameReq";
@@ -123,6 +126,32 @@ export const chainService: ChainHandlers = {
       .then((taskID) => {
         log.info(`node ${call.request.address} create task ${taskID}`);
         callback(null, { taskId: taskID });
+      })
+      .catch((err: Error) => {
+        log.error(err);
+        callback(err, null);
+      });
+  },
+
+  FinishTask(call: grpc.ServerUnaryCall<FinishTaskReq__Output, Empty>, callback: grpc.sendUnaryData<Empty>) {
+    impl
+      .finishTask(call.request.address, call.request.taskId)
+      .then(() => {
+        log.info(`task ${call.request.taskId} finish task`);
+        callback(null, {});
+      })
+      .catch((err: Error) => {
+        log.error(err);
+        callback(err, null);
+      });
+  },
+
+  GetTask(call: grpc.ServerUnaryCall<TaskReq__Output, TaskResp>, callback: grpc.sendUnaryData<TaskResp>) {
+    impl
+      .getTask(call.request.taskId)
+      .then((taskInfo) => {
+        log.info(`get task ${call.request.taskId} info`);
+        callback(null, taskInfo);
       })
       .catch((err: Error) => {
         log.error(err);
@@ -417,7 +446,7 @@ export const chainService: ChainHandlers = {
       switch (event.type) {
         case "TaskCreated":
           call.write({
-            taskCreate: {
+            taskCreated: {
               address: event.address,
               url: event.url,
               taskId: event.taskID,
@@ -470,6 +499,12 @@ export const chainService: ChainHandlers = {
             },
           });
           break;
+        case "TaskFinished":
+          call.write({
+            taskFinished: {
+              taskId: event.taskID,
+            },
+          });
       }
     });
     call.on("error", () => {

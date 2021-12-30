@@ -9,16 +9,7 @@ type DatabaseType = "mysql" | "sqlite";
 
 interface ContractOption {
   contractAddress: string;
-  nodeAddress: string;
-  privateKey: string;
-  provider: string;
   abiFile: string;
-  gasPrice: number;
-  gasLimit: number;
-  chainParam: {
-    name?: string;
-    chainId?: number;
-  };
 }
 
 interface Config {
@@ -35,8 +26,18 @@ interface Config {
     };
   };
   chain: {
+    nodeAddress: string;
+    privateKey: string;
+    provider: string;
+    gasPrice: number;
+    gasLimit: number;
+    chainParam: {
+      name?: string;
+      chainId?: number;
+    };
+
     identity: ContractOption;
-    delta: ContractOption;
+    hfl: ContractOption;
   };
 }
 
