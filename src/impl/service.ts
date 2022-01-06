@@ -19,8 +19,14 @@ export enum ShareType {
 }
 
 export interface NodeInfo {
+  address: string;
   url: string;
   name: string;
+}
+
+export interface NodeInfosPage {
+  nodes: NodeInfo[];
+  totalCount: number;
 }
 
 export interface TaskInfo {
@@ -48,58 +54,64 @@ export interface SecretShareData {
 
 export interface Impl {
   init(): Promise<void>;
-  join(url: string, name: string): Promise<string>;
-  updateUrl(address: string, url: string): Promise<void>;
-  updateName(address: string, name: string): Promise<void>;
-  leave(address: string): Promise<void>;
+  join(url: string, name: string): Promise<[string, string]>;
+  updateUrl(address: string, url: string): Promise<string>;
+  updateName(address: string, name: string): Promise<string>;
+  leave(address: string): Promise<string>;
   getNodeInfo(address: string): Promise<NodeInfo>;
-  createTask(address: string, dataset: string, commitment: string, taskType: string): Promise<string>;
-  finishTask(address: string, taskID: string): Promise<void>;
+  getNodes(page: number, pageSize: number): Promise<NodeInfosPage>;
+  createTask(
+    address: string,
+    dataset: string,
+    commitment: string,
+    taskType: string
+  ): Promise<[string, string]>;
+  finishTask(address: string, taskID: string): Promise<string>;
   getTask(taskID: string): Promise<TaskInfo>;
-  startRound(address: string, taskID: string, round: number): Promise<void>;
-  joinRound(address: string, taskID: string, round: number, pk1: string, pk2: string): Promise<void>;
+  startRound(address: string, taskID: string, round: number): Promise<string>;
+  joinRound(address: string, taskID: string, round: number, pk1: string, pk2: string): Promise<string>;
   getTaskRound(taskID: string, round: number): Promise<TaskRoundInfo>;
-  selectCandidates(address: string, taskID: string, round: number, clients: string[]): Promise<void>;
+  selectCandidates(address: string, taskID: string, round: number, clients: string[]): Promise<string>;
   uploadSeedCommitment(
     address: string,
     taskID: string,
     round: number,
     receivers: string[],
     commitments: string[]
-  ): Promise<void>;
+  ): Promise<string>;
   uploadSecretKeyCommitment(
     address: string,
     taskID: string,
     round: number,
     receivers: string[],
     commitments: string[]
-  ): Promise<void>;
+  ): Promise<string>;
   getClientPublickKeys(taskID: string, round: number, clients: string[]): Promise<[string, string][]>;
-  startCalculation(address: string, taskID: string, round: number, clients: string[]): Promise<void>;
-  uploadResultCommitment(address: string, taskID: string, round: number, commitment: string): Promise<void>;
+  startCalculation(address: string, taskID: string, round: number, clients: string[]): Promise<string>;
+  uploadResultCommitment(address: string, taskID: string, round: number, commitment: string): Promise<string>;
   getResultCommitment(taskID: string, round: number, client: string): Promise<string>;
-  startAggregation(address: string, taskID: string, round: number, clients: string[]): Promise<void>;
+  startAggregation(address: string, taskID: string, round: number, clients: string[]): Promise<string>;
   uploadSeed(
     address: string,
     taskID: string,
     round: number,
     senders: string[],
     seeds: string[]
-  ): Promise<void>;
+  ): Promise<string>;
   uploadSecretKey(
     address: string,
     taskID: string,
     round: number,
     senders: string[],
     secretKeys: string[]
-  ): Promise<void>;
+  ): Promise<string>;
   getSecretShareDatas(
     taskID: string,
     round: number,
     senders: string[],
     receiver: string
   ): Promise<SecretShareData[]>;
-  endRound(address: string, taskID: string, round: number): Promise<void>;
+  endRound(address: string, taskID: string, round: number): Promise<string>;
   subscribe(): Readable;
   unsubscribe(stream: Readable): void;
 }

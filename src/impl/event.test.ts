@@ -13,6 +13,7 @@ describe("Subscriber", function () {
         dataset: "1",
         url: "1",
         commitment: "1",
+        taskType: "horizontal",
       },
       {
         type: "RoundStarted",

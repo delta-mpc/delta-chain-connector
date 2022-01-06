@@ -19,16 +19,16 @@ chai.use(chaiAsPromised);
 const assert = chai.assert;
 
 describe("chain service", function () {
-  const nodeAddress = "0xF8EdFc90639d8ffdb39C99A92b6308D1e52D07c7";
-  const privateKey = "0xe395e72229bb071c55b73df9e0ac0dbf2ef906c1307eea61d2e6cae741695aaf";
+  const nodeAddress = "0x9dA1E0CcB6C9848Ad1088B96415CB845a8392794";
+  const privateKey = "0x38a95092ac564590f75679db5beda49148e59498337cf4a17bb017ce42363ba3";
 
   const identityOpt: ContractOption = {
-    contractAddress: "0x6eb62A6A11BB5a7629C96133BF5267B460EA71Bb",
+    contractAddress: "0xC282D87859a55B19446fE352a1b338391249eF57",
     abiFile: "IdentityContract.json",
   };
 
   const hflOpt: ContractOption = {
-    contractAddress: "0x6bCB107d241066923B055b8F7EE5E1C4E340d672",
+    contractAddress: "0xe9e00f59C88845cf9a211665E7413586fC2d8C90",
     abiFile: "HFLContract.json",
   };
 
@@ -64,7 +64,9 @@ describe("chain service", function () {
   const serverName = "first";
   describe("node join", function () {
     it("join and get", async function () {
-      const address = await impl.join(serverUrl, serverName);
+      /* eslint-disable  @typescript-eslint/no-unused-vars */
+      const [_, address] = await impl.join(serverUrl, serverName);
+      /* eslint-enable  @typescript-eslint/no-unused-vars */
       assert.strictEqual(address, nodeAddress);
 
       const info = await impl.getNodeInfo(address);
@@ -73,12 +75,23 @@ describe("chain service", function () {
     });
   });
 
+  describe("get nodes", function () {
+    it("get nodes", async function () {
+      const nodes = await impl.getNodes(1, 20);
+      assert.strictEqual(nodes.totalCount, 1);
+      assert.strictEqual(nodes.nodes[0].address, nodeAddress);
+      assert.strictEqual(nodes.nodes[0].url, serverUrl);
+      assert.strictEqual(nodes.nodes[0].name, serverName);
+    });
+  });
+
   let taskID: string;
   const taskCommitment = "0x" + crypto.randomBytes(32).toString("hex");
   const taskType = "horizontal";
   describe("createTask", function () {
     it("create first task", async function () {
-      taskID = await impl.createTask(nodeAddress, "mnist", taskCommitment, taskType);
+      const res = await impl.createTask(nodeAddress, "mnist", taskCommitment, taskType);
+      taskID = res[1];
       assert.strictEqual(taskID.slice(0, 2), "0x");
       assert.lengthOf(taskID, 66);
     });

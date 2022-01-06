@@ -1,8 +1,8 @@
-import { config } from "src/config";
+import { config } from "config";
 import { Readable } from "stream";
 import { EventData } from "web3-eth-contract";
 import { Event, Subscriber } from "../event";
-import { Impl, NodeInfo, SecretShareData, TaskInfo, TaskRoundInfo } from "../service";
+import { Impl, NodeInfo, NodeInfosPage, SecretShareData, TaskInfo, TaskRoundInfo } from "../service";
 import { ContractHelper } from "./contract";
 
 export interface ContractOption {
@@ -146,52 +146,75 @@ class _Impl implements Impl {
     }
   }
 
-  async join(url: string, name: string): Promise<string> {
+  async join(url: string, name: string): Promise<[string, string]> {
     const recepit = await this.identityContract.method("join", [url, name]);
     const res = this.identityContract.decodeLogs(recepit.logs);
     if (!res) {
       throw new Error("join has no result");
     }
-    return res.addr;
+    return [recepit.transactionHash, res.addr];
   }
 
-  async updateUrl(address: string, url: string): Promise<void> {
+  async updateUrl(address: string, url: string): Promise<string> {
     if (address !== this.option.nodeAddress) {
       throw new Error(`chain connector node address is not ${address}`);
     }
-    await this.identityContract.method("updateUrl", [url]);
+    const receipt = await this.identityContract.method("updateUrl", [url]);
+    return receipt.transactionHash;
   }
 
-  async updateName(address: string, name: string): Promise<void> {
+  async updateName(address: string, name: string): Promise<string> {
     if (address !== this.option.nodeAddress) {
       throw new Error(`chain connector node address is not ${address}`);
     }
-    await this.identityContract.method("updateName", [name]);
+    const receipt = await this.identityContract.method("updateName", [name]);
+    return receipt.transactionHash;
   }
 
-  async leave(address: string): Promise<void> {
+  async leave(address: string): Promise<string> {
     if (address !== this.option.nodeAddress) {
       throw new Error(`chain connector node address is not ${address}`);
     }
-    await this.identityContract.method("leave");
+    const receipt = await this.identityContract.method("leave");
+    return receipt.transactionHash;
   }
 
   async getNodeInfo(address: string): Promise<NodeInfo> {
-    if (address !== this.option.nodeAddress) {
-      throw new Error(`chain connector node address is not ${address}`);
-    }
-
     const res = await this.identityContract.call("getNodeInfo", [address]);
     if (typeof res === "string") {
       throw new Error("getNodeInfo return type error");
     }
     return {
+      address: address,
       url: res.url,
       name: res.name,
     };
   }
 
-  async createTask(address: string, dataset: string, commitment: string, taskType: string): Promise<string> {
+  async getNodes(page: number, pageSize: number): Promise<NodeInfosPage> {
+    const res = await this.identityContract.call("getNodes", [page, pageSize]);
+    if (typeof res === "string") {
+      throw new Error("getNodeInfo return type error");
+    }
+    const nodes = res[0].map((node: any) => {
+      return {
+        address: node.addr,
+        url: node.url,
+        name: node.name,
+      };
+    });
+    return {
+      nodes: nodes,
+      totalCount: Number(res[1]),
+    };
+  }
+
+  async createTask(
+    address: string,
+    dataset: string,
+    commitment: string,
+    taskType: string
+  ): Promise<[string, string]> {
     if (address !== this.option.nodeAddress) {
       throw new Error(`chain connector node address is not ${address}`);
     }
@@ -201,15 +224,16 @@ class _Impl implements Impl {
     if (!res) {
       throw new Error("createTask has no result");
     }
-    return res.taskId;
+    return [receipt.transactionHash, res.taskId];
   }
 
-  async finishTask(address: string, taskID: string): Promise<void> {
+  async finishTask(address: string, taskID: string): Promise<string> {
     if (address !== this.option.nodeAddress) {
       throw new Error(`chain connector node address is not ${address}`);
     }
 
-    await this.hflContract.method("finishTask", [taskID]);
+    const receipt = await this.hflContract.method("finishTask", [taskID]);
+    return receipt.transactionHash;
   }
 
   async getTask(taskID: string): Promise<TaskInfo> {
@@ -229,20 +253,22 @@ class _Impl implements Impl {
     };
   }
 
-  async startRound(address: string, taskID: string, round: number): Promise<void> {
+  async startRound(address: string, taskID: string, round: number): Promise<string> {
     if (address !== this.option.nodeAddress) {
       throw new Error(`chain connector node address is not ${address}`);
     }
 
-    await this.hflContract.method("startRound", [taskID, round, 100, 1]);
+    const receipt = await this.hflContract.method("startRound", [taskID, round, 100, 1]);
+    return receipt.transactionHash;
   }
 
-  async joinRound(address: string, taskID: string, round: number, pk1: string, pk2: string): Promise<void> {
+  async joinRound(address: string, taskID: string, round: number, pk1: string, pk2: string): Promise<string> {
     if (address !== this.option.nodeAddress) {
       throw new Error(`chain connector node address is not ${address}`);
     }
 
-    await this.hflContract.method("joinRound", [taskID, round, pk1, pk2]);
+    const receipt = await this.hflContract.method("joinRound", [taskID, round, pk1, pk2]);
+    return receipt.transactionHash;
   }
 
   async getTaskRound(taskID: string, round: number): Promise<TaskRoundInfo> {
@@ -258,12 +284,13 @@ class _Impl implements Impl {
     };
   }
 
-  async selectCandidates(address: string, taskID: string, round: number, clients: string[]): Promise<void> {
+  async selectCandidates(address: string, taskID: string, round: number, clients: string[]): Promise<string> {
     if (address !== this.option.nodeAddress) {
       throw new Error(`chain connector node address is not ${address}`);
     }
 
-    await this.hflContract.method("selectCandidates", [taskID, round, clients]);
+    const receipt = await this.hflContract.method("selectCandidates", [taskID, round, clients]);
+    return receipt.transactionHash;
   }
 
   async uploadSeedCommitment(
@@ -272,12 +299,18 @@ class _Impl implements Impl {
     round: number,
     receivers: string[],
     commitments: string[]
-  ): Promise<void> {
+  ): Promise<string> {
     if (address !== this.option.nodeAddress) {
       throw new Error(`chain connector node address is not ${address}`);
     }
 
-    await this.hflContract.method("uploadSeedCommitment", [taskID, round, receivers, commitments]);
+    const receipt = await this.hflContract.method("uploadSeedCommitment", [
+      taskID,
+      round,
+      receivers,
+      commitments,
+    ]);
+    return receipt.transactionHash;
   }
 
   async uploadSecretKeyCommitment(
@@ -286,12 +319,18 @@ class _Impl implements Impl {
     round: number,
     receivers: string[],
     commitments: string[]
-  ): Promise<void> {
+  ): Promise<string> {
     if (address !== this.option.nodeAddress) {
       throw new Error(`chain connector node address is not ${address}`);
     }
 
-    await this.hflContract.method("uploadSecretKeyCommitment", [taskID, round, receivers, commitments]);
+    const receipt = await this.hflContract.method("uploadSecretKeyCommitment", [
+      taskID,
+      round,
+      receivers,
+      commitments,
+    ]);
+    return receipt.transactionHash;
   }
 
   async getClientPublickKeys(taskID: string, round: number, clients: string[]): Promise<[string, string][]> {
@@ -303,12 +342,13 @@ class _Impl implements Impl {
     return res.map((item: any) => [item.pk1, item.pk2]);
   }
 
-  async startCalculation(address: string, taskID: string, round: number, clients: string[]): Promise<void> {
+  async startCalculation(address: string, taskID: string, round: number, clients: string[]): Promise<string> {
     if (address !== this.option.nodeAddress) {
       throw new Error(`chain connector node address is not ${address}`);
     }
 
-    await this.hflContract.method("startCalculate", [taskID, round, clients]);
+    const receipt = await this.hflContract.method("startCalculate", [taskID, round, clients]);
+    return receipt.transactionHash;
   }
 
   async uploadResultCommitment(
@@ -316,12 +356,13 @@ class _Impl implements Impl {
     taskID: string,
     round: number,
     commitment: string
-  ): Promise<void> {
+  ): Promise<string> {
     if (address !== this.option.nodeAddress) {
       throw new Error(`chain connector node address is not ${address}`);
     }
 
-    await this.hflContract.method("uploadResultCommitment", [taskID, round, commitment]);
+    const receipt = await this.hflContract.method("uploadResultCommitment", [taskID, round, commitment]);
+    return receipt.transactionHash;
   }
 
   async getResultCommitment(taskID: string, round: number, client: string): Promise<string> {
@@ -333,12 +374,13 @@ class _Impl implements Impl {
     return res;
   }
 
-  async startAggregation(address: string, taskID: string, round: number, clients: string[]): Promise<void> {
+  async startAggregation(address: string, taskID: string, round: number, clients: string[]): Promise<string> {
     if (address !== this.option.nodeAddress) {
       throw new Error(`chain connector node address is not ${address}`);
     }
 
-    await this.hflContract.method("startAggregate", [taskID, round, clients]);
+    const receipt = await this.hflContract.method("startAggregate", [taskID, round, clients]);
+    return receipt.transactionHash;
   }
 
   async uploadSeed(
@@ -347,12 +389,13 @@ class _Impl implements Impl {
     round: number,
     senders: string[],
     seeds: string[]
-  ): Promise<void> {
+  ): Promise<string> {
     if (address !== this.option.nodeAddress) {
       throw new Error(`chain connector node address is not ${address}`);
     }
 
-    await this.hflContract.method("uploadSeed", [taskID, round, senders, seeds]);
+    const receipt = await this.hflContract.method("uploadSeed", [taskID, round, senders, seeds]);
+    return receipt.transactionHash;
   }
 
   async uploadSecretKey(
@@ -361,12 +404,18 @@ class _Impl implements Impl {
     round: number,
     senders: string[],
     secretKeys: string[]
-  ): Promise<void> {
+  ): Promise<string> {
     if (address !== this.option.nodeAddress) {
       throw new Error(`chain connector node address is not ${address}`);
     }
 
-    await this.hflContract.method("uploadSecretkeyMask", [taskID, round, senders, secretKeys]);
+    const receipt = await this.hflContract.method("uploadSecretkeyMask", [
+      taskID,
+      round,
+      senders,
+      secretKeys,
+    ]);
+    return receipt.transactionHash;
   }
 
   async getSecretShareDatas(
@@ -390,12 +439,13 @@ class _Impl implements Impl {
     });
   }
 
-  async endRound(address: string, taskID: string, round: number): Promise<void> {
+  async endRound(address: string, taskID: string, round: number): Promise<string> {
     if (address !== this.option.nodeAddress) {
       throw new Error(`chain connector node address is not ${address}`);
     }
 
-    await this.hflContract.method("endRound", [taskID, round]);
+    const receipt = await this.hflContract.method("endRound", [taskID, round]);
+    return receipt.transactionHash;
   }
 }
 

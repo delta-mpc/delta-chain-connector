@@ -1,13 +1,12 @@
 import * as grpc from "@grpc/grpc-js";
-import { Event as ImplEvent, impl } from "src/impl";
-import log from "src/log";
+import { Event as ImplEvent, impl } from "../impl";
+import log from "log";
 import { AggregationReq__Output } from "./chain/AggregationReq";
 import { CalculationReq__Output } from "./chain/CalculationReq";
 import { CandidatesReq__Output } from "./chain/CandidatesReq";
 import { ChainHandlers } from "./chain/Chain";
 import { CreateTaskReq__Output } from "./chain/CreateTaskReq";
 import { CreateTaskResp } from "./chain/CreateTaskResp";
-import { Empty } from "./chain/Empty";
 import { EndRoundReq__Output } from "./chain/EndRoundReq";
 import { Event } from "./chain/Event";
 import { EventReq__Output } from "./chain/EventReq";
@@ -16,8 +15,10 @@ import { JoinReq__Output } from "./chain/JoinReq";
 import { JoinResp } from "./chain/JoinResp";
 import { JoinRoundReq__Output } from "./chain/JoinRoundReq";
 import { LeaveReq__Output } from "./chain/LeaveReq";
+import { NodeInfo } from "./chain/NodeInfo";
 import { NodeInfoReq__Output } from "./chain/NodeInfoReq";
-import { NodeInfoResp } from "./chain/NodeInfoResp";
+import { NodeInfos } from "./chain/NodeInfos";
+import { NodeInfosReq__Output } from "./chain/NodeInfosReq";
 import { PublicKeyReq__Output } from "./chain/PublicKeyReq";
 import { PublicKeyResp } from "./chain/PublicKeyResp";
 import { ResultCommitment__Output } from "./chain/ResultCommitment";
@@ -32,6 +33,7 @@ import { TaskReq__Output } from "./chain/TaskReq";
 import { TaskResp } from "./chain/TaskResp";
 import { TaskRoundReq__Output } from "./chain/TaskRoundReq";
 import { TaskRoundResp } from "./chain/TaskRoundResp";
+import { Transaction } from "./chain/Transaction";
 import { UpdateNameReq__Output } from "./chain/UpdateNameReq";
 import { UpdateUrlReq__Output } from "./chain/UpdateUrlReq";
 
@@ -42,9 +44,9 @@ export const chainService: ChainHandlers = {
 
     impl
       .join(url, name)
-      .then((address) => {
+      .then(([txHash, address]) => {
         log.info(`node ${address} join in`);
-        callback(null, { address: address });
+        callback(null, { address: address, txHash: txHash });
       })
       .catch((err: Error) => {
         log.error(err);
@@ -52,15 +54,18 @@ export const chainService: ChainHandlers = {
       });
   },
 
-  UpdateName(call: grpc.ServerUnaryCall<UpdateNameReq__Output, Empty>, callback: grpc.sendUnaryData<Empty>) {
+  UpdateName(
+    call: grpc.ServerUnaryCall<UpdateNameReq__Output, Transaction>,
+    callback: grpc.sendUnaryData<Transaction>
+  ) {
     const address = call.request.address;
     const name = call.request.name;
 
     impl
       .updateName(address, name)
-      .then(() => {
+      .then((txHash) => {
         log.info(`node ${address} change name to ${name}`);
-        callback(null, {});
+        callback(null, { txHash: txHash });
       })
       .catch((err: Error) => {
         log.error(err);
@@ -68,15 +73,18 @@ export const chainService: ChainHandlers = {
       });
   },
 
-  UpdateUrl(call: grpc.ServerUnaryCall<UpdateUrlReq__Output, Empty>, callback: grpc.sendUnaryData<Empty>) {
+  UpdateUrl(
+    call: grpc.ServerUnaryCall<UpdateUrlReq__Output, Transaction>,
+    callback: grpc.sendUnaryData<Transaction>
+  ) {
     const address = call.request.address;
     const url = call.request.url;
 
     impl
       .updateUrl(address, url)
-      .then(() => {
+      .then((txHash) => {
         log.info(`node ${address} change url to ${url}`);
-        callback(null, {});
+        callback(null, { txHash: txHash });
       })
       .catch((err: Error) => {
         log.error(err);
@@ -84,14 +92,17 @@ export const chainService: ChainHandlers = {
       });
   },
 
-  Leave(call: grpc.ServerUnaryCall<LeaveReq__Output, Empty>, callback: grpc.sendUnaryData<Empty>) {
+  Leave(
+    call: grpc.ServerUnaryCall<LeaveReq__Output, Transaction>,
+    callback: grpc.sendUnaryData<Transaction>
+  ) {
     const address = call.request.address;
 
     impl
       .leave(address)
-      .then(() => {
+      .then((txHash) => {
         log.info(`node ${address} leave`);
-        callback(null, {});
+        callback(null, { txHash: txHash });
       })
       .catch((err: Error) => {
         log.error(err);
@@ -100,8 +111,8 @@ export const chainService: ChainHandlers = {
   },
 
   GetNodeInfo(
-    call: grpc.ServerUnaryCall<NodeInfoReq__Output, NodeInfoResp>,
-    callback: grpc.sendUnaryData<NodeInfoResp>
+    call: grpc.ServerUnaryCall<NodeInfoReq__Output, NodeInfo>,
+    callback: grpc.sendUnaryData<NodeInfo>
   ) {
     const address = call.request.address;
 
@@ -117,15 +128,15 @@ export const chainService: ChainHandlers = {
       });
   },
 
-  CreateTask(
-    call: grpc.ServerUnaryCall<CreateTaskReq__Output, CreateTaskResp>,
-    callback: grpc.sendUnaryData<CreateTaskResp>
+  GetNodes(
+    call: grpc.ServerUnaryCall<NodeInfosReq__Output, NodeInfos>,
+    callback: grpc.sendUnaryData<NodeInfos>
   ) {
     impl
-      .createTask(call.request.address, call.request.dataset, call.request.commitment, call.request.taskType)
-      .then((taskID) => {
-        log.info(`node ${call.request.address} create task ${taskID}`);
-        callback(null, { taskId: taskID });
+      .getNodes(call.request.page, call.request.pageSize)
+      .then((resp) => {
+        log.info("get nodes");
+        callback(null, resp);
       })
       .catch((err: Error) => {
         log.error(err);
@@ -133,12 +144,31 @@ export const chainService: ChainHandlers = {
       });
   },
 
-  FinishTask(call: grpc.ServerUnaryCall<FinishTaskReq__Output, Empty>, callback: grpc.sendUnaryData<Empty>) {
+  CreateTask(
+    call: grpc.ServerUnaryCall<CreateTaskReq__Output, CreateTaskResp>,
+    callback: grpc.sendUnaryData<CreateTaskResp>
+  ) {
+    impl
+      .createTask(call.request.address, call.request.dataset, call.request.commitment, call.request.taskType)
+      .then(([txHash, taskID]) => {
+        log.info(`node ${call.request.address} create task ${taskID}`);
+        callback(null, { txHash: txHash, taskId: taskID });
+      })
+      .catch((err: Error) => {
+        log.error(err);
+        callback(err, null);
+      });
+  },
+
+  FinishTask(
+    call: grpc.ServerUnaryCall<FinishTaskReq__Output, Transaction>,
+    callback: grpc.sendUnaryData<Transaction>
+  ) {
     impl
       .finishTask(call.request.address, call.request.taskId)
-      .then(() => {
+      .then((txHash) => {
         log.info(`task ${call.request.taskId} finish task`);
-        callback(null, {});
+        callback(null, { txHash: txHash });
       })
       .catch((err: Error) => {
         log.error(err);
@@ -159,12 +189,15 @@ export const chainService: ChainHandlers = {
       });
   },
 
-  StartRound(call: grpc.ServerUnaryCall<StartRoundReq__Output, Empty>, callback: grpc.sendUnaryData<Empty>) {
+  StartRound(
+    call: grpc.ServerUnaryCall<StartRoundReq__Output, Transaction>,
+    callback: grpc.sendUnaryData<Transaction>
+  ) {
     impl
       .startRound(call.request.address, call.request.taskId, call.request.round)
-      .then(() => {
+      .then((txHash) => {
         log.info(`task ${call.request.taskId} start round ${call.request.round}`);
-        callback(null, {});
+        callback(null, { txHash: txHash });
       })
       .catch((err: Error) => {
         log.error(err);
@@ -172,7 +205,10 @@ export const chainService: ChainHandlers = {
       });
   },
 
-  JoinRound(call: grpc.ServerUnaryCall<JoinRoundReq__Output, Empty>, callback: grpc.sendUnaryData<Empty>) {
+  JoinRound(
+    call: grpc.ServerUnaryCall<JoinRoundReq__Output, Transaction>,
+    callback: grpc.sendUnaryData<Transaction>
+  ) {
     impl
       .joinRound(
         call.request.address,
@@ -181,9 +217,9 @@ export const chainService: ChainHandlers = {
         call.request.pk1,
         call.request.pk2
       )
-      .then(() => {
+      .then((txHash) => {
         log.info(`node ${call.request.address} join task ${call.request.taskId} round ${call.request.round}`);
-        callback(null, {});
+        callback(null, { txHash: txHash });
       })
       .catch((err: Error) => {
         log.error(err);
@@ -208,14 +244,14 @@ export const chainService: ChainHandlers = {
   },
 
   SelectCandidates(
-    call: grpc.ServerUnaryCall<CandidatesReq__Output, Empty>,
-    callback: grpc.sendUnaryData<Empty>
+    call: grpc.ServerUnaryCall<CandidatesReq__Output, Transaction>,
+    callback: grpc.sendUnaryData<Transaction>
   ) {
     impl
       .selectCandidates(call.request.address, call.request.taskId, call.request.round, call.request.clients)
-      .then(() => {
+      .then((txHash) => {
         log.info(`task ${call.request.taskId} round ${call.request.round} select candidates`);
-        callback(null, {});
+        callback(null, { txHash: txHash });
       })
       .catch((err: Error) => {
         log.error(err);
@@ -224,8 +260,8 @@ export const chainService: ChainHandlers = {
   },
 
   UploadSeedCommitment(
-    call: grpc.ServerUnaryCall<ShareCommitment__Output, Empty>,
-    callback: grpc.sendUnaryData<Empty>
+    call: grpc.ServerUnaryCall<ShareCommitment__Output, Transaction>,
+    callback: grpc.sendUnaryData<Transaction>
   ) {
     impl
       .uploadSeedCommitment(
@@ -235,10 +271,10 @@ export const chainService: ChainHandlers = {
         call.request.receivers,
         call.request.commitments
       )
-      .then(() => {
+      .then((txHash) => {
         log.info(`task ${call.request.taskId} round ${call.request.round} seed commitment 
         ${call.request.address} -> ${call.request.receivers}`);
-        callback(null, {});
+        callback(null, { txHash: txHash });
       })
       .catch((err: Error) => {
         log.error(err);
@@ -247,8 +283,8 @@ export const chainService: ChainHandlers = {
   },
 
   UploadSecretKeyCommitment(
-    call: grpc.ServerUnaryCall<ShareCommitment__Output, Empty>,
-    callback: grpc.sendUnaryData<Empty>
+    call: grpc.ServerUnaryCall<ShareCommitment__Output, Transaction>,
+    callback: grpc.sendUnaryData<Transaction>
   ) {
     impl
       .uploadSecretKeyCommitment(
@@ -258,10 +294,10 @@ export const chainService: ChainHandlers = {
         call.request.receivers,
         call.request.commitments
       )
-      .then(() => {
+      .then((txHash) => {
         log.info(`task ${call.request.taskId} round ${call.request.round} secret key commitment 
         ${call.request.address} -> ${call.request.receivers}`);
-        callback(null, {});
+        callback(null, { txHash: txHash });
       })
       .catch((err: Error) => {
         log.error(err);
@@ -294,14 +330,14 @@ export const chainService: ChainHandlers = {
   },
 
   StartCalculation(
-    call: grpc.ServerUnaryCall<CalculationReq__Output, Empty>,
-    callback: grpc.sendUnaryData<Empty>
+    call: grpc.ServerUnaryCall<CalculationReq__Output, Transaction>,
+    callback: grpc.sendUnaryData<Transaction>
   ) {
     impl
       .startCalculation(call.request.address, call.request.taskId, call.request.round, call.request.clients)
-      .then(() => {
+      .then((txHash) => {
         log.info(`task ${call.request.taskId} round ${call.request.round} start calculation`);
-        callback(null, {});
+        callback(null, { txHash: txHash });
       })
       .catch((err: Error) => {
         log.error(err);
@@ -310,8 +346,8 @@ export const chainService: ChainHandlers = {
   },
 
   UploadResultCommitment(
-    call: grpc.ServerUnaryCall<ResultCommitment__Output, Empty>,
-    callback: grpc.sendUnaryData<Empty>
+    call: grpc.ServerUnaryCall<ResultCommitment__Output, Transaction>,
+    callback: grpc.sendUnaryData<Transaction>
   ) {
     impl
       .uploadResultCommitment(
@@ -320,10 +356,10 @@ export const chainService: ChainHandlers = {
         call.request.round,
         call.request.commitment
       )
-      .then(() => {
+      .then((txHash) => {
         log.info(`node ${call.request.address} task ${call.request} round ${call.request.round}
         upload result commitment`);
-        callback(null, {});
+        callback(null, { txHash: txHash });
       })
       .catch((err: Error) => {
         log.error(err);
@@ -348,14 +384,14 @@ export const chainService: ChainHandlers = {
   },
 
   StartAggregation(
-    call: grpc.ServerUnaryCall<AggregationReq__Output, Empty>,
-    callback: grpc.sendUnaryData<Empty>
+    call: grpc.ServerUnaryCall<AggregationReq__Output, Transaction>,
+    callback: grpc.sendUnaryData<Transaction>
   ) {
     impl
       .startAggregation(call.request.address, call.request.taskId, call.request.round, call.request.clients)
-      .then(() => {
+      .then((txHash) => {
         log.info(`task ${call.request.taskId} round ${call.request.round} start aggregation`);
-        callback(null, {});
+        callback(null, { txHash: txHash });
       })
       .catch((err: Error) => {
         log.error(err);
@@ -363,7 +399,10 @@ export const chainService: ChainHandlers = {
       });
   },
 
-  UploadSeed(call: grpc.ServerUnaryCall<Share__Output, Empty>, callback: grpc.sendUnaryData<Empty>) {
+  UploadSeed(
+    call: grpc.ServerUnaryCall<Share__Output, Transaction>,
+    callback: grpc.sendUnaryData<Transaction>
+  ) {
     impl
       .uploadSeed(
         call.request.address,
@@ -372,10 +411,10 @@ export const chainService: ChainHandlers = {
         call.request.senders,
         call.request.shares
       )
-      .then(() => {
+      .then((txHash) => {
         log.info(`task ${call.request.taskId} round ${call.request.round} seed
         ${call.request.senders} -> ${call.request.address}`);
-        callback(null, {});
+        callback(null, { txHash: txHash });
       })
       .catch((err: Error) => {
         log.error(err);
@@ -383,7 +422,10 @@ export const chainService: ChainHandlers = {
       });
   },
 
-  UploadSecretKey(call: grpc.ServerUnaryCall<Share__Output, Empty>, callback: grpc.sendUnaryData<Empty>) {
+  UploadSecretKey(
+    call: grpc.ServerUnaryCall<Share__Output, Transaction>,
+    callback: grpc.sendUnaryData<Transaction>
+  ) {
     impl
       .uploadSecretKey(
         call.request.address,
@@ -392,10 +434,10 @@ export const chainService: ChainHandlers = {
         call.request.senders,
         call.request.shares
       )
-      .then(() => {
+      .then((txHash) => {
         log.info(`task ${call.request.taskId} round ${call.request.round} secret key
         ${call.request.senders} -> ${call.request.address}`);
-        callback(null, {});
+        callback(null, { txHash: txHash });
       })
       .catch((err: Error) => {
         log.error(err);
@@ -425,12 +467,15 @@ export const chainService: ChainHandlers = {
       });
   },
 
-  EndRound(call: grpc.ServerUnaryCall<EndRoundReq__Output, Empty>, callback: grpc.sendUnaryData<Empty>) {
+  EndRound(
+    call: grpc.ServerUnaryCall<EndRoundReq__Output, Transaction>,
+    callback: grpc.sendUnaryData<Transaction>
+  ) {
     impl
       .endRound(call.request.address, call.request.taskId, call.request.round)
-      .then(() => {
+      .then((txHash) => {
         log.info(`task ${call.request.taskId} round ${call.request.round} end`);
-        callback(null, {});
+        callback(null, { txHash: txHash });
       })
       .catch((err: Error) => {
         log.error(err);
