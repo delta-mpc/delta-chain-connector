@@ -22,7 +22,6 @@ import type {
   CreateTaskResp as _chain_CreateTaskResp,
   CreateTaskResp__Output as _chain_CreateTaskResp__Output,
 } from "../chain/CreateTaskResp";
-import type { Empty as _chain_Empty, Empty__Output as _chain_Empty__Output } from "../chain/Empty";
 import type {
   EndRoundReq as _chain_EndRoundReq,
   EndRoundReq__Output as _chain_EndRoundReq__Output,
@@ -50,13 +49,21 @@ import type {
   LeaveReq__Output as _chain_LeaveReq__Output,
 } from "../chain/LeaveReq";
 import type {
+  NodeInfo as _chain_NodeInfo,
+  NodeInfo__Output as _chain_NodeInfo__Output,
+} from "../chain/NodeInfo";
+import type {
   NodeInfoReq as _chain_NodeInfoReq,
   NodeInfoReq__Output as _chain_NodeInfoReq__Output,
 } from "../chain/NodeInfoReq";
 import type {
-  NodeInfoResp as _chain_NodeInfoResp,
-  NodeInfoResp__Output as _chain_NodeInfoResp__Output,
-} from "../chain/NodeInfoResp";
+  NodeInfos as _chain_NodeInfos,
+  NodeInfos__Output as _chain_NodeInfos__Output,
+} from "../chain/NodeInfos";
+import type {
+  NodeInfosReq as _chain_NodeInfosReq,
+  NodeInfosReq__Output as _chain_NodeInfosReq__Output,
+} from "../chain/NodeInfosReq";
 import type {
   PublicKeyReq as _chain_PublicKeyReq,
   PublicKeyReq__Output as _chain_PublicKeyReq__Output,
@@ -107,6 +114,10 @@ import type {
   TaskRoundResp as _chain_TaskRoundResp,
   TaskRoundResp__Output as _chain_TaskRoundResp__Output,
 } from "../chain/TaskRoundResp";
+import type {
+  Transaction as _chain_Transaction,
+  Transaction__Output as _chain_Transaction__Output,
+} from "../chain/Transaction";
 import type {
   UpdateNameReq as _chain_UpdateNameReq,
   UpdateNameReq__Output as _chain_UpdateNameReq__Output,
@@ -162,82 +173,82 @@ export interface ChainClient extends grpc.Client {
     argument: _chain_EndRoundReq,
     metadata: grpc.Metadata,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   EndRound(
     argument: _chain_EndRoundReq,
     metadata: grpc.Metadata,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   EndRound(
     argument: _chain_EndRoundReq,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   EndRound(
     argument: _chain_EndRoundReq,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   endRound(
     argument: _chain_EndRoundReq,
     metadata: grpc.Metadata,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   endRound(
     argument: _chain_EndRoundReq,
     metadata: grpc.Metadata,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   endRound(
     argument: _chain_EndRoundReq,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   endRound(
     argument: _chain_EndRoundReq,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
 
   FinishTask(
     argument: _chain_FinishTaskReq,
     metadata: grpc.Metadata,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   FinishTask(
     argument: _chain_FinishTaskReq,
     metadata: grpc.Metadata,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   FinishTask(
     argument: _chain_FinishTaskReq,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   FinishTask(
     argument: _chain_FinishTaskReq,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   finishTask(
     argument: _chain_FinishTaskReq,
     metadata: grpc.Metadata,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   finishTask(
     argument: _chain_FinishTaskReq,
     metadata: grpc.Metadata,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   finishTask(
     argument: _chain_FinishTaskReq,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   finishTask(
     argument: _chain_FinishTaskReq,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
 
   GetClientPublickKeys(
@@ -285,41 +296,82 @@ export interface ChainClient extends grpc.Client {
     argument: _chain_NodeInfoReq,
     metadata: grpc.Metadata,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_NodeInfoResp__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_NodeInfo__Output) => void
   ): grpc.ClientUnaryCall;
   GetNodeInfo(
     argument: _chain_NodeInfoReq,
     metadata: grpc.Metadata,
-    callback: (error?: grpc.ServiceError, result?: _chain_NodeInfoResp__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_NodeInfo__Output) => void
   ): grpc.ClientUnaryCall;
   GetNodeInfo(
     argument: _chain_NodeInfoReq,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_NodeInfoResp__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_NodeInfo__Output) => void
   ): grpc.ClientUnaryCall;
   GetNodeInfo(
     argument: _chain_NodeInfoReq,
-    callback: (error?: grpc.ServiceError, result?: _chain_NodeInfoResp__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_NodeInfo__Output) => void
   ): grpc.ClientUnaryCall;
   getNodeInfo(
     argument: _chain_NodeInfoReq,
     metadata: grpc.Metadata,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_NodeInfoResp__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_NodeInfo__Output) => void
   ): grpc.ClientUnaryCall;
   getNodeInfo(
     argument: _chain_NodeInfoReq,
     metadata: grpc.Metadata,
-    callback: (error?: grpc.ServiceError, result?: _chain_NodeInfoResp__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_NodeInfo__Output) => void
   ): grpc.ClientUnaryCall;
   getNodeInfo(
     argument: _chain_NodeInfoReq,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_NodeInfoResp__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_NodeInfo__Output) => void
   ): grpc.ClientUnaryCall;
   getNodeInfo(
     argument: _chain_NodeInfoReq,
-    callback: (error?: grpc.ServiceError, result?: _chain_NodeInfoResp__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_NodeInfo__Output) => void
+  ): grpc.ClientUnaryCall;
+
+  GetNodes(
+    argument: _chain_NodeInfosReq,
+    metadata: grpc.Metadata,
+    options: grpc.CallOptions,
+    callback: (error?: grpc.ServiceError, result?: _chain_NodeInfos__Output) => void
+  ): grpc.ClientUnaryCall;
+  GetNodes(
+    argument: _chain_NodeInfosReq,
+    metadata: grpc.Metadata,
+    callback: (error?: grpc.ServiceError, result?: _chain_NodeInfos__Output) => void
+  ): grpc.ClientUnaryCall;
+  GetNodes(
+    argument: _chain_NodeInfosReq,
+    options: grpc.CallOptions,
+    callback: (error?: grpc.ServiceError, result?: _chain_NodeInfos__Output) => void
+  ): grpc.ClientUnaryCall;
+  GetNodes(
+    argument: _chain_NodeInfosReq,
+    callback: (error?: grpc.ServiceError, result?: _chain_NodeInfos__Output) => void
+  ): grpc.ClientUnaryCall;
+  getNodes(
+    argument: _chain_NodeInfosReq,
+    metadata: grpc.Metadata,
+    options: grpc.CallOptions,
+    callback: (error?: grpc.ServiceError, result?: _chain_NodeInfos__Output) => void
+  ): grpc.ClientUnaryCall;
+  getNodes(
+    argument: _chain_NodeInfosReq,
+    metadata: grpc.Metadata,
+    callback: (error?: grpc.ServiceError, result?: _chain_NodeInfos__Output) => void
+  ): grpc.ClientUnaryCall;
+  getNodes(
+    argument: _chain_NodeInfosReq,
+    options: grpc.CallOptions,
+    callback: (error?: grpc.ServiceError, result?: _chain_NodeInfos__Output) => void
+  ): grpc.ClientUnaryCall;
+  getNodes(
+    argument: _chain_NodeInfosReq,
+    callback: (error?: grpc.ServiceError, result?: _chain_NodeInfos__Output) => void
   ): grpc.ClientUnaryCall;
 
   GetResultCommitment(
@@ -531,246 +583,246 @@ export interface ChainClient extends grpc.Client {
     argument: _chain_JoinRoundReq,
     metadata: grpc.Metadata,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   JoinRound(
     argument: _chain_JoinRoundReq,
     metadata: grpc.Metadata,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   JoinRound(
     argument: _chain_JoinRoundReq,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   JoinRound(
     argument: _chain_JoinRoundReq,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   joinRound(
     argument: _chain_JoinRoundReq,
     metadata: grpc.Metadata,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   joinRound(
     argument: _chain_JoinRoundReq,
     metadata: grpc.Metadata,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   joinRound(
     argument: _chain_JoinRoundReq,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   joinRound(
     argument: _chain_JoinRoundReq,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
 
   Leave(
     argument: _chain_LeaveReq,
     metadata: grpc.Metadata,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   Leave(
     argument: _chain_LeaveReq,
     metadata: grpc.Metadata,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   Leave(
     argument: _chain_LeaveReq,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   Leave(
     argument: _chain_LeaveReq,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   leave(
     argument: _chain_LeaveReq,
     metadata: grpc.Metadata,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   leave(
     argument: _chain_LeaveReq,
     metadata: grpc.Metadata,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   leave(
     argument: _chain_LeaveReq,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   leave(
     argument: _chain_LeaveReq,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
 
   SelectCandidates(
     argument: _chain_CandidatesReq,
     metadata: grpc.Metadata,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   SelectCandidates(
     argument: _chain_CandidatesReq,
     metadata: grpc.Metadata,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   SelectCandidates(
     argument: _chain_CandidatesReq,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   SelectCandidates(
     argument: _chain_CandidatesReq,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   selectCandidates(
     argument: _chain_CandidatesReq,
     metadata: grpc.Metadata,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   selectCandidates(
     argument: _chain_CandidatesReq,
     metadata: grpc.Metadata,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   selectCandidates(
     argument: _chain_CandidatesReq,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   selectCandidates(
     argument: _chain_CandidatesReq,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
 
   StartAggregation(
     argument: _chain_AggregationReq,
     metadata: grpc.Metadata,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   StartAggregation(
     argument: _chain_AggregationReq,
     metadata: grpc.Metadata,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   StartAggregation(
     argument: _chain_AggregationReq,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   StartAggregation(
     argument: _chain_AggregationReq,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   startAggregation(
     argument: _chain_AggregationReq,
     metadata: grpc.Metadata,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   startAggregation(
     argument: _chain_AggregationReq,
     metadata: grpc.Metadata,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   startAggregation(
     argument: _chain_AggregationReq,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   startAggregation(
     argument: _chain_AggregationReq,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
 
   StartCalculation(
     argument: _chain_CalculationReq,
     metadata: grpc.Metadata,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   StartCalculation(
     argument: _chain_CalculationReq,
     metadata: grpc.Metadata,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   StartCalculation(
     argument: _chain_CalculationReq,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   StartCalculation(
     argument: _chain_CalculationReq,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   startCalculation(
     argument: _chain_CalculationReq,
     metadata: grpc.Metadata,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   startCalculation(
     argument: _chain_CalculationReq,
     metadata: grpc.Metadata,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   startCalculation(
     argument: _chain_CalculationReq,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   startCalculation(
     argument: _chain_CalculationReq,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
 
   StartRound(
     argument: _chain_StartRoundReq,
     metadata: grpc.Metadata,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   StartRound(
     argument: _chain_StartRoundReq,
     metadata: grpc.Metadata,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   StartRound(
     argument: _chain_StartRoundReq,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   StartRound(
     argument: _chain_StartRoundReq,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   startRound(
     argument: _chain_StartRoundReq,
     metadata: grpc.Metadata,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   startRound(
     argument: _chain_StartRoundReq,
     metadata: grpc.Metadata,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   startRound(
     argument: _chain_StartRoundReq,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   startRound(
     argument: _chain_StartRoundReq,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
 
   Subscribe(
@@ -796,300 +848,302 @@ export interface ChainClient extends grpc.Client {
     argument: _chain_UpdateNameReq,
     metadata: grpc.Metadata,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   UpdateName(
     argument: _chain_UpdateNameReq,
     metadata: grpc.Metadata,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   UpdateName(
     argument: _chain_UpdateNameReq,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   UpdateName(
     argument: _chain_UpdateNameReq,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   updateName(
     argument: _chain_UpdateNameReq,
     metadata: grpc.Metadata,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   updateName(
     argument: _chain_UpdateNameReq,
     metadata: grpc.Metadata,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   updateName(
     argument: _chain_UpdateNameReq,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   updateName(
     argument: _chain_UpdateNameReq,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
 
   UpdateUrl(
     argument: _chain_UpdateUrlReq,
     metadata: grpc.Metadata,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   UpdateUrl(
     argument: _chain_UpdateUrlReq,
     metadata: grpc.Metadata,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   UpdateUrl(
     argument: _chain_UpdateUrlReq,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   UpdateUrl(
     argument: _chain_UpdateUrlReq,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   updateUrl(
     argument: _chain_UpdateUrlReq,
     metadata: grpc.Metadata,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   updateUrl(
     argument: _chain_UpdateUrlReq,
     metadata: grpc.Metadata,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   updateUrl(
     argument: _chain_UpdateUrlReq,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   updateUrl(
     argument: _chain_UpdateUrlReq,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
 
   UploadResultCommitment(
     argument: _chain_ResultCommitment,
     metadata: grpc.Metadata,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   UploadResultCommitment(
     argument: _chain_ResultCommitment,
     metadata: grpc.Metadata,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   UploadResultCommitment(
     argument: _chain_ResultCommitment,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   UploadResultCommitment(
     argument: _chain_ResultCommitment,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   uploadResultCommitment(
     argument: _chain_ResultCommitment,
     metadata: grpc.Metadata,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   uploadResultCommitment(
     argument: _chain_ResultCommitment,
     metadata: grpc.Metadata,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   uploadResultCommitment(
     argument: _chain_ResultCommitment,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   uploadResultCommitment(
     argument: _chain_ResultCommitment,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
 
   UploadSecretKey(
     argument: _chain_Share,
     metadata: grpc.Metadata,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   UploadSecretKey(
     argument: _chain_Share,
     metadata: grpc.Metadata,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   UploadSecretKey(
     argument: _chain_Share,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   UploadSecretKey(
     argument: _chain_Share,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   uploadSecretKey(
     argument: _chain_Share,
     metadata: grpc.Metadata,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   uploadSecretKey(
     argument: _chain_Share,
     metadata: grpc.Metadata,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   uploadSecretKey(
     argument: _chain_Share,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   uploadSecretKey(
     argument: _chain_Share,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
 
   UploadSecretKeyCommitment(
     argument: _chain_ShareCommitment,
     metadata: grpc.Metadata,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   UploadSecretKeyCommitment(
     argument: _chain_ShareCommitment,
     metadata: grpc.Metadata,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   UploadSecretKeyCommitment(
     argument: _chain_ShareCommitment,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   UploadSecretKeyCommitment(
     argument: _chain_ShareCommitment,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   uploadSecretKeyCommitment(
     argument: _chain_ShareCommitment,
     metadata: grpc.Metadata,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   uploadSecretKeyCommitment(
     argument: _chain_ShareCommitment,
     metadata: grpc.Metadata,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   uploadSecretKeyCommitment(
     argument: _chain_ShareCommitment,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   uploadSecretKeyCommitment(
     argument: _chain_ShareCommitment,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
 
   UploadSeed(
     argument: _chain_Share,
     metadata: grpc.Metadata,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   UploadSeed(
     argument: _chain_Share,
     metadata: grpc.Metadata,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   UploadSeed(
     argument: _chain_Share,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   UploadSeed(
     argument: _chain_Share,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   uploadSeed(
     argument: _chain_Share,
     metadata: grpc.Metadata,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   uploadSeed(
     argument: _chain_Share,
     metadata: grpc.Metadata,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   uploadSeed(
     argument: _chain_Share,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   uploadSeed(
     argument: _chain_Share,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
 
   UploadSeedCommitment(
     argument: _chain_ShareCommitment,
     metadata: grpc.Metadata,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   UploadSeedCommitment(
     argument: _chain_ShareCommitment,
     metadata: grpc.Metadata,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   UploadSeedCommitment(
     argument: _chain_ShareCommitment,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   UploadSeedCommitment(
     argument: _chain_ShareCommitment,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   uploadSeedCommitment(
     argument: _chain_ShareCommitment,
     metadata: grpc.Metadata,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   uploadSeedCommitment(
     argument: _chain_ShareCommitment,
     metadata: grpc.Metadata,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   uploadSeedCommitment(
     argument: _chain_ShareCommitment,
     options: grpc.CallOptions,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
   uploadSeedCommitment(
     argument: _chain_ShareCommitment,
-    callback: (error?: grpc.ServiceError, result?: _chain_Empty__Output) => void
+    callback: (error?: grpc.ServiceError, result?: _chain_Transaction__Output) => void
   ): grpc.ClientUnaryCall;
 }
 
 export interface ChainHandlers extends grpc.UntypedServiceImplementation {
   CreateTask: grpc.handleUnaryCall<_chain_CreateTaskReq__Output, _chain_CreateTaskResp>;
 
-  EndRound: grpc.handleUnaryCall<_chain_EndRoundReq__Output, _chain_Empty>;
+  EndRound: grpc.handleUnaryCall<_chain_EndRoundReq__Output, _chain_Transaction>;
 
-  FinishTask: grpc.handleUnaryCall<_chain_FinishTaskReq__Output, _chain_Empty>;
+  FinishTask: grpc.handleUnaryCall<_chain_FinishTaskReq__Output, _chain_Transaction>;
 
   GetClientPublickKeys: grpc.handleUnaryCall<_chain_PublicKeyReq__Output, _chain_PublicKeyResp>;
 
-  GetNodeInfo: grpc.handleUnaryCall<_chain_NodeInfoReq__Output, _chain_NodeInfoResp>;
+  GetNodeInfo: grpc.handleUnaryCall<_chain_NodeInfoReq__Output, _chain_NodeInfo>;
+
+  GetNodes: grpc.handleUnaryCall<_chain_NodeInfosReq__Output, _chain_NodeInfos>;
 
   GetResultCommitment: grpc.handleUnaryCall<_chain_ResultCommitmentReq__Output, _chain_ResultCommitmentResp>;
 
@@ -1101,33 +1155,33 @@ export interface ChainHandlers extends grpc.UntypedServiceImplementation {
 
   Join: grpc.handleUnaryCall<_chain_JoinReq__Output, _chain_JoinResp>;
 
-  JoinRound: grpc.handleUnaryCall<_chain_JoinRoundReq__Output, _chain_Empty>;
+  JoinRound: grpc.handleUnaryCall<_chain_JoinRoundReq__Output, _chain_Transaction>;
 
-  Leave: grpc.handleUnaryCall<_chain_LeaveReq__Output, _chain_Empty>;
+  Leave: grpc.handleUnaryCall<_chain_LeaveReq__Output, _chain_Transaction>;
 
-  SelectCandidates: grpc.handleUnaryCall<_chain_CandidatesReq__Output, _chain_Empty>;
+  SelectCandidates: grpc.handleUnaryCall<_chain_CandidatesReq__Output, _chain_Transaction>;
 
-  StartAggregation: grpc.handleUnaryCall<_chain_AggregationReq__Output, _chain_Empty>;
+  StartAggregation: grpc.handleUnaryCall<_chain_AggregationReq__Output, _chain_Transaction>;
 
-  StartCalculation: grpc.handleUnaryCall<_chain_CalculationReq__Output, _chain_Empty>;
+  StartCalculation: grpc.handleUnaryCall<_chain_CalculationReq__Output, _chain_Transaction>;
 
-  StartRound: grpc.handleUnaryCall<_chain_StartRoundReq__Output, _chain_Empty>;
+  StartRound: grpc.handleUnaryCall<_chain_StartRoundReq__Output, _chain_Transaction>;
 
   Subscribe: grpc.handleServerStreamingCall<_chain_EventReq__Output, _chain_Event>;
 
-  UpdateName: grpc.handleUnaryCall<_chain_UpdateNameReq__Output, _chain_Empty>;
+  UpdateName: grpc.handleUnaryCall<_chain_UpdateNameReq__Output, _chain_Transaction>;
 
-  UpdateUrl: grpc.handleUnaryCall<_chain_UpdateUrlReq__Output, _chain_Empty>;
+  UpdateUrl: grpc.handleUnaryCall<_chain_UpdateUrlReq__Output, _chain_Transaction>;
 
-  UploadResultCommitment: grpc.handleUnaryCall<_chain_ResultCommitment__Output, _chain_Empty>;
+  UploadResultCommitment: grpc.handleUnaryCall<_chain_ResultCommitment__Output, _chain_Transaction>;
 
-  UploadSecretKey: grpc.handleUnaryCall<_chain_Share__Output, _chain_Empty>;
+  UploadSecretKey: grpc.handleUnaryCall<_chain_Share__Output, _chain_Transaction>;
 
-  UploadSecretKeyCommitment: grpc.handleUnaryCall<_chain_ShareCommitment__Output, _chain_Empty>;
+  UploadSecretKeyCommitment: grpc.handleUnaryCall<_chain_ShareCommitment__Output, _chain_Transaction>;
 
-  UploadSeed: grpc.handleUnaryCall<_chain_Share__Output, _chain_Empty>;
+  UploadSeed: grpc.handleUnaryCall<_chain_Share__Output, _chain_Transaction>;
 
-  UploadSeedCommitment: grpc.handleUnaryCall<_chain_ShareCommitment__Output, _chain_Empty>;
+  UploadSeedCommitment: grpc.handleUnaryCall<_chain_ShareCommitment__Output, _chain_Transaction>;
 }
 
 export interface ChainDefinition extends grpc.ServiceDefinition {
@@ -1139,15 +1193,15 @@ export interface ChainDefinition extends grpc.ServiceDefinition {
   >;
   EndRound: MethodDefinition<
     _chain_EndRoundReq,
-    _chain_Empty,
+    _chain_Transaction,
     _chain_EndRoundReq__Output,
-    _chain_Empty__Output
+    _chain_Transaction__Output
   >;
   FinishTask: MethodDefinition<
     _chain_FinishTaskReq,
-    _chain_Empty,
+    _chain_Transaction,
     _chain_FinishTaskReq__Output,
-    _chain_Empty__Output
+    _chain_Transaction__Output
   >;
   GetClientPublickKeys: MethodDefinition<
     _chain_PublicKeyReq,
@@ -1157,9 +1211,15 @@ export interface ChainDefinition extends grpc.ServiceDefinition {
   >;
   GetNodeInfo: MethodDefinition<
     _chain_NodeInfoReq,
-    _chain_NodeInfoResp,
+    _chain_NodeInfo,
     _chain_NodeInfoReq__Output,
-    _chain_NodeInfoResp__Output
+    _chain_NodeInfo__Output
+  >;
+  GetNodes: MethodDefinition<
+    _chain_NodeInfosReq,
+    _chain_NodeInfos,
+    _chain_NodeInfosReq__Output,
+    _chain_NodeInfos__Output
   >;
   GetResultCommitment: MethodDefinition<
     _chain_ResultCommitmentReq,
@@ -1183,66 +1243,81 @@ export interface ChainDefinition extends grpc.ServiceDefinition {
   Join: MethodDefinition<_chain_JoinReq, _chain_JoinResp, _chain_JoinReq__Output, _chain_JoinResp__Output>;
   JoinRound: MethodDefinition<
     _chain_JoinRoundReq,
-    _chain_Empty,
+    _chain_Transaction,
     _chain_JoinRoundReq__Output,
-    _chain_Empty__Output
+    _chain_Transaction__Output
   >;
-  Leave: MethodDefinition<_chain_LeaveReq, _chain_Empty, _chain_LeaveReq__Output, _chain_Empty__Output>;
+  Leave: MethodDefinition<
+    _chain_LeaveReq,
+    _chain_Transaction,
+    _chain_LeaveReq__Output,
+    _chain_Transaction__Output
+  >;
   SelectCandidates: MethodDefinition<
     _chain_CandidatesReq,
-    _chain_Empty,
+    _chain_Transaction,
     _chain_CandidatesReq__Output,
-    _chain_Empty__Output
+    _chain_Transaction__Output
   >;
   StartAggregation: MethodDefinition<
     _chain_AggregationReq,
-    _chain_Empty,
+    _chain_Transaction,
     _chain_AggregationReq__Output,
-    _chain_Empty__Output
+    _chain_Transaction__Output
   >;
   StartCalculation: MethodDefinition<
     _chain_CalculationReq,
-    _chain_Empty,
+    _chain_Transaction,
     _chain_CalculationReq__Output,
-    _chain_Empty__Output
+    _chain_Transaction__Output
   >;
   StartRound: MethodDefinition<
     _chain_StartRoundReq,
-    _chain_Empty,
+    _chain_Transaction,
     _chain_StartRoundReq__Output,
-    _chain_Empty__Output
+    _chain_Transaction__Output
   >;
   Subscribe: MethodDefinition<_chain_EventReq, _chain_Event, _chain_EventReq__Output, _chain_Event__Output>;
   UpdateName: MethodDefinition<
     _chain_UpdateNameReq,
-    _chain_Empty,
+    _chain_Transaction,
     _chain_UpdateNameReq__Output,
-    _chain_Empty__Output
+    _chain_Transaction__Output
   >;
   UpdateUrl: MethodDefinition<
     _chain_UpdateUrlReq,
-    _chain_Empty,
+    _chain_Transaction,
     _chain_UpdateUrlReq__Output,
-    _chain_Empty__Output
+    _chain_Transaction__Output
   >;
   UploadResultCommitment: MethodDefinition<
     _chain_ResultCommitment,
-    _chain_Empty,
+    _chain_Transaction,
     _chain_ResultCommitment__Output,
-    _chain_Empty__Output
+    _chain_Transaction__Output
   >;
-  UploadSecretKey: MethodDefinition<_chain_Share, _chain_Empty, _chain_Share__Output, _chain_Empty__Output>;
+  UploadSecretKey: MethodDefinition<
+    _chain_Share,
+    _chain_Transaction,
+    _chain_Share__Output,
+    _chain_Transaction__Output
+  >;
   UploadSecretKeyCommitment: MethodDefinition<
     _chain_ShareCommitment,
-    _chain_Empty,
+    _chain_Transaction,
     _chain_ShareCommitment__Output,
-    _chain_Empty__Output
+    _chain_Transaction__Output
   >;
-  UploadSeed: MethodDefinition<_chain_Share, _chain_Empty, _chain_Share__Output, _chain_Empty__Output>;
+  UploadSeed: MethodDefinition<
+    _chain_Share,
+    _chain_Transaction,
+    _chain_Share__Output,
+    _chain_Transaction__Output
+  >;
   UploadSeedCommitment: MethodDefinition<
     _chain_ShareCommitment,
-    _chain_Empty,
+    _chain_Transaction,
     _chain_ShareCommitment__Output,
-    _chain_Empty__Output
+    _chain_Transaction__Output
   >;
 }

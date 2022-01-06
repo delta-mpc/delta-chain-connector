@@ -20,7 +20,6 @@ export interface ProtoGrpcType {
     Chain: SubtypeConstructor<typeof grpc.Client, _chain_ChainClient> & { service: _chain_ChainDefinition };
     CreateTaskReq: MessageTypeDefinition;
     CreateTaskResp: MessageTypeDefinition;
-    Empty: MessageTypeDefinition;
     EndRoundReq: MessageTypeDefinition;
     Event: MessageTypeDefinition;
     EventReq: MessageTypeDefinition;
@@ -29,8 +28,10 @@ export interface ProtoGrpcType {
     JoinResp: MessageTypeDefinition;
     JoinRoundReq: MessageTypeDefinition;
     LeaveReq: MessageTypeDefinition;
+    NodeInfo: MessageTypeDefinition;
     NodeInfoReq: MessageTypeDefinition;
-    NodeInfoResp: MessageTypeDefinition;
+    NodeInfos: MessageTypeDefinition;
+    NodeInfosReq: MessageTypeDefinition;
     PartnerSelectedEvent: MessageTypeDefinition;
     PublicKeyReq: MessageTypeDefinition;
     PublicKeyResp: MessageTypeDefinition;
@@ -53,6 +54,7 @@ export interface ProtoGrpcType {
     TaskResp: MessageTypeDefinition;
     TaskRoundReq: MessageTypeDefinition;
     TaskRoundResp: MessageTypeDefinition;
+    Transaction: MessageTypeDefinition;
     UpdateNameReq: MessageTypeDefinition;
     UpdateUrlReq: MessageTypeDefinition;
   };

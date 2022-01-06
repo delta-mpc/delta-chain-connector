@@ -4,9 +4,10 @@
   "description": "The centralized replacement of Blockchain to run Delta tasks faster and easier for demonstration purposes or in the environment where decentralized trust is not required..",
   "main": "index.js",
   "scripts": {
-    "build:proto": "$(npm bin)/proto-loader-gen-types --defaults --oneofs --grpcLib=@grpc/grpc-js -O src/service src/service/*.proto",
-    "serve": "ts-node --cwd-mode src/server.ts | bunyan",
-    "serve:debug": "node --inspect $(npm bin)/ts-node --cwd-mode src/server.ts | bunyan",
+    "build:proto": "$(npm bin)/proto-loader-gen-types --defaults --oneofs --grpcLib=@grpc/grpc-js -O src/service proto/*.proto",
+    "build:ts": "rm -rf dist && tsc && cp src/service/chain.proto dist/service/chain.proto",
+    "serve": "ts-node --cwd-mode src run | bunyan",
+    "serve:debug": "node --inspect $(npm bin)/ts-node --cwd-mode src run | bunyan",
     "test": "mocha -r ts-node/register --exit 'src/**/*.test.ts'",
     "test:debug": "mocha --inspect -r ts-node/register --exit 'src/**/*.test.ts'",
     "format": "prettier -w 'src/**/*.ts'"
@@ -54,7 +55,7 @@
     "@mikro-orm/core": "^4.5.9",
     "@mikro-orm/sqlite": "^4.5.9",
     "bunyan": "^1.8.15",
-    "hi-base32": "^0.5.1",
+    "commander": "^8.3.0",
     "reflect-metadata": "^0.1.13",
     "web3": "^1.6.1",
     "web3-core": "^1.6.1",

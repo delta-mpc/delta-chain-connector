@@ -1,4 +1,4 @@
-import { config } from "src/config";
+import { config } from "config";
 import { Impl } from "./service";
 import * as monkey from "./monkey";
 import * as chain from "./chain";

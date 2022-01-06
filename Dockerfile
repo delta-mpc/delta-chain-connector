@@ -1,18 +1,21 @@
-FROM python:3.7-buster as builder
+FROM node:16-alpine as builder
 
 WORKDIR /app
 
-COPY coordinator /app/coordinator
-COPY setup.py /app/setup.py
+COPY package*.json /app/
+COPY src /app/src
+COPY tsconfig.json /app/
 
-RUN pip wheel -w whls .
+RUN npm ci && npm run build:ts
 
-FROM python:3.7-slim-buster
+FROM node:16-alpine
 
 WORKDIR /app
 
-COPY --from=builder /app/whls /app/whls
+COPY --from=builder /app/dist /app/dist
+COPY package*.json /app/
+RUN npm ci --production
+COPY run.sh /app/
 
-RUN pip install --no-cache-dir whls/*.whl &&  rm -rf whls
-ENTRYPOINT [ "coordinator_start" ]
+ENTRYPOINT [ "/bin/sh", "run.sh" ]
 CMD [ "run" ]

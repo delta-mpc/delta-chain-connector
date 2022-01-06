@@ -1,8 +1,7 @@
 import fs from "fs";
+import path from "path";
 
 const configFile = process.env.COORDINATOR ?? __dirname + "/../config/config.json";
-
-const file = fs.readFileSync(configFile, { encoding: "utf-8" });
 
 type LogLevelType = "debug" | "info" | "warn" | "error" | "fatal";
 type DatabaseType = "mysql" | "sqlite";
@@ -41,4 +40,57 @@ interface Config {
   };
 }
 
-export const config = JSON.parse(file) as Config;
+const defaultConfig: Config = {
+  log: {
+    level: "info",
+  },
+  impl: "monkey",
+  host: "0.0.0.0",
+  port: 4500,
+  monkey: {
+    db: {
+      type: "sqlite",
+      url: "db/chain.db",
+    },
+  },
+  chain: {
+    nodeAddress: "",
+    privateKey: "",
+    provider: "http://127.0.0.1:8545",
+    gasPrice: 1,
+    gasLimit: 6721975,
+    chainParam: {
+      chainId: 1337,
+    },
+
+    identity: {
+      contractAddress: "",
+      abiFile: "IdentityContract.json",
+    },
+    hfl: {
+      contractAddress: "",
+      abiFile: "HFLContract.json",
+    },
+  },
+};
+
+export function init(): void {
+  if (!fs.existsSync(configFile)) {
+    const configDir = path.dirname(configFile);
+    fs.mkdirSync(configDir, { recursive: true });
+    fs.writeFileSync(configFile, JSON.stringify(defaultConfig, null, 4), { encoding: "utf-8" });
+  }
+}
+
+function getConfig(): Config {
+  let config: Config;
+  if (fs.existsSync(configFile)) {
+    const configStr = fs.readFileSync(configFile, { encoding: "utf-8" });
+    config = JSON.parse(configStr) as Config;
+  } else {
+    config = defaultConfig;
+  }
+  return config;
+}
+
+export const config: Config = getConfig();

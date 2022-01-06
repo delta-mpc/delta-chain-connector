@@ -1,11 +1,12 @@
 import { Options } from "@mikro-orm/core";
-import log from "src/log";
+import log from "log";
 import { Readable } from "stream";
 import { Event, Subscriber } from "../event";
 import {
   Impl,
   KeyType,
   NodeInfo,
+  NodeInfosPage,
   RoundStatus,
   SecretShareData,
   ShareType,
@@ -16,9 +17,14 @@ import * as db from "./db";
 import dbConfig from "./db/config";
 import * as entity from "./entity";
 import { Key, RoundMember } from "./entity";
+import * as crypto from "crypto";
 
 export interface ImplOption extends Options {
   dev?: boolean;
+}
+
+function randomHex(length: number): string {
+  return "0x" + crypto.randomBytes(length).toString("hex");
 }
 
 class _Impl implements Impl {
@@ -28,7 +34,7 @@ class _Impl implements Impl {
     await db.init(cfg);
   }
 
-  async join(url: string, name: string): Promise<string> {
+  async join(url: string, name: string): Promise<[string, string]> {
     const em = db.getEntityManager();
     const node = await em.findOne(entity.Node, { url: url });
     log.info(`node joined ${node?.joined}`);
@@ -36,18 +42,18 @@ class _Impl implements Impl {
       const node = new entity.Node(url, name);
       node.joined = true;
       await em.persistAndFlush(node);
-      return node.address;
+      return [randomHex(32), node.address];
     } else if (node.joined == false) {
       // check node.joined explictly. Note: node.joined is a integer in database, so we should use == instead of === to check it.
       node.joined = true;
       await em.flush();
-      return node.address;
+      return [randomHex(32), node.address];
     } else {
       throw new Error(`node ${node.address} has already joined`);
     }
   }
 
-  async updateUrl(address: string, url: string): Promise<void> {
+  async updateUrl(address: string, url: string): Promise<string> {
     const em = db.getEntityManager();
     const node = await em.findOne(entity.Node, { address: address });
 
@@ -56,9 +62,10 @@ class _Impl implements Impl {
     }
     node.url = url;
     await em.persistAndFlush(node);
+    return randomHex(32);
   }
 
-  async updateName(address: string, name: string): Promise<void> {
+  async updateName(address: string, name: string): Promise<string> {
     const em = db.getEntityManager();
     const node = await em.findOne(entity.Node, { address: address });
     if (!node) {
@@ -66,9 +73,10 @@ class _Impl implements Impl {
     }
     node.name = name;
     await em.persistAndFlush(node);
+    return randomHex(32);
   }
 
-  async leave(address: string): Promise<void> {
+  async leave(address: string): Promise<string> {
     const em = db.getEntityManager();
     const node = await em.findOne(entity.Node, { address: address });
     if (!node) {
@@ -76,6 +84,7 @@ class _Impl implements Impl {
     }
     node.joined = false;
     await em.flush();
+    return randomHex(32);
   }
 
   async getNodeInfo(address: string): Promise<NodeInfo> {
@@ -84,10 +93,34 @@ class _Impl implements Impl {
     if (!node) {
       throw new Error(`node of address ${address} doesn't exist`);
     }
-    return { url: node.url, name: node.name };
+    return { address: address, url: node.url, name: node.name };
   }
 
-  async createTask(address: string, dataset: string, commitment: string, taskType: string): Promise<string> {
+  async getNodes(page: number, pageSize: number): Promise<NodeInfosPage> {
+    const em = db.getEntityManager();
+    const [nodes, totalCount] = await em.findAndCount(
+      entity.Node,
+      { joined: true },
+      { orderBy: { id: "ASC" }, limit: pageSize, offset: (page - 1) * pageSize }
+    );
+    return {
+      nodes: nodes.map((node) => {
+        return {
+          address: node.address,
+          url: node.url,
+          name: node.name,
+        };
+      }),
+      totalCount: totalCount,
+    };
+  }
+
+  async createTask(
+    address: string,
+    dataset: string,
+    commitment: string,
+    taskType: string
+  ): Promise<[string, string]> {
     const em = db.getEntityManager();
     const node = await em.findOne(entity.Node, { address: address });
     if (!node) {
@@ -106,10 +139,10 @@ class _Impl implements Impl {
       taskType: taskType,
     };
     this.subscriber.publish(event);
-    return task.outID;
+    return [randomHex(32), task.outID];
   }
 
-  async finishTask(address: string, taskID: string) {
+  async finishTask(address: string, taskID: string): Promise<string> {
     const em = db.getEntityManager();
     const node = await em.findOne(entity.Node, { address: address });
     if (!node) {
@@ -128,6 +161,7 @@ class _Impl implements Impl {
       taskID: taskID,
     };
     this.subscriber.publish(event);
+    return randomHex(32);
   }
 
   async getTask(taskID: string): Promise<TaskInfo> {
@@ -153,7 +187,7 @@ class _Impl implements Impl {
     };
   }
 
-  async startRound(address: string, taskID: string, round: number): Promise<void> {
+  async startRound(address: string, taskID: string, round: number): Promise<string> {
     const em = db.getEntityManager();
     const node = await em.findOne(entity.Node, { address: address });
     if (!node) {
@@ -173,9 +207,10 @@ class _Impl implements Impl {
       round: round,
     };
     this.subscriber.publish(event);
+    return randomHex(32);
   }
 
-  async joinRound(address: string, taskID: string, round: number, pk1: string, pk2: string): Promise<void> {
+  async joinRound(address: string, taskID: string, round: number, pk1: string, pk2: string): Promise<string> {
     const em = db.getEntityManager();
     const node = await em.findOne(entity.Node, { address: address });
     if (!node) {
@@ -196,6 +231,7 @@ class _Impl implements Impl {
     member.keys.add(key1);
     member.keys.add(key2);
     await em.persistAndFlush(member);
+    return randomHex(32);
   }
 
   async getTaskRound(taskID: string, round: number): Promise<TaskRoundInfo> {
@@ -215,7 +251,7 @@ class _Impl implements Impl {
     };
   }
 
-  async selectCandidates(address: string, taskID: string, round: number, clients: string[]): Promise<void> {
+  async selectCandidates(address: string, taskID: string, round: number, clients: string[]): Promise<string> {
     const em = db.getEntityManager();
     const node = await em.findOne(entity.Node, { address: address });
     if (!node) {
@@ -255,6 +291,7 @@ class _Impl implements Impl {
       addrs: clients,
     };
     this.subscriber.publish(event);
+    return randomHex(32);
   }
 
   private async uploadShareCommitment(
@@ -264,7 +301,7 @@ class _Impl implements Impl {
     receivers: string[],
     commitments: string[],
     type: ShareType
-  ) {
+  ): Promise<string> {
     if (receivers.length !== commitments.length) {
       throw new Error(`task ${taskID} round ${round} receivers' length is not equal to commitments' length`);
     }
@@ -305,6 +342,7 @@ class _Impl implements Impl {
     }
 
     await em.flush();
+    return randomHex(32);
   }
 
   async uploadSeedCommitment(
@@ -313,8 +351,8 @@ class _Impl implements Impl {
     round: number,
     receivers: string[],
     commitments: string[]
-  ) {
-    await this.uploadShareCommitment(address, taskID, round, receivers, commitments, ShareType.Seed);
+  ): Promise<string> {
+    return await this.uploadShareCommitment(address, taskID, round, receivers, commitments, ShareType.Seed);
   }
 
   async uploadSecretKeyCommitment(
@@ -323,8 +361,15 @@ class _Impl implements Impl {
     round: number,
     receivers: string[],
     commitments: string[]
-  ) {
-    await this.uploadShareCommitment(address, taskID, round, receivers, commitments, ShareType.SecretKey);
+  ): Promise<string> {
+    return await this.uploadShareCommitment(
+      address,
+      taskID,
+      round,
+      receivers,
+      commitments,
+      ShareType.SecretKey
+    );
   }
 
   async getClientPublickKeys(taskID: string, round: number, clients: string[]): Promise<[string, string][]> {
@@ -370,7 +415,7 @@ class _Impl implements Impl {
     return pks;
   }
 
-  async startCalculation(address: string, taskID: string, round: number, clients: string[]) {
+  async startCalculation(address: string, taskID: string, round: number, clients: string[]): Promise<string> {
     const em = db.getEntityManager();
 
     const roundEntity = await em.findOne(entity.Round, {
@@ -413,9 +458,15 @@ class _Impl implements Impl {
       addrs: clients,
     };
     this.subscriber.publish(event);
+    return randomHex(32);
   }
 
-  async uploadResultCommitment(address: string, taskID: string, round: number, commitment: string) {
+  async uploadResultCommitment(
+    address: string,
+    taskID: string,
+    round: number,
+    commitment: string
+  ): Promise<string> {
     const em = db.getEntityManager();
 
     const roundEntity = await em.findOne(entity.Round, {
@@ -442,6 +493,7 @@ class _Impl implements Impl {
 
     const resultCommitment = new entity.ResultCommitment(member, commitment);
     await em.persistAndFlush(resultCommitment);
+    return randomHex(32);
   }
 
   async getResultCommitment(taskID: string, round: number, client: string): Promise<string> {
@@ -473,7 +525,7 @@ class _Impl implements Impl {
     return resultCommitment.commitment;
   }
 
-  async startAggregation(address: string, taskID: string, round: number, clients: string[]) {
+  async startAggregation(address: string, taskID: string, round: number, clients: string[]): Promise<string> {
     const em = db.getEntityManager();
 
     const roundEntity = await em.findOne(entity.Round, {
@@ -516,9 +568,16 @@ class _Impl implements Impl {
       addrs: clients,
     };
     this.subscriber.publish(event);
+    return randomHex(32);
   }
 
-  async uploadSeed(address: string, taskID: string, round: number, senders: string[], seeds: string[]) {
+  async uploadSeed(
+    address: string,
+    taskID: string,
+    round: number,
+    senders: string[],
+    seeds: string[]
+  ): Promise<string> {
     if (senders.length !== seeds.length) {
       throw new Error(`task ${taskID} round ${round} senders' length is not equal to seeds' length`);
     }
@@ -573,6 +632,7 @@ class _Impl implements Impl {
     }
 
     await em.flush();
+    return randomHex(32);
   }
 
   async uploadSecretKey(
@@ -581,7 +641,7 @@ class _Impl implements Impl {
     round: number,
     senders: string[],
     secretKeys: string[]
-  ) {
+  ): Promise<string> {
     if (senders.length !== secretKeys.length) {
       throw new Error(`task ${taskID} round ${round} senders' length is not equal to secretKeys' length`);
     }
@@ -636,6 +696,7 @@ class _Impl implements Impl {
     }
 
     await em.flush();
+    return randomHex(32);
   }
 
   async getSecretShareDatas(
@@ -715,7 +776,7 @@ class _Impl implements Impl {
     return ssDatas;
   }
 
-  async endRound(address: string, taskID: string, round: number) {
+  async endRound(address: string, taskID: string, round: number): Promise<string> {
     const em = db.getEntityManager();
 
     const roundEntity = await em.findOne(entity.Round, {
@@ -738,6 +799,7 @@ class _Impl implements Impl {
       round: round,
     };
     this.subscriber.publish(event);
+    return randomHex(32);
   }
 
   subscribe(): Readable {
