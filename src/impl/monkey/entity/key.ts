@@ -1,5 +1,5 @@
 import { Entity, Enum, ManyToOne, PrimaryKey, Property } from "@mikro-orm/core";
-import { KeyType } from "src/impl/service";
+import { KeyType } from "impl/service";
 import { RoundMember } from ".";
 
 @Entity()
