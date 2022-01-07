@@ -1,13 +1,13 @@
-import { config } from "config";
+import { config } from "~/config";
 import { Readable } from "stream";
 import { EventData } from "web3-eth-contract";
 import { Event, Subscriber } from "../event";
 import { Impl, NodeInfo, NodeInfosPage, SecretShareData, TaskInfo, TaskRoundInfo } from "../service";
 import { ContractHelper } from "./contract";
+import path from "path";
 
 export interface ContractOption {
   contractAddress: string;
-  abiFile: string;
 }
 
 export interface ChainOption {
@@ -39,6 +39,7 @@ class _Impl implements Impl {
 
     const identityOption = {
       ...this.option.identity,
+      abiFile: path.resolve(__dirname + "/IdentityContract.json"),
       nodeAddress: this.option.nodeAddress,
       privateKey: this.option.privateKey,
       provider: this.option.provider,
@@ -48,6 +49,7 @@ class _Impl implements Impl {
     };
     const hflOption = {
       ...this.option.hfl,
+      abiFile: path.resolve(__dirname + "/HFLContract.json"),
       nodeAddress: this.option.nodeAddress,
       privateKey: this.option.privateKey,
       provider: this.option.provider,

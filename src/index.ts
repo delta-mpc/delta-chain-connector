@@ -1,8 +1,12 @@
+import path from "path";
+import { addAlias } from "module-alias";
+addAlias("~", path.resolve(__dirname + "/../lib"));
+
 import { Command } from "commander";
 import { run } from "./service";
 import { config, init } from "./config";
 
-if (require.main === module) {
+export function main(): void {
   const program = new Command();
   program.version("0.3.0");
 
@@ -21,4 +25,8 @@ if (require.main === module) {
     });
 
   program.parse();
+}
+
+if (require.main === module) {
+  main();
 }

@@ -1,14 +1,13 @@
 import fs from "fs";
 import path from "path";
 
-const configFile = process.env.COORDINATOR ?? __dirname + "/../config/config.json";
+const configFile = process.env.COORDINATOR ?? process.env.PWD + "/config/config.json";
 
 type LogLevelType = "debug" | "info" | "warn" | "error" | "fatal";
 type DatabaseType = "mysql" | "sqlite";
 
 interface ContractOption {
   contractAddress: string;
-  abiFile: string;
 }
 
 interface Config {
@@ -65,16 +64,15 @@ const defaultConfig: Config = {
 
     identity: {
       contractAddress: "",
-      abiFile: "IdentityContract.json",
     },
     hfl: {
       contractAddress: "",
-      abiFile: "HFLContract.json",
     },
   },
 };
 
 export function init(): void {
+  console.log(configFile);
   if (!fs.existsSync(configFile)) {
     const configDir = path.dirname(configFile);
     fs.mkdirSync(configDir, { recursive: true });

@@ -8,7 +8,7 @@ import {
   PrimaryKey,
   Property,
 } from "@mikro-orm/core";
-import { RoundStatus } from "impl/service";
+import { RoundStatus } from "~/impl/service";
 import { Key, ResultCommitment, Round } from ".";
 
 @Entity()

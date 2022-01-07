@@ -9,5 +9,5 @@ node_modules
 config/
 whls/
 db/*.db
-
-dist
+nodes/*
+lib/*

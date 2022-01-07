@@ -1,5 +1,5 @@
 import { Options } from "@mikro-orm/core";
-import log from "log";
+import log from "~/log";
 import { Readable } from "stream";
 import { Event, Subscriber } from "../event";
 import {

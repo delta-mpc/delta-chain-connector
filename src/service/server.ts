@@ -2,8 +2,8 @@ import * as protoloader from "@grpc/proto-loader";
 import * as grpc from "@grpc/grpc-js";
 import { ProtoGrpcType } from "./chain";
 import { chainService } from "./service";
-import { impl } from "impl";
-import log from "log";
+import { impl } from "~/impl";
+import log from "~/log";
 
 export function run(host: string, port: number): void {
   const definition = protoloader.loadSync(__dirname + "/./chain.proto", {
@@ -27,7 +27,7 @@ export function run(host: string, port: number): void {
           server.start();
         })
         .catch((err: Error) => {
-          log.info(`service init error ${err.message}`);
+          log.info(`service init error ${err}`);
         });
     }
   });
