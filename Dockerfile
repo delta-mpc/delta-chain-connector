@@ -1,21 +1,16 @@
-FROM node:16-alpine as builder
+FROM node:16-slim
+
+WORKDIR /dcc
+
+COPY src /dcc/src
+COPY package*.json /dcc/
+COPY bin /dcc/bin
+COPY tsconfig.json /dcc/
+
+RUN npm install && npm run build:ts && npm install . -g
 
 WORKDIR /app
 
-COPY package*.json /app/
-COPY src /app/src
-COPY tsconfig.json /app/
+ENTRYPOINT ["delta-chain-connector"]
 
-RUN npm ci && npm run build:ts
-
-FROM node:16-alpine
-
-WORKDIR /app
-
-COPY --from=builder /app/dist /app/dist
-COPY package*.json /app/
-RUN npm ci --production
-COPY run.sh /app/
-
-ENTRYPOINT [ "/bin/sh", "run.sh" ]
 CMD [ "run" ]

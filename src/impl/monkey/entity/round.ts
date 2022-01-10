@@ -1,5 +1,5 @@
 import { Collection, Entity, Enum, ManyToOne, OneToMany, PrimaryKey, Property } from "@mikro-orm/core";
-import { RoundStatus } from "impl/service";
+import { RoundStatus } from "~/impl/service";
 import { RoundMember, Task } from ".";
 
 @Entity()

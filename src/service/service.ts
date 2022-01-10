@@ -1,6 +1,6 @@
 import * as grpc from "@grpc/grpc-js";
 import { Event as ImplEvent, impl } from "../impl";
-import log from "log";
+import log from "~/log";
 import { AggregationReq__Output } from "./chain/AggregationReq";
 import { CalculationReq__Output } from "./chain/CalculationReq";
 import { CandidatesReq__Output } from "./chain/CandidatesReq";

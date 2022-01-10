@@ -1,7 +1,7 @@
 import common from "@ethereumjs/common";
 import { TransactionFactory } from "@ethereumjs/tx";
 import * as fs from "fs/promises";
-import log from "log";
+import log from "~/log";
 import { EventEmitter, PassThrough, Readable } from "stream";
 import Web3 from "web3";
 import { Log, provider, TransactionReceipt } from "web3-core";

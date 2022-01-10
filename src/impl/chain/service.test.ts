@@ -24,12 +24,10 @@ describe("chain service", function () {
 
   const identityOpt: ContractOption = {
     contractAddress: "0xC282D87859a55B19446fE352a1b338391249eF57",
-    abiFile: "IdentityContract.json",
   };
 
   const hflOpt: ContractOption = {
     contractAddress: "0xe9e00f59C88845cf9a211665E7413586fC2d8C90",
-    abiFile: "HFLContract.json",
   };
 
   const opt: ChainOption = {
