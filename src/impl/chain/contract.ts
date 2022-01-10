@@ -45,7 +45,6 @@ export class ContractHelper {
 
   constructor(option: ContractOption) {
     this.option = option;
-    log.info(`${option.abiFile}`);
   }
 
   async init(): Promise<void> {

@@ -1,4 +1,4 @@
-FROM node:16
+FROM node:16-slim
 
 WORKDIR /dcc
 
@@ -11,5 +11,6 @@ RUN npm install && npm run build:ts && npm install . -g
 
 WORKDIR /app
 
-ENTRYPOINT ["bash"]
+ENTRYPOINT ["delta-chain-connector"]
 
+CMD [ "run" ]
