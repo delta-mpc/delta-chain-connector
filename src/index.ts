@@ -1,7 +1,3 @@
-import path from "path";
-import { addAlias } from "module-alias";
-addAlias("~", path.resolve(__dirname + "/../lib"));
-
 import { Command } from "commander";
 import { run } from "./service";
 import { config, init } from "./config";

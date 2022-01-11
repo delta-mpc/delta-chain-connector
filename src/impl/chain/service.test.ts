@@ -19,25 +19,26 @@ chai.use(chaiAsPromised);
 const assert = chai.assert;
 
 describe("chain service", function () {
-  const nodeAddress = "0x9dA1E0CcB6C9848Ad1088B96415CB845a8392794";
-  const privateKey = "0x38a95092ac564590f75679db5beda49148e59498337cf4a17bb017ce42363ba3";
+  this.timeout(0);
+  const nodeAddress = "0x611E81653966Db69b0698a175990Fb34dBcd8d50";
+  const privateKey = "0x937eacbb7285359d383cbd0edc81ac47c919816870acbf65bfb03535389b4c64";
 
   const identityOpt: ContractOption = {
-    contractAddress: "0xC282D87859a55B19446fE352a1b338391249eF57",
+    contractAddress: "0x43A6feb218F0a1Bc3Ad9d9045ee6528349572E42",
   };
 
   const hflOpt: ContractOption = {
-    contractAddress: "0xe9e00f59C88845cf9a211665E7413586fC2d8C90",
+    contractAddress: "0x3830C82700B050dA87F1D1A60104Fb667227B686",
   };
 
   const opt: ChainOption = {
     nodeAddress: nodeAddress,
     privateKey: privateKey,
-    provider: "http://127.0.0.1:8545",
+    provider: "wss://node.delta.yuanben.org",
     gasPrice: 1,
-    gasLimit: 6721975,
+    gasLimit: 4294967294,
     chainParam: {
-      chainId: 1337,
+      chainId: 42,
     },
 
     identity: identityOpt,
@@ -50,6 +51,7 @@ describe("chain service", function () {
     await impl.init(opt);
     stream = impl.subscribe();
     stream.on("data", (event: Event) => {
+      console.log(event.type);
       events.push(event);
     });
   });
@@ -123,7 +125,7 @@ describe("chain service", function () {
   describe("selectCandidates", function () {
     it("selectCandidates", async function () {
       await impl.selectCandidates(nodeAddress, taskID, round, [nodeAddress]);
-      assert.isRejected(
+      await assert.isRejected(
         impl.selectCandidates(nodeAddress, taskID, round, [
           nodeAddress,
           "0x8Caf33d112b4695f630c2E80E41Fc0336470b3b1",
@@ -161,7 +163,7 @@ describe("chain service", function () {
   describe("startCalculation", function () {
     it("startCalculation", async function () {
       await impl.startCalculation(nodeAddress, taskID, round, [nodeAddress]);
-      assert.isRejected(
+      await assert.isRejected(
         impl.startCalculation(nodeAddress, taskID, round, [
           nodeAddress,
           "0x8Caf33d112b4695f630c2E80E41Fc0336470b3b1",
@@ -185,7 +187,7 @@ describe("chain service", function () {
   describe("startAggregation", function () {
     it("startAggregation", async function () {
       await impl.startAggregation(nodeAddress, taskID, round, [nodeAddress]);
-      assert.isRejected(
+      await assert.isRejected(
         impl.startAggregation(nodeAddress, taskID, round, [
           nodeAddress,
           "0x8Caf33d112b4695f630c2E80E41Fc0336470b3b1",

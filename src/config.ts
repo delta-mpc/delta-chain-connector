@@ -55,18 +55,18 @@ const defaultConfig: Config = {
   chain: {
     nodeAddress: "",
     privateKey: "",
-    provider: "http://127.0.0.1:8545",
+    provider: "wss://node.delta.yuanben.org",
     gasPrice: 1,
-    gasLimit: 6721975,
+    gasLimit: 4294967294,
     chainParam: {
-      chainId: 1337,
+      chainId: 42,
     },
 
     identity: {
-      contractAddress: "",
+      contractAddress: "0x43A6feb218F0a1Bc3Ad9d9045ee6528349572E42",
     },
     hfl: {
-      contractAddress: "",
+      contractAddress: "0x3830C82700B050dA87F1D1A60104Fb667227B686",
     },
   },
 };
