@@ -70,11 +70,16 @@ export class ContractHelper {
   async connect(url: string): Promise<provider> {
     const provider = new Web3.providers.WebsocketProvider(url, {
       reconnect: {
-        auto: true,
+        auto: false,
         delay: 5000,
         maxAttempts: 5,
-        onTimeout: false,
+        onTimeout: true,
       },
+      clientConfig: {
+        keepalive: true,
+        keepaliveInterval: 60000, // ms
+      },
+      timeout: 30000,
     });
     return new Promise((resolve, reject) => {
       provider.on("connect", () => {
@@ -122,20 +127,42 @@ export class ContractHelper {
     });
     const serializedTx = "0x" + tx.sign(key).serialize().toString("hex");
     return new Promise((resolve, reject) => {
-      this.web3.eth
-        .sendSignedTransaction(serializedTx)
-        .then((receipt) => {
-          if (receipt.status) {
-            resolve(receipt);
-          } else {
-            const err = `method ${name} tx hash ${receipt.transactionHash} is reverted`;
-            reject(err);
-          }
-        })
-        .catch((err: Error) => {
+      this.web3.eth.sendSignedTransaction(serializedTx, (err: Error, hash: string) => {
+        if (err) {
           reject(err);
-        });
+        } else {
+          resolve(this.waitForReceipt(hash));
+        }
+      });
     });
+  }
+
+  async waitForReceipt(hash: string, retry: number = 3): Promise<TransactionReceipt> {
+    if (retry === 0) {
+      throw new Error(`unable to get transaction receipt for tx ${hash}`);
+    }
+    try {
+      const receipt = await this.web3.eth.getTransactionReceipt(hash);
+      if (receipt) {
+        if (receipt.status == true) {
+          return receipt;
+        } else {
+          throw new Error(`tx ${receipt.transactionHash} is reverted`);
+        }
+      } else {
+        return await this.waitForReceipt(hash);
+      }
+    } catch (err) {
+      if (
+        err instanceof Error &&
+        err.message.includes("CONNECTION ERROR") &&
+        err.message.includes("reconnect")
+      ) {
+        return await this.waitForReceipt(hash, retry - 1);
+      } else {
+        throw err;
+      }
+    }
   }
 
   decodeLogs(logs: Log[]): Result | undefined {
