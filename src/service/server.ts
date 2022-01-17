@@ -11,7 +11,12 @@ export function run(host: string, port: number): void {
     oneofs: true,
   });
   const proto = grpc.loadPackageDefinition(definition) as unknown as ProtoGrpcType;
-  const server = new grpc.Server();
+  const server = new grpc.Server({
+    "grpc.keepalive_time_ms": 10000,
+    "grpc.keepalive_timeout_ms": 5000,
+    "grpc.keepalive_permit_without_calls": 1,
+    "grpc.max_pings_without_data": 0,
+  });
   server.addService(proto.chain.Chain.service, chainService);
   server.bindAsync(`${host}:${port}`, grpc.ServerCredentials.createInsecure(), (err, p) => {
     if (err) {
