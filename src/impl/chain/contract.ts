@@ -70,9 +70,8 @@ export class ContractHelper {
   async connect(url: string): Promise<provider> {
     const provider = new Web3.providers.WebsocketProvider(url, {
       reconnect: {
-        auto: false,
-        delay: 5000,
-        maxAttempts: 5,
+        auto: true,
+        delay: 2500,
         onTimeout: true,
       },
       clientConfig: {
@@ -97,7 +96,7 @@ export class ContractHelper {
     args: any[] = [],
     nonce: number = 0,
     gasOpt: gasOption | null = null
-  ): Promise<TransactionReceipt> {
+  ): Promise<string> {
     const method = this.contract.methods[name](...args);
     const data = method.encodeABI();
 
@@ -131,7 +130,7 @@ export class ContractHelper {
         if (err) {
           reject(err);
         } else {
-          resolve(this.waitForReceipt(hash));
+          resolve(hash);
         }
       });
     });
