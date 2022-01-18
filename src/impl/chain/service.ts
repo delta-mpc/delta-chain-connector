@@ -149,36 +149,39 @@ class _Impl implements Impl {
   }
 
   async join(url: string, name: string): Promise<[string, string]> {
-    const recepit = await this.identityContract.method("join", [url, name]);
-    const res = this.identityContract.decodeLogs(recepit.logs);
+    const hash = await this.identityContract.method("join", [url, name]);
+    const receipt = await this.identityContract.waitForReceipt(hash);
+    const res = this.identityContract.decodeLogs(receipt.logs);
     if (!res) {
       throw new Error("join has no result");
     }
-    return [recepit.transactionHash, res.addr];
+    return [receipt.transactionHash, res.addr];
   }
 
   async updateUrl(address: string, url: string): Promise<string> {
     if (address !== this.option.nodeAddress) {
       throw new Error(`chain connector node address is not ${address}`);
     }
-    const receipt = await this.identityContract.method("updateUrl", [url]);
-    return receipt.transactionHash;
+    const hash = await this.identityContract.method("updateUrl", [url]);
+    await this.hflContract.waitForReceipt(hash);
+    return hash;
   }
 
   async updateName(address: string, name: string): Promise<string> {
     if (address !== this.option.nodeAddress) {
       throw new Error(`chain connector node address is not ${address}`);
     }
-    const receipt = await this.identityContract.method("updateName", [name]);
-    return receipt.transactionHash;
+    const hash = await this.identityContract.method("updateName", [name]);
+    await this.hflContract.waitForReceipt(hash);
+    return hash;
   }
 
   async leave(address: string): Promise<string> {
     if (address !== this.option.nodeAddress) {
       throw new Error(`chain connector node address is not ${address}`);
     }
-    const receipt = await this.identityContract.method("leave");
-    return receipt.transactionHash;
+    const hash = await this.identityContract.method("leave");
+    return hash;
   }
 
   async getNodeInfo(address: string): Promise<NodeInfo> {
@@ -221,7 +224,8 @@ class _Impl implements Impl {
       throw new Error(`chain connector node address is not ${address}`);
     }
 
-    const receipt = await this.hflContract.method("createTask", [dataset, commitment, taskType]);
+    const hash = await this.hflContract.method("createTask", [dataset, commitment, taskType]);
+    const receipt = await this.hflContract.waitForReceipt(hash);
     const res = this.hflContract.decodeLogs(receipt.logs);
     if (!res) {
       throw new Error("createTask has no result");
@@ -234,8 +238,9 @@ class _Impl implements Impl {
       throw new Error(`chain connector node address is not ${address}`);
     }
 
-    const receipt = await this.hflContract.method("finishTask", [taskID]);
-    return receipt.transactionHash;
+    const hash = await this.hflContract.method("finishTask", [taskID]);
+    await this.hflContract.waitForReceipt(hash);
+    return hash;
   }
 
   async getTask(taskID: string): Promise<TaskInfo> {
@@ -260,8 +265,9 @@ class _Impl implements Impl {
       throw new Error(`chain connector node address is not ${address}`);
     }
 
-    const receipt = await this.hflContract.method("startRound", [taskID, round, 100, 1]);
-    return receipt.transactionHash;
+    const hash = await this.hflContract.method("startRound", [taskID, round, 100, 1]);
+    await this.hflContract.waitForReceipt(hash);
+    return hash;
   }
 
   async joinRound(address: string, taskID: string, round: number, pk1: string, pk2: string): Promise<string> {
@@ -269,8 +275,9 @@ class _Impl implements Impl {
       throw new Error(`chain connector node address is not ${address}`);
     }
 
-    const receipt = await this.hflContract.method("joinRound", [taskID, round, pk1, pk2]);
-    return receipt.transactionHash;
+    const hash = await this.hflContract.method("joinRound", [taskID, round, pk1, pk2]);
+    await this.hflContract.waitForReceipt(hash);
+    return hash;
   }
 
   async getTaskRound(taskID: string, round: number): Promise<TaskRoundInfo> {
@@ -291,8 +298,9 @@ class _Impl implements Impl {
       throw new Error(`chain connector node address is not ${address}`);
     }
 
-    const receipt = await this.hflContract.method("selectCandidates", [taskID, round, clients]);
-    return receipt.transactionHash;
+    const hash = await this.hflContract.method("selectCandidates", [taskID, round, clients]);
+    await this.hflContract.waitForReceipt(hash);
+    return hash;
   }
 
   async uploadSeedCommitment(
@@ -306,13 +314,14 @@ class _Impl implements Impl {
       throw new Error(`chain connector node address is not ${address}`);
     }
 
-    const receipt = await this.hflContract.method("uploadSeedCommitment", [
+    const hash = await this.hflContract.method("uploadSeedCommitment", [
       taskID,
       round,
       receivers,
       commitments,
     ]);
-    return receipt.transactionHash;
+    await this.hflContract.waitForReceipt(hash);
+    return hash;
   }
 
   async uploadSecretKeyCommitment(
@@ -326,13 +335,14 @@ class _Impl implements Impl {
       throw new Error(`chain connector node address is not ${address}`);
     }
 
-    const receipt = await this.hflContract.method("uploadSecretKeyCommitment", [
+    const hash = await this.hflContract.method("uploadSecretKeyCommitment", [
       taskID,
       round,
       receivers,
       commitments,
     ]);
-    return receipt.transactionHash;
+    await this.hflContract.waitForReceipt(hash);
+    return hash;
   }
 
   async getClientPublickKeys(taskID: string, round: number, clients: string[]): Promise<[string, string][]> {
@@ -349,8 +359,9 @@ class _Impl implements Impl {
       throw new Error(`chain connector node address is not ${address}`);
     }
 
-    const receipt = await this.hflContract.method("startCalculate", [taskID, round, clients]);
-    return receipt.transactionHash;
+    const hash = await this.hflContract.method("startCalculate", [taskID, round, clients]);
+    await this.hflContract.waitForReceipt(hash);
+    return hash;
   }
 
   async uploadResultCommitment(
@@ -363,8 +374,9 @@ class _Impl implements Impl {
       throw new Error(`chain connector node address is not ${address}`);
     }
 
-    const receipt = await this.hflContract.method("uploadResultCommitment", [taskID, round, commitment]);
-    return receipt.transactionHash;
+    const hash = await this.hflContract.method("uploadResultCommitment", [taskID, round, commitment]);
+    await this.hflContract.waitForReceipt(hash);
+    return hash;
   }
 
   async getResultCommitment(taskID: string, round: number, client: string): Promise<string> {
@@ -381,8 +393,9 @@ class _Impl implements Impl {
       throw new Error(`chain connector node address is not ${address}`);
     }
 
-    const receipt = await this.hflContract.method("startAggregate", [taskID, round, clients]);
-    return receipt.transactionHash;
+    const hash = await this.hflContract.method("startAggregate", [taskID, round, clients]);
+    await this.hflContract.waitForReceipt(hash);
+    return hash;
   }
 
   async uploadSeed(
@@ -396,8 +409,9 @@ class _Impl implements Impl {
       throw new Error(`chain connector node address is not ${address}`);
     }
 
-    const receipt = await this.hflContract.method("uploadSeed", [taskID, round, senders, seeds]);
-    return receipt.transactionHash;
+    const hash = await this.hflContract.method("uploadSeed", [taskID, round, senders, seeds]);
+    await this.hflContract.waitForReceipt(hash);
+    return hash;
   }
 
   async uploadSecretKey(
@@ -411,13 +425,14 @@ class _Impl implements Impl {
       throw new Error(`chain connector node address is not ${address}`);
     }
 
-    const receipt = await this.hflContract.method("uploadSecretkeyMask", [
+    const hash = await this.hflContract.method("uploadSecretkeyMask", [
       taskID,
       round,
       senders,
       secretKeys,
     ]);
-    return receipt.transactionHash;
+    await this.hflContract.waitForReceipt(hash);
+    return hash;
   }
 
   async getSecretShareDatas(
@@ -446,8 +461,9 @@ class _Impl implements Impl {
       throw new Error(`chain connector node address is not ${address}`);
     }
 
-    const receipt = await this.hflContract.method("endRound", [taskID, round]);
-    return receipt.transactionHash;
+    const hash = await this.hflContract.method("endRound", [taskID, round]);
+    await this.hflContract.waitForReceipt(hash);
+    return hash;
   }
 }
 
