@@ -55,7 +55,7 @@ const defaultConfig: Config = {
   chain: {
     nodeAddress: "",
     privateKey: "",
-    provider: "wss://node.delta.yuanben.org",
+    provider: "wss://apus.chain.deltampc.com",
     gasPrice: 1,
     gasLimit: 4294967294,
     chainParam: {
