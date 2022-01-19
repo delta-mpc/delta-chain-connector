@@ -34,4 +34,4 @@ jobs:
         with:
           context: .
           push: true
-          tags: deltampc/delta-chain-connector-${{ steps.vars.outputs.sha_short }}
+          tags: deltampc/delta-chain-connector:dev-${{ steps.vars.outputs.sha_short }}
