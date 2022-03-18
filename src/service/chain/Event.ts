@@ -28,6 +28,10 @@ import type {
   TaskFinishEvent as _chain_TaskFinishEvent,
   TaskFinishEvent__Output as _chain_TaskFinishEvent__Output,
 } from "../chain/TaskFinishEvent";
+import type {
+  HeartBeatEvent as _chain_HeartBeatEvent,
+  HeartBeatEvent__Output as _chain_HeartBeatEvent__Output,
+} from "../chain/HeartBeatEvent";
 
 export interface Event {
   taskCreated?: _chain_TaskCreateEvent | null;
@@ -37,6 +41,7 @@ export interface Event {
   aggregationStarted?: _chain_AggregationStartedEvent | null;
   roundEnded?: _chain_RoundEndedEvent | null;
   taskFinished?: _chain_TaskFinishEvent | null;
+  heartbeat?: _chain_HeartBeatEvent | null;
   event?:
     | "taskCreated"
     | "roundStarted"
@@ -44,7 +49,8 @@ export interface Event {
     | "calculationStarted"
     | "aggregationStarted"
     | "roundEnded"
-    | "taskFinished";
+    | "taskFinished"
+    | "heartbeat";
 }
 
 export interface Event__Output {
@@ -55,6 +61,7 @@ export interface Event__Output {
   aggregationStarted?: _chain_AggregationStartedEvent__Output | null;
   roundEnded?: _chain_RoundEndedEvent__Output | null;
   taskFinished?: _chain_TaskFinishEvent__Output | null;
+  heartbeat?: _chain_HeartBeatEvent__Output | null;
   event:
     | "taskCreated"
     | "roundStarted"
@@ -62,5 +69,6 @@ export interface Event__Output {
     | "calculationStarted"
     | "aggregationStarted"
     | "roundEnded"
-    | "taskFinished";
+    | "taskFinished"
+    | "heartbeat";
 }

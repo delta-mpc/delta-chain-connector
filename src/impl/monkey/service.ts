@@ -28,7 +28,7 @@ function randomHex(length: number): string {
 }
 
 class _Impl implements Impl {
-  private subscriber = new Subscriber();
+  private subscriber = new Subscriber(30);
 
   async init(cfg: ImplOption = dbConfig): Promise<void> {
     await db.init(cfg);

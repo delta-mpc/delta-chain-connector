@@ -24,6 +24,7 @@ export interface ProtoGrpcType {
     Event: MessageTypeDefinition;
     EventReq: MessageTypeDefinition;
     FinishTaskReq: MessageTypeDefinition;
+    HeartBeatEvent: MessageTypeDefinition;
     JoinReq: MessageTypeDefinition;
     JoinResp: MessageTypeDefinition;
     JoinRoundReq: MessageTypeDefinition;

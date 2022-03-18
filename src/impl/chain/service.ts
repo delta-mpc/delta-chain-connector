@@ -26,7 +26,7 @@ export interface ChainOption {
 }
 
 class _Impl implements Impl {
-  private subscriber = new Subscriber();
+  private subscriber = new Subscriber(30);
 
   private option!: ChainOption;
   private identityContract!: ContractHelper;
@@ -425,12 +425,7 @@ class _Impl implements Impl {
       throw new Error(`chain connector node address is not ${address}`);
     }
 
-    const hash = await this.hflContract.method("uploadSecretkeyMask", [
-      taskID,
-      round,
-      senders,
-      secretKeys,
-    ]);
+    const hash = await this.hflContract.method("uploadSecretkeyMask", [taskID, round, senders, secretKeys]);
     await this.hflContract.waitForReceipt(hash);
     return hash;
   }
