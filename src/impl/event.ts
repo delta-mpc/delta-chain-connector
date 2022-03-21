@@ -48,6 +48,10 @@ export interface TaskFinishedEvent {
   taskID: string;
 }
 
+export interface HeartBeatEvent {
+  type: "Heartbeat";
+}
+
 export type Event =
   | TaskCreatedEvent
   | RoundStartedEvent
@@ -55,20 +59,37 @@ export type Event =
   | CalculationStartedEvent
   | AggregationStartedEvent
   | RoundEndedEvent
-  | TaskFinishedEvent;
+  | TaskFinishedEvent
+  | HeartBeatEvent;
 
 export class Subscriber {
   private streams: PassThrough[] = [];
+  private timers: (NodeJS.Timer | null)[] = [];
 
-  subscribe(): Readable {
+  subscribe(timeout: number): Readable {
     const stream = new PassThrough({ objectMode: true });
     this.streams.push(stream);
+    if (timeout > 0) {
+      const timer = setInterval(() => {
+        stream.write({ type: "Heartbeat" });
+      }, timeout * 1000);
+      this.timers.push(timer);
+    } else {
+      this.timers.push(null);
+    }
     return stream;
   }
 
   unsubscribe(stream: Readable): void {
-    const i = this.streams.indexOf(stream as PassThrough);
-    this.streams.splice(i);
+    if (this.streams.length > 0) {
+      const i = this.streams.indexOf(stream as PassThrough);
+      this.streams.splice(i);
+      const timer = this.timers[i];
+      if (timer) {
+        clearInterval(timer);
+      }
+      this.timers.splice(i);
+    }
   }
 
   publish(event: Event): void {

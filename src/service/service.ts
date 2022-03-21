@@ -1,6 +1,6 @@
 import * as grpc from "@grpc/grpc-js";
-import { Event as ImplEvent, impl } from "../impl";
 import log from "~/log";
+import { Event as ImplEvent, impl } from "../impl";
 import { AggregationReq__Output } from "./chain/AggregationReq";
 import { CalculationReq__Output } from "./chain/CalculationReq";
 import { CandidatesReq__Output } from "./chain/CandidatesReq";
@@ -485,8 +485,9 @@ export const chainService: ChainHandlers = {
 
   Subscribe(call: grpc.ServerWritableStream<EventReq__Output, Event>) {
     const address = call.request.address;
+    const timeout = call.request.timeout;
     log.info(`node ${address} subscribe`);
-    const stream = impl.subscribe();
+    const stream = impl.subscribe(timeout);
     stream.on("data", (event: ImplEvent) => {
       switch (event.type) {
         case "TaskCreated":
@@ -549,6 +550,10 @@ export const chainService: ChainHandlers = {
             taskFinished: {
               taskId: event.taskID,
             },
+          });
+        case "Heartbeat":
+          call.write({
+            heartbeat: {},
           });
       }
     });

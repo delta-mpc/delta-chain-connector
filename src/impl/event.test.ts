@@ -60,4 +60,19 @@ describe("Subscriber", function () {
     }
     subscriber.unsubscribe(stream);
   });
+
+  it("heartbeat", function (done) {
+    this.timeout(3000);
+    const subscriber = new Subscriber(1);
+    const events: Event[] = [];
+    const stream = subscriber.subscribe();
+    stream.on("data", (e: Event) => {
+      events.push(e);
+    });
+    setTimeout(() => {
+      assert.isAtLeast(events.length, 1);
+      subscriber.unsubscribe(stream);
+      done();
+    }, 2000);
+  });
 });
