@@ -1,6 +1,7 @@
 import { Options } from "@mikro-orm/core";
-import log from "~/log";
+import * as crypto from "crypto";
 import { Readable } from "stream";
+import log from "~/log";
 import { Event, Subscriber } from "../event";
 import {
   Impl,
@@ -11,13 +12,12 @@ import {
   SecretShareData,
   ShareType,
   TaskInfo,
-  TaskRoundInfo,
+  TaskRoundInfo
 } from "../service";
 import * as db from "./db";
 import dbConfig from "./db/config";
 import * as entity from "./entity";
 import { Key, RoundMember } from "./entity";
-import * as crypto from "crypto";
 
 export interface ImplOption extends Options {
   dev?: boolean;
@@ -28,7 +28,7 @@ function randomHex(length: number): string {
 }
 
 class _Impl implements Impl {
-  private subscriber = new Subscriber(30);
+  private subscriber = new Subscriber();
 
   async init(cfg: ImplOption = dbConfig): Promise<void> {
     await db.init(cfg);
@@ -802,8 +802,8 @@ class _Impl implements Impl {
     return randomHex(32);
   }
 
-  subscribe(): Readable {
-    return this.subscriber.subscribe();
+  subscribe(timeout: number): Readable {
+    return this.subscriber.subscribe(timeout);
   }
 
   unsubscribe(stream: Readable) {

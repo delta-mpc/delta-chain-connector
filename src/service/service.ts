@@ -485,8 +485,9 @@ export const chainService: ChainHandlers = {
 
   Subscribe(call: grpc.ServerWritableStream<EventReq__Output, Event>) {
     const address = call.request.address;
+    const timeout = call.request.timeout;
     log.info(`node ${address} subscribe`);
-    const stream = impl.subscribe();
+    const stream = impl.subscribe(timeout);
     stream.on("data", (event: ImplEvent) => {
       switch (event.type) {
         case "TaskCreated":
@@ -551,7 +552,9 @@ export const chainService: ChainHandlers = {
             },
           });
         case "Heartbeat":
-          call.write({});
+          call.write({
+            heartbeat: {},
+          });
       }
     });
     call.on("error", () => {

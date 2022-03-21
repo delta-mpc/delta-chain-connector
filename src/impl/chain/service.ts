@@ -1,10 +1,10 @@
-import { config } from "~/config";
+import path from "path";
 import { Readable } from "stream";
 import { EventData } from "web3-eth-contract";
+import { config } from "~/config";
 import { Event, Subscriber } from "../event";
 import { Impl, NodeInfo, NodeInfosPage, SecretShareData, TaskInfo, TaskRoundInfo } from "../service";
 import { ContractHelper } from "./contract";
-import path from "path";
 
 export interface ContractOption {
   contractAddress: string;
@@ -26,7 +26,7 @@ export interface ChainOption {
 }
 
 class _Impl implements Impl {
-  private subscriber = new Subscriber(30);
+  private subscriber = new Subscriber();
 
   private option!: ChainOption;
   private identityContract!: ContractHelper;
@@ -63,7 +63,7 @@ class _Impl implements Impl {
     await this.hflContract.init();
   }
 
-  subscribe(): Readable {
+  subscribe(timeout: number): Readable {
     const src = this.hflContract.subscribe();
     src.on("data", (event: EventData) => {
       const res = event.returnValues;
@@ -133,7 +133,7 @@ class _Impl implements Impl {
           break;
       }
     });
-    const res = this.subscriber.subscribe();
+    const res = this.subscriber.subscribe(timeout);
     this.subscribeMap.set(res, src);
     return res;
   }

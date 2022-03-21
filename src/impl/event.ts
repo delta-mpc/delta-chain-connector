@@ -64,20 +64,18 @@ export type Event =
 
 export class Subscriber {
   private streams: PassThrough[] = [];
-  private heartbeat: number;
-  private heartbeatTimer: NodeJS.Timer | null = null;
+  private timers: (NodeJS.Timer | null)[] = [];
 
-  constructor(heartbeat: number = 0) {
-    this.heartbeat = heartbeat;
-  }
-
-  subscribe(): Readable {
+  subscribe(timeout: number): Readable {
     const stream = new PassThrough({ objectMode: true });
     this.streams.push(stream);
-    if (this.heartbeat > 0 && !this.heartbeatTimer) {
-      this.heartbeatTimer = setInterval(() => {
-        this.publish({ type: "Heartbeat" });
-      }, this.heartbeat * 1000);
+    if (timeout > 0) {
+      const timer = setInterval(() => {
+        stream.write({ type: "Heartbeat" });
+      }, timeout * 1000);
+      this.timers.push(timer);
+    } else {
+      this.timers.push(null);
     }
     return stream;
   }
@@ -86,10 +84,11 @@ export class Subscriber {
     if (this.streams.length > 0) {
       const i = this.streams.indexOf(stream as PassThrough);
       this.streams.splice(i);
-      if (this.streams.length === 0 && this.heartbeatTimer) {
-        clearInterval(this.heartbeatTimer);
-        this.heartbeatTimer = null;
+      const timer = this.timers[i];
+      if (timer) {
+        clearInterval(timer);
       }
+      this.timers.splice(i);
     }
   }
 
