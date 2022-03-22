@@ -802,8 +802,8 @@ class _Impl implements Impl {
     return randomHex(32);
   }
 
-  subscribe(timeout: number): Readable {
-    return this.subscriber.subscribe(timeout);
+  subscribe(address: string, timeout: number): Readable {
+    return this.subscriber.subscribe(address, timeout);
   }
 
   unsubscribe(stream: Readable) {

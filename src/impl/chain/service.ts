@@ -63,7 +63,7 @@ class _Impl implements Impl {
     await this.hflContract.init();
   }
 
-  subscribe(timeout: number): Readable {
+  subscribe(address: string, timeout: number): Readable {
     const src = this.hflContract.subscribe();
     src.on("data", (event: EventData) => {
       const res = event.returnValues;
@@ -133,7 +133,7 @@ class _Impl implements Impl {
           break;
       }
     });
-    const res = this.subscriber.subscribe(timeout);
+    const res = this.subscriber.subscribe(address, timeout);
     this.subscribeMap.set(res, src);
     return res;
   }

@@ -112,6 +112,6 @@ export interface Impl {
     receiver: string
   ): Promise<SecretShareData[]>;
   endRound(address: string, taskID: string, round: number): Promise<string>;
-  subscribe(timeout: number): Readable;
+  subscribe(address: string, timeout: number): Readable;
   unsubscribe(stream: Readable): void;
 }
