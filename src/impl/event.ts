@@ -1,4 +1,5 @@
 import { PassThrough, Readable } from "stream";
+import log from "~/log";
 
 export interface TaskCreatedEvent {
   type: "TaskCreated";
@@ -62,39 +63,57 @@ export type Event =
   | TaskFinishedEvent
   | HeartBeatEvent;
 
-export class Subscriber {
-  private streams: PassThrough[] = [];
-  private timers: (NodeJS.Timer | null)[] = [];
+class EventStream {
+  public readonly stream: PassThrough;
+  private dst: string;
+  private timer: NodeJS.Timer | null;
 
-  subscribe(timeout: number): Readable {
-    const stream = new PassThrough({ objectMode: true });
-    this.streams.push(stream);
+  constructor(dst: string, timeout: number = 0) {
+    this.stream = new PassThrough({ objectMode: true });
+    this.dst = dst;
     if (timeout > 0) {
-      const timer = setInterval(() => {
-        stream.write({ type: "Heartbeat" });
+      this.timer = setInterval(() => {
+        this.stream.write({ type: "Heartbeat" });
       }, timeout * 1000);
-      this.timers.push(timer);
     } else {
-      this.timers.push(null);
+      this.timer = null;
     }
-    return stream;
+  }
+
+  write(event: Event) {
+    log.debug(`send event ${event.type} to ${this.dst}`);
+    this.stream.write(event);
+  }
+
+  destroy() {
+    if (this.timer) {
+      clearInterval(this.timer);
+    }
+    this.stream.destroy();
+    log.debug(`destroy event stream for ${this.dst}`);
+  }
+}
+
+export class Subscriber {
+  private streamMap: Map<Readable, EventStream> = new Map<Readable, EventStream>();
+
+  subscribe(address: string, timeout: number): Readable {
+    const stream = new EventStream(address, timeout);
+    this.streamMap.set(stream.stream, stream);
+    return stream.stream;
   }
 
   unsubscribe(stream: Readable): void {
-    if (this.streams.length > 0) {
-      const i = this.streams.indexOf(stream as PassThrough);
-      this.streams.splice(i);
-      const timer = this.timers[i];
-      if (timer) {
-        clearInterval(timer);
-      }
-      this.timers.splice(i);
+    const eventStream = this.streamMap.get(stream);
+    if (eventStream) {
+      eventStream.destroy();
+      this.streamMap.delete(stream);
     }
   }
 
   publish(event: Event): void {
-    for (const stream of this.streams) {
-      stream.write(event);
+    for (const eventStrem of this.streamMap.values()) {
+      eventStrem.write(event);
     }
   }
 }

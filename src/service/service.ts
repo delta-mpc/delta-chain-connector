@@ -487,7 +487,7 @@ export const chainService: ChainHandlers = {
     const address = call.request.address;
     const timeout = call.request.timeout;
     log.info(`node ${address} subscribe`);
-    const stream = impl.subscribe(timeout);
+    const stream = impl.subscribe(address, timeout);
     stream.on("data", (event: ImplEvent) => {
       switch (event.type) {
         case "TaskCreated":
