@@ -35,7 +35,7 @@ class _Impl implements Impl {
   private subscribeMap: Map<Readable, Readable> = new Map();
 
   async init(opt?: ChainOption): Promise<void> {
-    this.option = opt || config.chain;
+    this.option = opt || config.ethereum;
 
     const identityOption = {
       ...this.option.identity,

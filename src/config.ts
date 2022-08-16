@@ -17,13 +17,13 @@ interface Config {
   impl: "monkey" | "chain";
   host: string;
   port: number;
-  monkey: {
+  coordinator: {
     db: {
       type: DatabaseType;
       url: string;
     };
   };
-  chain: {
+  ethereum: {
     nodeAddress: string;
     privateKey: string;
     provider: string;
@@ -46,13 +46,13 @@ const defaultConfig: Config = {
   impl: "monkey",
   host: "0.0.0.0",
   port: 4500,
-  monkey: {
+  coordinator: {
     db: {
       type: "sqlite",
       url: "db/chain.db",
     },
   },
-  chain: {
+  ethereum: {
     nodeAddress: "",
     privateKey: "",
     provider: "wss://apus.chain.deltampc.com",
