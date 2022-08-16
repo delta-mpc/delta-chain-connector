@@ -9,7 +9,7 @@
   },
   "scripts": {
     "build:proto": "$(npm bin)/proto-loader-gen-types --defaults --oneofs --grpcLib=@grpc/grpc-js -O src/service src/service/*.proto",
-    "build:ts": "rm -rf lib && tsc && cp src/service/*.proto lib/service/ && cp src/impl/chain/*.json lib/impl/chain/",
+    "build:ts": "rm -rf lib && tsc && cp src/service/*.proto lib/service/ && cp src/impl/ethereum/*.json lib/ethereum/chain/",
     "serve": "ts-node --cwd-mode src run | bunyan",
     "serve:debug": "node --inspect $(npm bin)/ts-node --cwd-mode src run | bunyan",
     "test": "mocha -r ts-node/register --exit 'src/**/*.test.ts'",
