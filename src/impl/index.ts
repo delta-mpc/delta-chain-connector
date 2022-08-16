@@ -1,7 +1,7 @@
 import { config } from "~/config";
 import { Impl } from "./service";
-import * as monkey from "./monkey";
-import * as chain from "./chain";
+import * as monkey from "./coordinator";
+import * as chain from "./ethereum";
 
 let impl: Impl;
 
