@@ -14,7 +14,7 @@ interface Config {
   log: {
     level: LogLevelType;
   };
-  impl: "monkey" | "chain";
+  impl: "coordinator" | "ethereum";
   host: string;
   port: number;
   coordinator: {
@@ -43,7 +43,7 @@ const defaultConfig: Config = {
   log: {
     level: "info",
   },
-  impl: "monkey",
+  impl: "coordinator",
   host: "0.0.0.0",
   port: 4500,
   coordinator: {

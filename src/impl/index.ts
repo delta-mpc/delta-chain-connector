@@ -1,14 +1,14 @@
 import { config } from "~/config";
 import { Impl } from "./service";
-import * as monkey from "./coordinator";
-import * as chain from "./ethereum";
+import * as coordinator from "./coordinator";
+import * as ethereum from "./ethereum";
 
 let impl: Impl;
 
-if (config.impl === "monkey") {
-  impl = monkey.impl;
+if (config.impl === "coordinator") {
+  impl = coordinator.impl;
 } else {
-  impl = chain.impl;
+  impl = ethereum.impl;
 }
 
 export { impl };
