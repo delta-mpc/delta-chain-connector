@@ -40,14 +40,14 @@ The config file looks like:
   "log": {
     "level": "info"
   },
-  "impl": "monkey",
-  "monkey": {
+  "impl": "coordinator",
+  "coordinator": {
     "db": {
       "type": "sqlite",
       "url": "db/chain.db"
     }
   },
-  "chain": {
+  "ethereum": {
     "nodeAddress": "",
     "privateKey": "",
     "provider": "wss://apus.chain.deltampc.com",
@@ -74,16 +74,16 @@ Delta chain connector will start a grpc server for delta node to connect. Item `
 
 ### coordinator mode configuration
 
-To run delta-chain-connector in coordinator mode, we need to set `impl` to `monkey`.
+To run delta-chain-connector in coordinator mode, we need to set `impl` to `coordinator`.
 
 ```json
-  "impl": "monkey",
+  "impl": "coordinator",
 ```
 
-Configurationa of coordinator mode are in the section `monkey` in config file.
+Configurationa of coordinator mode are in the section `coordinator` in config file.
 
 ```json
-  "monkey": {
+  "coordinator": {
     "db": {
       "type": "sqlite",
       "url": "db/chain.db"
@@ -97,16 +97,16 @@ You can change these configurations by yourself.
 
 ### chain mode configuration
 
-To run delta-chain-connector in coordinator mode, we need to set `impl` to `chain`.
+To run delta-chain-connector in coordinator mode, we need to set `impl` to `ethereum`.
 
 ```json
-  "impl": "chain",
+  "impl": "ethereum",
 ```
 
-Configurationa of coordinator mode are in the section `chain` in config file.
+Configurationa of coordinator mode are in the section `ethereum` in config file.
 
 ```json
-  "chain": {
+  "ethereum": {
     "nodeAddress": "",
     "privateKey": "",
     "provider": "wss://apus.chain.deltampc.com",
