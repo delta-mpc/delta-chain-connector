@@ -1,5 +1,5 @@
 import { Command } from "commander";
-import { run } from "./service";
+import { run } from "./server";
 import { config, init } from "./config";
 
 export function main(): void {
