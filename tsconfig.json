@@ -12,9 +12,9 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "outDir": "lib",
-    "baseUrl": "src",
+    "baseUrl": "./",
     "paths": {
-      "~/*": ["./*"]
+      "~/*": ["./src/*"]
     }
   },
   "include": ["src"],

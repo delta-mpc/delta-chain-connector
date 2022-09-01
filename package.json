@@ -8,13 +8,12 @@
     "delta-chain-connector": "./bin/delta-chain-connector"
   },
   "scripts": {
-    "build:proto:horizontal": "$(npm bin)/proto-loader-gen-types --defaults --oneofs --grpcLib=@grpc/grpc-js -O src/horizontal/service src/proto/horizontal.proto",
-    "build:proto": "npm run build:proto:horizontal",
-    "build:ts": "rm -rf lib && tsc -p tsconfig-build.json && mkdir -p lib/proto && cp src/proto/*.proto lib/proto/ && mkdir -p lib/contract && cp src/contract/*.json lib/contract",
+    "build:proto": "$(npm bin)/proto-loader-gen-types --defaults --oneofs --grpcLib=@grpc/grpc-js -O src/proto src/proto/*.proto",
+    "build:ts": "rm -rf lib && tsc -p tsconfig-build.json && cp src/proto/*.proto lib/proto/ && mkdir -p lib/contract && cp src/contract/*.json lib/contract",
     "serve": "ts-node --cwd-mode src run | bunyan",
     "serve:debug": "node --inspect $(npm bin)/ts-node --cwd-mode src run | bunyan",
-    "test": "mocha -r ts-node/register --exit 'src/**/*.test.ts'",
-    "test:debug": "mocha --inspect -r ts-node/register --exit 'src/**/*.test.ts'",
+    "test": "mocha -r ts-node/register --exit --timeout 10000 'src/ethereum/horizontal.test.ts'",
+    "test:debug": "mocha --inspect -r ts-node/register --exit --timout 10000 'src/ethereum/horizontal.test.ts'",
     "format": "prettier -w 'src/**/*.ts'"
   },
   "repository": {
@@ -46,6 +45,7 @@
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^4.0.0",
+    "ganache": "^7.4.1",
     "mocha": "^9.1.3",
     "prettier": "^2.4.1",
     "ts-node": "^10.4.0",
@@ -60,6 +60,7 @@
     "@mikro-orm/cli": "^4.5.9",
     "@mikro-orm/core": "^4.5.9",
     "@mikro-orm/sqlite": "^4.5.9",
+    "async-mutex": "^0.3.2",
     "bunyan": "^1.8.15",
     "commander": "^8.3.0",
     "module-alias": "^2.2.2",

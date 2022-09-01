@@ -1,6 +1,6 @@
 import * as grpc from "@grpc/grpc-js";
-import { impl } from "~/horizontal/impl";
-import * as hservice from "~/horizontal/service";
+import { addService } from "./service";
+import * as impl from "./impl";
 import log from "~/log";
 
 export function run(host: string, port: number): void {
@@ -10,7 +10,7 @@ export function run(host: string, port: number): void {
     "grpc.keepalive_permit_without_calls": 1,
     "grpc.max_pings_without_data": 0,
   });
-  hservice.addService(server);
+  addService(server);
   server.bindAsync(`${host}:${port}`, grpc.ServerCredentials.createInsecure(), (err, p) => {
     if (err) {
       log.error(`Server error: ${err.message}`);

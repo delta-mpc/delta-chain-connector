@@ -1,6 +1,6 @@
 import { PassThrough, Readable } from "stream";
 import log from "~/log";
-import { Event } from "./event";
+import { Event } from "./common";
 
 class EventStream<T extends Event> {
   public readonly stream: PassThrough;
