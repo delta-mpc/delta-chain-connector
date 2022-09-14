@@ -1,6 +1,6 @@
 import { randomHex } from "~/utils";
 import { Readable } from "stream";
-import { Subscriber } from "~/event";
+import { HorizontalEvent, Subscriber } from "~/event";
 import * as db from "~/db";
 import * as entity from "~/entity/horizontal";
 import { identity } from "./identity";
@@ -8,7 +8,7 @@ import { HorizontalImpl } from "~/impl/horizontal";
 import dbConfig from "~/db/config";
 
 class Horizontal implements HorizontalImpl {
-  private subscriber = new Subscriber();
+  private subscriber = new Subscriber<HorizontalEvent>();
 
   async init(cfg = dbConfig): Promise<void> {
     await db.init(cfg);
@@ -28,7 +28,7 @@ class Horizontal implements HorizontalImpl {
 
     const task = new entity.Task(address, dataset, commitment, taskType);
     await em.persistAndFlush(task);
-    const event = {
+    this.subscriber.publish({
       type: "TaskCreated",
       address: task.address,
       taskID: task.outID,
@@ -36,8 +36,7 @@ class Horizontal implements HorizontalImpl {
       url: node.url,
       commitment: task.commitment,
       taskType: taskType,
-    };
-    this.subscriber.publish(event);
+    });
     return [randomHex(32), task.outID];
   }
 
@@ -55,11 +54,10 @@ class Horizontal implements HorizontalImpl {
     }
     task.finished = true;
     await em.flush();
-    const event = {
+    this.subscriber.publish({
       type: "TaskFinished",
       taskID: taskID,
-    };
-    this.subscriber.publish(event);
+    });
     return randomHex(32);
   }
 
@@ -100,12 +98,11 @@ class Horizontal implements HorizontalImpl {
 
     const roundEntity = new entity.Round(task, round, entity.RoundStatus.Started);
     await em.persistAndFlush(roundEntity);
-    const event = {
+    this.subscriber.publish({
       type: "RoundStarted",
       taskID: taskID,
       round: round,
-    };
-    this.subscriber.publish(event);
+    });
     return randomHex(32);
   }
 
@@ -183,13 +180,12 @@ class Horizontal implements HorizontalImpl {
     roundEntity.status = entity.RoundStatus.Running;
     await em.flush();
 
-    const event = {
+    this.subscriber.publish({
       type: "PartnerSelected",
       taskID: taskID,
       round: round,
       addrs: clients,
-    };
-    this.subscriber.publish(event);
+    });
     return randomHex(32);
   }
 
@@ -357,13 +353,12 @@ class Horizontal implements HorizontalImpl {
     roundEntity.status = entity.RoundStatus.Calculating;
     await em.flush();
 
-    const event = {
+    this.subscriber.publish({
       type: "CalculationStarted",
       taskID: taskID,
       round: round,
       addrs: clients,
-    };
-    this.subscriber.publish(event);
+    });
     return randomHex(32);
   }
 
@@ -467,13 +462,12 @@ class Horizontal implements HorizontalImpl {
     roundEntity.status = entity.RoundStatus.Aggregating;
     await em.flush();
 
-    const event = {
+    this.subscriber.publish({
       type: "AggregationStarted",
       taskID: taskID,
       round: round,
       addrs: clients,
-    };
-    this.subscriber.publish(event);
+    });
     return randomHex(32);
   }
 
@@ -699,12 +693,11 @@ class Horizontal implements HorizontalImpl {
     roundEntity.status = entity.RoundStatus.Finished;
     await em.flush();
 
-    const event = {
+    this.subscriber.publish({
       type: "RoundEnded",
       taskID: taskID,
       round: round,
-    };
-    this.subscriber.publish(event);
+    });
     return randomHex(32);
   }
 

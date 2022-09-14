@@ -3,9 +3,9 @@ import chaiAsPromised from "chai-as-promised";
 import * as crypto from "crypto";
 import * as db from "~/db";
 import * as entity from "~/entity/horizontal";
-import {horizontal} from "./horizontal";
+import { horizontal } from "./horizontal";
 import { Options } from "@mikro-orm/core";
-import {identity} from "./identity";
+import { identity } from "./identity";
 
 chai.use(chaiAsPromised);
 
@@ -15,7 +15,7 @@ function randomBytesString(length: number): string {
   return "0x" + crypto.randomBytes(length).toString("hex");
 }
 
-describe("coordinator service", function () {
+describe("coordinator horizontal", function () {
   let address1: string;
   let address2: string;
   let address3: string;
@@ -24,7 +24,7 @@ describe("coordinator service", function () {
   before(async function () {
     const dbConfig: Options = {
       type: "sqlite",
-      dbName: "file::memory",
+      dbName: ":memory:",
       entities: ["dist/entity/**/*.js"],
       entitiesTs: ["src/entity/**/*.ts"],
     };
@@ -34,7 +34,7 @@ describe("coordinator service", function () {
     address2 = (await identity.join("127.0.0.1:6800", "2"))[1];
     address3 = (await identity.join("127.0.0.1:6900", "3"))[1];
     address4 = (await identity.join("127.0.0.1:7000", "4"))[1];
-});
+  });
 
   after(async function () {
     await identity.leave(address1);
@@ -47,7 +47,6 @@ describe("coordinator service", function () {
     await generator.dropSchema();
     await orm.close(true);
   });
-
 
   let taskID: string;
   const dataset = "mnist";

@@ -1,6 +1,5 @@
 import * as entity from "~/entity/identity";
 import * as db from "~/db";
-import log from "~/log";
 import { randomHex } from "~/utils";
 import { IdentityImpl } from "~/impl/identity";
 import dbConfig from "~/db/config";
@@ -13,7 +12,6 @@ class Identity implements IdentityImpl {
   async join(url: string, name: string): Promise<[string, string]> {
     const em = db.getEntityManager();
     const node = await em.findOne(entity.Node, { url: url });
-    log.info(`node joined ${node?.joined}`);
     if (!node) {
       const node = new entity.Node(url, name);
       node.joined = true;

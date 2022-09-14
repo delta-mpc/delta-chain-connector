@@ -9,11 +9,11 @@ chai.use(chaiAsPromised);
 
 const assert = chai.assert;
 
-describe("coordinator service", function () {
+describe("coordinator identity", function () {
   before(async function () {
     const dbConfig: Options = {
       type: "sqlite",
-      dbName: "db/identity.test.db",
+      dbName: ":memory:",
       entities: ["dist/entity/**/*.js"],
       entitiesTs: ["src/entity/**/*.ts"],
     };
