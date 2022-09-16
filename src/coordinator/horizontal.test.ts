@@ -197,7 +197,7 @@ describe("coordinator horizontal", function () {
 
   describe("getClientPublickKeys", function () {
     it("get node2,3 public keys", async function () {
-      const pks = await horizontal.getClientPublickKeys(taskID, round, [address2, address3]);
+      const pks = await horizontal.getClientPublicKeys(taskID, round, [address2, address3]);
 
       assert.strictEqual(pks[0][0], pk21);
       assert.strictEqual(pks[0][1], pk22);

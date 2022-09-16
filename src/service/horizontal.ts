@@ -198,7 +198,7 @@ const service: HorizontalHandlers = {
     callback: grpc.sendUnaryData<PublicKeyResp>
   ) {
     getHorizontal()
-      .getClientPublickKeys(call.request.taskId, call.request.round, call.request.clients)
+      .getClientPublicKeys(call.request.taskId, call.request.round, call.request.clients)
       .then((pks) => {
         log.info(
           `task ${call.request.taskId} round ${call.request.round} clients ${call.request.clients} pks`

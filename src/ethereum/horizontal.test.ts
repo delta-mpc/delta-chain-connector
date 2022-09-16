@@ -146,7 +146,7 @@ describe("ethereum service", function () {
 
   describe("getClientPublickKeys", function () {
     it("getClientPublickKeys", async function () {
-      const pks = await horizontal.getClientPublickKeys(taskID, round, [nodeAddress]);
+      const pks = await horizontal.getClientPublicKeys(taskID, round, [nodeAddress]);
       assert.lengthOf(pks, 1);
       assert.strictEqual(pks[0][0], pk1);
       assert.strictEqual(pks[0][1], pk2);

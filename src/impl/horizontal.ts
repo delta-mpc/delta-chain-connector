@@ -32,7 +32,7 @@ export interface HorizontalImpl {
     receivers: string[],
     commitments: string[]
   ): Promise<string>;
-  getClientPublickKeys(taskID: string, round: number, clients: string[]): Promise<[string, string][]>;
+  getClientPublicKeys(taskID: string, round: number, clients: string[]): Promise<[string, string][]>;
   startCalculation(address: string, taskID: string, round: number, clients: string[]): Promise<string>;
   uploadResultCommitment(address: string, taskID: string, round: number, commitment: string): Promise<string>;
   getResultCommitment(taskID: string, round: number, client: string): Promise<string>;

@@ -3,21 +3,12 @@ import { Readable } from "stream";
 import { EventData } from "web3-eth-contract";
 import { config } from "~/config";
 import * as entity from "~/entity/horizontal";
-import { Subscriber } from "~/event";
-import {
-  AggregationStartedEvent,
-  CalculationStartedEvent,
-  PartnerSelectedEvent,
-  RoundEndedEvent,
-  RoundStartedEvent,
-  TaskCreatedEvent,
-  TaskFinishedEvent
-} from "~/event/horizontal";
+import { HorizontalEvent, Subscriber } from "~/event";
 import { HorizontalImpl } from "~/impl/horizontal";
 import { ContractHelper, ContractOption } from "./contract";
 
 class Horizontal implements HorizontalImpl {
-  private subscriber = new Subscriber();
+  private subscriber = new Subscriber<HorizontalEvent>();
 
   private option!: ContractOption;
   contract!: ContractHelper;
@@ -50,7 +41,7 @@ class Horizontal implements HorizontalImpl {
             taskID: res.taskId,
             round: Number(res.round),
             addrs: res.addrs,
-          } as AggregationStartedEvent);
+          });
           break;
         case "CalculateStarted":
           this.subscriber.publish({
@@ -58,7 +49,7 @@ class Horizontal implements HorizontalImpl {
             taskID: res.taskId,
             round: Number(res.round),
             addrs: res.addrs,
-          } as CalculationStartedEvent);
+          });
           break;
         case "PartnerSelected":
           this.subscriber.publish({
@@ -66,21 +57,21 @@ class Horizontal implements HorizontalImpl {
             taskID: res.taskId,
             round: Number(res.round),
             addrs: res.addrs,
-          } as PartnerSelectedEvent);
+          });
           break;
         case "RoundEnd":
           this.subscriber.publish({
             type: "RoundEnded",
             taskID: res.taskId,
             round: Number(res.round),
-          } as RoundEndedEvent);
+          });
           break;
         case "RoundStart":
           this.subscriber.publish({
             type: "RoundStarted",
             taskID: res.taskId,
             round: Number(res.round),
-          } as RoundStartedEvent);
+          });
           break;
         case "TaskCreated":
           this.subscriber.publish({
@@ -91,13 +82,13 @@ class Horizontal implements HorizontalImpl {
             url: res.creatorUrl,
             commitment: res.commitment,
             taskType: res.taskType,
-          } as TaskCreatedEvent);
+          });
           break;
         case "TaskFinished":
           this.subscriber.publish({
             type: "TaskFinished",
             taskID: res.taskId,
-          } as TaskFinishedEvent);
+          });
           break;
       }
     });
@@ -247,7 +238,7 @@ class Horizontal implements HorizontalImpl {
     return hash;
   }
 
-  async getClientPublickKeys(taskID: string, round: number, clients: string[]): Promise<[string, string][]> {
+  async getClientPublicKeys(taskID: string, round: number, clients: string[]): Promise<[string, string][]> {
     const res = await this.contract.call("getClientPublickeys", [taskID, round, clients]);
     if (typeof res === "string") {
       throw new Error("getClientPublickeys return type error");

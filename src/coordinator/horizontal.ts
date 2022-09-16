@@ -274,7 +274,7 @@ class Horizontal implements HorizontalImpl {
     );
   }
 
-  async getClientPublickKeys(taskID: string, round: number, clients: string[]): Promise<[string, string][]> {
+  async getClientPublicKeys(taskID: string, round: number, clients: string[]): Promise<[string, string][]> {
     const em = db.getEntityManager();
 
     const members = await em.find(entity.RoundMember, {
