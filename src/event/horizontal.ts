@@ -1,4 +1,4 @@
-export interface TaskCreatedEvent {
+interface TaskCreatedEvent {
   type: "TaskCreated";
   address: string;
   taskID: string;
@@ -8,40 +8,40 @@ export interface TaskCreatedEvent {
   taskType: string;
 }
 
-export interface RoundStartedEvent {
+interface RoundStartedEvent {
   type: "RoundStarted";
   taskID: string;
   round: number;
 }
 
-export interface PartnerSelectedEvent {
+interface PartnerSelectedEvent {
   type: "PartnerSelected";
   taskID: string;
   round: number;
   addrs: string[];
 }
 
-export interface CalculationStartedEvent {
+interface CalculationStartedEvent {
   type: "CalculationStarted";
   taskID: string;
   round: number;
   addrs: string[];
 }
 
-export interface AggregationStartedEvent {
+interface AggregationStartedEvent {
   type: "AggregationStarted";
   taskID: string;
   round: number;
   addrs: string[];
 }
 
-export interface RoundEndedEvent {
+interface RoundEndedEvent {
   type: "RoundEnded";
   taskID: string;
   round: number;
 }
 
-export interface TaskFinishedEvent {
+interface TaskFinishedEvent {
   type: "TaskFinished";
   taskID: string;
 }

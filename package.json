@@ -12,8 +12,8 @@
     "build:ts": "rm -rf lib && tsc -p tsconfig-build.json && cp src/proto/*.proto lib/proto/ && mkdir -p lib/contract && cp src/contract/*.json lib/contract",
     "serve": "ts-node --cwd-mode src run | bunyan",
     "serve:debug": "node --inspect $(npm bin)/ts-node --cwd-mode src run | bunyan",
-    "test": "mocha -r ts-node/register --exit --timeout 10000 'src/ethereum/horizontal.test.ts'",
-    "test:debug": "mocha --inspect -r ts-node/register --exit --timout 10000 'src/ethereum/horizontal.test.ts'",
+    "test": "mocha -r ts-node/register --exit --timeout 10000 'src/coordinator/vlr.test.ts'",
+    "test:debug": "mocha --inspect -r ts-node/register --exit --timout 10000 'src/coordinator/vlr.test.ts'",
     "format": "prettier -w 'src/**/*.ts'"
   },
   "repository": {
@@ -65,6 +65,7 @@
     "commander": "^8.3.0",
     "module-alias": "^2.2.2",
     "reflect-metadata": "^0.1.13",
+    "snarkjs": "^0.5.0",
     "web3": "^1.6.1",
     "web3-core": "^1.6.1",
     "web3-eth": "^1.6.1",
