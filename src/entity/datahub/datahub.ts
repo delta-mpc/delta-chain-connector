@@ -14,7 +14,7 @@ export class DataRecord {
   @Property()
   commitment!: string;
 
-  @Property()
+  @Property({type: "number"})
   version = 1;
 
   constructor(owner: string, name: string, commitment: string) {
