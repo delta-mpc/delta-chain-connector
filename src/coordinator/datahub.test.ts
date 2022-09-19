@@ -1,6 +1,7 @@
 import { Options } from "@mikro-orm/core";
 import * as chai from "chai";
 import chaiAsPromised from "chai-as-promised";
+import * as db from "~/db";
 import { datahub } from "./datahub";
 import { identity } from "./identity";
 
@@ -21,6 +22,15 @@ describe("datahub coordinator", () => {
     await datahub.init(dbConfig);
 
     address = (await identity.join("127.0.0.1:6700", "node1"))[1];
+  });
+
+  after(async function () {
+    await identity.leave(address);
+
+    const orm = db.getORM();
+    const generator = orm.getSchemaGenerator();
+    await generator.dropSchema();
+    await orm.close(true);
   });
 
   const dataset = "mnist";
