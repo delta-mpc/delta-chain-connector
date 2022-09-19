@@ -2,7 +2,7 @@ import { Entity, Enum, ManyToOne, PrimaryKey, Property } from "@mikro-orm/core";
 import { HLRRoundMember } from ".";
 
 @Entity()
-export class Share {
+export class HLRShare {
   @PrimaryKey()
   id!: number;
 

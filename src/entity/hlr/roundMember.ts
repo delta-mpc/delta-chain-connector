@@ -8,7 +8,7 @@ import {
   PrimaryKey,
   Property,
 } from "@mikro-orm/core";
-import { Key, HLRResultCommitment } from ".";
+import { HLRKey, HLRResultCommitment } from ".";
 import { RoundStatus, HLRRound } from "./round";
 
 @Entity()
@@ -27,8 +27,8 @@ export class HLRRoundMember {
   @Enum({ items: () => RoundStatus, type: "number" })
   status!: RoundStatus;
 
-  @OneToMany(() => Key, (key) => key.member)
-  keys = new Collection<Key>(this);
+  @OneToMany(() => HLRKey, (key) => key.member)
+  keys = new Collection<HLRKey>(this);
 
   @OneToOne(() => HLRResultCommitment, (result) => result.member)
   result!: HLRResultCommitment;
