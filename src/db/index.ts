@@ -1,6 +1,6 @@
 import { EntityManager, MikroORM } from "@mikro-orm/core";
-import dbConfig from "./config";
 import { Mutex } from "async-mutex";
+import dbConfig from "./config";
 
 interface DI {
   orm?: MikroORM;
@@ -41,4 +41,16 @@ export function getORM(): MikroORM {
   } else {
     throw new Error("db is not initialed");
   }
+}
+
+export async function close(): Promise<void> {
+  await initMutex.runExclusive(async () => {
+    if (DB.orm) {
+      await DB.orm.close(true);
+      DB.orm = undefined;
+      DB.em = undefined;
+    } else {
+      throw new Error("db is not initialed");
+    }
+  });
 }
