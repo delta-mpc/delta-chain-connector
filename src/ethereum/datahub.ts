@@ -27,30 +27,22 @@ class DataHub implements DataHubImpl {
     await this.contract.init();
   }
 
-  async register(address: string, name: string, commitment: string): Promise<string> {
+  async register(address: string, name: string, index: number, commitment: string): Promise<string> {
     if (address !== this.option.nodeAddress) {
       throw new Error(`chain connector node address is not ${address}`);
     }
 
-    const hash = await this.contract.method("register", [name, commitment]);
+    const hash = await this.contract.method("register", [name, index, commitment]);
     const receipt = await this.contract.waitForReceipt(hash);
     return receipt.transactionHash;
   }
 
-  async getDataCommitment(address: string, name: string): Promise<string> {
-    const res = await this.contract.call("getDataCommitment", [address, name]);
+  async getDataCommitment(address: string, name: string, index: number): Promise<string> {
+    const res = await this.contract.call("getDataCommitment", [address, name, index]);
     if (typeof res === "object") {
       throw new Error("getDataCommitment return type error");
     }
     return res;
-  }
-
-  async getDataVersion(address: string, name: string): Promise<number> {
-    const res = await this.contract.call("getDataVersion", [address, name]);
-    if (typeof res === "object") {
-      throw new Error("getDataVersion return type error");
-    }
-    return Number(res);
   }
 
   subscribe(address: string, timeout: number): Readable {
@@ -58,13 +50,13 @@ class DataHub implements DataHubImpl {
     src.on("data", (event: EventData) => {
       const res = event.returnValues;
       switch (event.event) {
-        case "AggregateStarted":
+        case "DataRegistered":
           this.subscriber.publish({
             type: "DataRegistered",
             owner: res.owner,
             name: res.name,
+            index: Number(res.index),
             commitment: res.commitment,
-            version: Number(res.version),
           });
           break;
       }

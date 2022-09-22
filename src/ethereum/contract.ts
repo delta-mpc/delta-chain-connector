@@ -1,13 +1,13 @@
 import common from "@ethereumjs/common";
 import { TransactionFactory } from "@ethereumjs/tx";
 import * as fs from "fs/promises";
+import { EthereumProvider } from "ganache";
 import { EventEmitter, PassThrough, Readable } from "stream";
 import Web3 from "web3";
 import { Log, provider, TransactionReceipt } from "web3-core";
 import { Contract, EventData } from "web3-eth-contract";
 import { AbiItem, sha3 } from "web3-utils";
 import log from "~/log";
-import {EthereumProvider} from "ganache";
 
 interface Abi extends AbiItem {
   signature?: string;
@@ -35,7 +35,6 @@ interface gasOption {
 
 type Result = { [key: string]: string };
 type Mixed = { [key: string | number]: string | any } | string;
-
 
 export class ContractHelper {
   private web3!: Web3;
@@ -77,7 +76,6 @@ export class ContractHelper {
       this.option.contractAddress = await this.deployContract(jsonInterface.bytecode);
       this.contract.options.address = this.option.contractAddress;
     }
-
   }
 
   async connect(url: string): Promise<provider> {
@@ -106,11 +104,13 @@ export class ContractHelper {
   }
 
   async deployContract(bytecode: string): Promise<string> {
-    const abiData = this.contract.deploy({
-      data: bytecode,
-      arguments: this.option.deployArgs
-    }).encodeABI();
-    const nonce = await this.web3.eth.getTransactionCount(this.option.nodeAddress);
+    const abiData = this.contract
+      .deploy({
+        data: bytecode,
+        arguments: this.option.deployArgs,
+      })
+      .encodeABI();
+    const nonce = await this.web3.eth.getTransactionCount(this.option.nodeAddress, "pending");
     const tra = {
       data: abiData,
       from: this.option.nodeAddress,
@@ -120,7 +120,7 @@ export class ContractHelper {
     };
     const key = Buffer.from(this.option.privateKey, "hex");
     const tx = TransactionFactory.fromTxData(tra, {
-      common: common.custom({chainId: 1337}),
+      common: common.custom({ chainId: 1337 }),
     });
     const serializedTx = "0x" + tx.sign(key).serialize().toString("hex");
     const receipt = await this.web3.eth.sendSignedTransaction(serializedTx);
@@ -144,7 +144,7 @@ export class ContractHelper {
     const gasLimit = gasOpt?.gasLimit || this.option.gasLimit;
 
     if (nonce === 0) {
-      nonce = await this.web3.eth.getTransactionCount(this.option.nodeAddress);
+      nonce = await this.web3.eth.getTransactionCount(this.option.nodeAddress, "pending");
     }
 
     const tra = {
@@ -165,15 +165,8 @@ export class ContractHelper {
       common: common.custom(this.option.chainParam),
     });
     const serializedTx = "0x" + tx.sign(key).serialize().toString("hex");
-    return new Promise((resolve, reject) => {
-      this.web3.eth.sendSignedTransaction(serializedTx, (err: Error, hash: string) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(hash);
-        }
-      });
-    });
+    const receipt = await this.web3.eth.sendSignedTransaction(serializedTx);
+    return receipt.transactionHash;
   }
 
   async waitForReceipt(hash: string, retry: number = 3): Promise<TransactionReceipt> {

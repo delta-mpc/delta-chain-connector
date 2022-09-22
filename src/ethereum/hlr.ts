@@ -8,15 +8,21 @@ import { HLRImpl } from "~/impl/hlr";
 import * as verifier from "~/verifier";
 import { ContractHelper, ContractOption } from "./contract";
 
+export interface HLRContractOption extends ContractOption {
+  verifiers: {
+    [key: number]: string;
+  };
+}
+
 class HLR implements HLRImpl {
   private subscriber = new Subscriber<HLREvent>();
 
-  private option!: ContractOption;
+  private option!: HLRContractOption;
   contract!: ContractHelper;
 
   private subscribeMap: Map<Readable, Readable> = new Map();
 
-  async init(opt?: ContractOption): Promise<void> {
+  async init(opt?: HLRContractOption): Promise<void> {
     this.option = opt || {
       contractAddress: config.ethereum.hlr.contractAddress,
       abiFile: path.resolve(__dirname + "/../contract/HLR.json"),
@@ -26,6 +32,7 @@ class HLR implements HLRImpl {
       gasPrice: config.ethereum.gasPrice,
       gasLimit: config.ethereum.gasLimit,
       chainParam: config.ethereum.chainParam,
+      verifiers: config.ethereum.hlr.verifiers,
     };
     this.contract = new ContractHelper(this.option);
     await this.contract.init();
@@ -97,7 +104,7 @@ class HLR implements HLRImpl {
           this.subscriber.publish({
             type: "TaskMemberVerified",
             taskID: res.taskId,
-            address: res.address,
+            address: res.addr,
             verified: Boolean(res.verified),
           });
           break;
@@ -216,8 +223,8 @@ class HLR implements HLRImpl {
     return {
       round: Number(res.currentRound),
       status: Number(res.status),
-      joinedClients: res.joinedAddrs,
-      finishedClients: res.finishedClients,
+      joinedClients: res.joinedAddrs || [],
+      finishedClients: res.finishedClients || [],
     };
   }
 
@@ -303,7 +310,7 @@ class HLR implements HLRImpl {
   }
 
   async getResultCommitment(taskID: string, round: number, client: string): Promise<string> {
-    const res = await this.contract.call("getResultCommitment", [taskID, client, round]);
+    const res = await this.contract.call("getResultCommitment", [taskID, round, client]);
     if (typeof res === "object") {
       throw new Error("getClientPublickeys return type error");
     }
@@ -389,21 +396,30 @@ class HLR implements HLRImpl {
     taskID: string,
     weightSize: number,
     proof: string,
-    pubSignals: string[]
+    pubSignals: string[],
+    blockIndex: number,
+    samples: number
   ): Promise<[string, boolean]> {
     if (address !== this.option.nodeAddress) {
       throw new Error(`chain connector node address is not ${address}`);
     }
 
-    const verifierAddress = config.ethereum.hlr.verifiers[weightSize];
+    const verifierAddress = this.option.verifiers[weightSize];
     const [_proof, _pubSignals] = await verifier.exportCallData(proof, pubSignals);
-    const hash = await this.contract.method("verify", [taskID, verifierAddress, _proof, _pubSignals]);
+    const hash = await this.contract.method("verify", [
+      taskID,
+      verifierAddress,
+      _proof,
+      _pubSignals,
+      blockIndex,
+      samples,
+    ]);
     const receipt = await this.contract.waitForReceipt(hash);
     const res = this.contract.decodeLogs(receipt.logs);
     if (!res) {
       throw new Error("verify has no result");
     }
-    return [receipt.transactionHash, Boolean(res.valid)];
+    return [receipt.transactionHash, Boolean(res.verified)];
   }
 
   async getVerifierState(taskID: string): Promise<entity.VerifierState> {
