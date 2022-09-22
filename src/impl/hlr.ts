@@ -1,5 +1,8 @@
 import { Readable } from "stream";
+import { config } from "~/config";
+import { hlr as ci } from "~/coordinator";
 import { SecretShareData, TaskInfo, TaskRoundInfo, VerifierState } from "~/entity/hlr";
+import { hlr as ei } from "~/ethereum";
 
 export interface HLRImpl {
   init(): Promise<void>;
@@ -69,4 +72,21 @@ export interface HLRImpl {
   getVerifierState(taskID: string): Promise<VerifierState>;
   subscribe(address: string, timeout: number): Readable;
   unsubscribe(stream: Readable): void;
+}
+
+let impl: HLRImpl | undefined = undefined;
+
+function init(): HLRImpl {
+  if (config.impl === "coordinator") {
+    return ci;
+  } else {
+    return ei;
+  }
+}
+
+export function getHLR(): HLRImpl {
+  if (impl === undefined) {
+    impl = init();
+  }
+  return impl;
 }
