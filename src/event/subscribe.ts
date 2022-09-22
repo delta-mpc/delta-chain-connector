@@ -1,4 +1,4 @@
-import { PassThrough, Readable } from "stream";
+import { PassThrough, Readable, Writable } from "stream";
 import log from "~/log";
 import { Event } from "./common";
 

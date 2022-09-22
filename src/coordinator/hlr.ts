@@ -7,8 +7,8 @@ import { HLREvent, Subscriber } from "~/event";
 import { HLRImpl } from "~/impl/hlr";
 import { randomHex } from "~/utils";
 import * as verifier from "~/verifier";
-import { identity } from "./identity";
 import { datahub } from "./datahub";
+import { identity } from "./identity";
 
 class HLR implements HLRImpl {
   private subscriber = new Subscriber<HLREvent>();
@@ -145,8 +145,8 @@ class HLR implements HLRImpl {
     }
 
     const member = new entity.HLRRoundMember(roundEntity, address, entity.RoundStatus.Started);
-    const key1 = new entity.Key(member, pk1, entity.KeyType.PK1);
-    const key2 = new entity.Key(member, pk2, entity.KeyType.PK2);
+    const key1 = new entity.HLRKey(member, pk1, entity.KeyType.PK1);
+    const key2 = new entity.HLRKey(member, pk2, entity.KeyType.PK2);
     member.keys.add(key1);
     member.keys.add(key2);
     await em.persistAndFlush(member);
@@ -164,7 +164,7 @@ class HLR implements HLRImpl {
     }
     const joinedClients = Array.from(roundEntity.members, (member) => member.address);
     const finishedClients = Array.from(roundEntity.members)
-      .filter((member) => member.status == entity.RoundStatus.Finished)
+      .filter((member) => member.status == entity.RoundStatus.Aggregating)
       .map((member) => member.address);
     return {
       round: round,
@@ -317,14 +317,14 @@ class HLR implements HLRImpl {
       }
     }
 
-    const pk1s = await em.find(entity.Key, {
+    const pk1s = await em.find(entity.HLRKey, {
       member: { $in: members },
       type: entity.KeyType.PK1,
     });
     if (pk1s.length !== members.length) {
       throw new Error(`task ${taskID} round ${round} some member doesn't upload pk1`);
     }
-    const pk2s = await em.find(entity.Key, {
+    const pk2s = await em.find(entity.HLRKey, {
       member: { $in: members },
       type: entity.KeyType.PK2,
     });
@@ -541,7 +541,7 @@ class HLR implements HLRImpl {
     }
 
     // check secret key do not exist
-    const skCount = await em.count(entity.Share, {
+    const skCount = await em.count(entity.HLRShare, {
       sender: { $in: srcs },
       receiver: dst,
       type: entity.ShareType.SecretKey,
@@ -554,7 +554,7 @@ class HLR implements HLRImpl {
     for (let i = 0; i < senders.length; i++) {
       const src = srcMap.get(senders[i])!;
       const seed = seeds[i];
-      const share = new entity.Share(src, dst, seed, entity.ShareType.Seed);
+      const share = new entity.HLRShare(src, dst, seed, entity.ShareType.Seed);
       em.persist(share);
     }
 
@@ -605,7 +605,7 @@ class HLR implements HLRImpl {
     }
 
     // check seed do not exist
-    const seedCount = await em.count(entity.Share, {
+    const seedCount = await em.count(entity.HLRShare, {
       sender: { $in: srcs },
       receiver: dst,
       type: entity.ShareType.Seed,
@@ -618,7 +618,7 @@ class HLR implements HLRImpl {
     for (let i = 0; i < senders.length; i++) {
       const src = srcMap.get(senders[i])!;
       const secretKey = secretKeys[i];
-      const share = new entity.Share(src, dst, secretKey, entity.ShareType.SecretKey);
+      const share = new entity.HLRShare(src, dst, secretKey, entity.ShareType.SecretKey);
       em.persist(share);
     }
 
@@ -674,12 +674,12 @@ class HLR implements HLRImpl {
       throw new Error(`task ${taskID} round ${round} some senders do not have secret key commitments`);
     }
 
-    const seeds = await em.find(entity.Share, {
+    const seeds = await em.find(entity.HLRShare, {
       sender: { $in: srcs },
       receiver: dst,
       type: entity.ShareType.Seed,
     });
-    const sks = await em.find(entity.Share, {
+    const sks = await em.find(entity.HLRShare, {
       sender: { $in: srcs },
       receiver: dst,
       type: entity.ShareType.SecretKey,
@@ -733,7 +733,9 @@ class HLR implements HLRImpl {
     taskID: string,
     weightSize: number,
     proof: string,
-    pubSignals: string[]
+    pubSignals: string[],
+    blockIndex: number,
+    samples: number
   ): Promise<[string, boolean]> {
     const txHash = randomHex(32);
 
@@ -804,12 +806,14 @@ class HLR implements HLRImpl {
     }
     // check gradients
     const gradients = state.gradients.map((g) => new BN(g, 10));
+    const q = verifier.getQ(vk.curve);
+    state.samples += samples;
 
     for (const [i, v] of pubSignals.slice(0, -2).entries()) {
       if (i % 2 == 0) {
         const gradient = new BN(v, 10);
         const idx = i / 2;
-        gradients[idx] = gradients[idx].add(gradient);
+        gradients[idx] = gradients[idx].add(gradient).mod(q);
       } else {
         const precision = Number(v);
         if (state.precision === 0) {
@@ -822,10 +826,10 @@ class HLR implements HLRImpl {
         }
       }
     }
+    state.gradients = gradients.map((v) => v.toString(10));
 
     // the last member
     if (finishedCount + 1 === finalMembers.length) {
-      const q = verifier.getQ(vk.curve);
       const absGradients = gradients.map((g) => {
         return BN.min(g, q.sub(g));
       });
@@ -835,7 +839,7 @@ class HLR implements HLRImpl {
           norm = g;
         }
       }
-      const threshold = new BN(10, 10).pow(new BN(state.precision - task.tolerance, 10));
+      const threshold = new BN(10, 10).pow(new BN(state.precision - task.tolerance, 10)).muln(state.samples);
       if (norm.gte(threshold)) {
         memberState.valid = false;
         state.valid = false;
@@ -877,7 +881,7 @@ class HLR implements HLRImpl {
 
     // check data commitment
     const _dataCommitment = "0x" + new BN(pubSignals[pubSignals.length - 1], 10).toString("hex", 64);
-    const dataCommitment = await datahub.getDataCommitment(address, task.dataset);
+    const dataCommitment = await datahub.getDataCommitment(address, task.dataset, blockIndex);
     if (_dataCommitment !== dataCommitment) {
       memberState.valid = false;
       state.valid = false;

@@ -7,7 +7,7 @@ export class HLRVerifier {
   @PrimaryKey()
   id!: number;
 
-  @Property({ default: false })
+  @Property({ default: false, type: "boolean" })
   valid = true;
 
   @Property()
@@ -16,6 +16,9 @@ export class HLRVerifier {
   @Property()
   precision!: number;
 
+  @Property()
+  samples!: number;
+
   @OneToOne(() => HLRTask)
   task!: HLRTask;
 
@@ -23,6 +26,7 @@ export class HLRVerifier {
     this.task = task;
     this.gradients = gradients;
     this.precision = precision;
+    this.samples = 0;
   }
 }
 

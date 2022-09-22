@@ -11,15 +11,16 @@ export class DataRecord {
   @Property()
   name!: string;
 
+  @Property({ type: "number" })
+  index!: number;
+
   @Property()
   commitment!: string;
 
-  @Property({type: "number"})
-  version = 1;
-
-  constructor(owner: string, name: string, commitment: string) {
+  constructor(owner: string, name: string, index: number, commitment: string) {
     this.owner = owner;
     this.name = name;
+    this.index = index;
     this.commitment = commitment;
   }
 }

@@ -31,6 +31,6 @@ export async function exportCallData(proof: string, pubSignals: string[]): Promi
   const calldata = await snarkjs.plonk.exportSolidityCallData(proofStruct, pubSignals);
   const sep = calldata.search(",");
   const _proof = calldata.slice(0, sep);
-  const _pubSignals: string[] = JSON.parse(calldata.slice(sep));
+  const _pubSignals: string[] = JSON.parse(calldata.slice(sep + 1));
   return [_proof, _pubSignals]; 
 }

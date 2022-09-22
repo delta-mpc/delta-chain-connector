@@ -1,7 +1,9 @@
 import { Options } from "@mikro-orm/core";
 import * as chai from "chai";
 import chaiAsPromised from "chai-as-promised";
+import { Readable } from "stream";
 import * as db from "~/db";
+import { DataRegisteredEvent } from "~/event";
 import { datahub } from "./datahub";
 import { identity } from "./identity";
 
@@ -11,6 +13,7 @@ const assert = chai.assert;
 
 describe("datahub coordinator", () => {
   let address: string;
+  let stream: Readable;
 
   before(async () => {
     const dbConfig: Options = {
@@ -22,6 +25,8 @@ describe("datahub coordinator", () => {
     await datahub.init(dbConfig);
 
     address = (await identity.join("127.0.0.1:6700", "node1"))[1];
+
+    stream = datahub.subscribe(address, 0);
   });
 
   after(async function () {
@@ -30,30 +35,51 @@ describe("datahub coordinator", () => {
     const orm = db.getORM();
     const generator = orm.getSchemaGenerator();
     await generator.dropSchema();
-    await orm.close(true);
+    await db.close();
   });
 
   const dataset = "mnist";
-  const commitment = "0x1230000000000000000000000000000000000000000000000000000000000000";
+  const commitment0 = "0x1230000000000000000000000000000000000000000000000000000000000000";
 
-  it("register", async () => {
-    await datahub.register(address, dataset, commitment);
-
-    const _commitment = await datahub.getDataCommitment(address, dataset);
-    assert.strictEqual(_commitment, commitment);
-
-    const version = await datahub.getDataVersion(address, dataset);
-    assert.strictEqual(version, 1);
+  it("reject block 1", async () => {
+    assert.isRejected(datahub.register(address, dataset, 1, commitment0));
   });
 
-  const newCommitment = "0x1230000000000000000000000000000000000000000000000000000000000001";
-  it("update", async () => {
-    await datahub.register(address, dataset, newCommitment);
+  it("register block 0", async () => {
+    await datahub.register(address, dataset, 0, commitment0);
 
-    const _commitment = await datahub.getDataCommitment(address, dataset);
-    assert.strictEqual(_commitment, newCommitment);
+    const _commitment = await datahub.getDataCommitment(address, dataset, 0);
+    assert.strictEqual(_commitment, commitment0);
 
-    const version = await datahub.getDataVersion(address, dataset);
-    assert.strictEqual(version, 2);
+    const event: DataRegisteredEvent | null = stream.read();
+    assert.strictEqual(event?.name, dataset);
+    assert.strictEqual(event?.index, 0);
+    assert.strictEqual(event?.commitment, commitment0);
+  });
+
+  const commitment1 = "0x1110000000000000000000000000000000000000000000000000000000000000";
+  it("register block 1", async () => {
+    await datahub.register(address, dataset, 1, commitment1);
+    const _commitment = await datahub.getDataCommitment(address, dataset, 1);
+    assert.strictEqual(_commitment, commitment1);
+    const event: DataRegisteredEvent | null = stream.read();
+    assert.strictEqual(event?.name, dataset);
+    assert.strictEqual(event?.index, 1);
+    assert.strictEqual(event?.commitment, commitment1);
+  });
+
+  const newCommitment1 = "0x2220000000000000000000000000000000000000000000000000000000000000";
+  it("update block 1", async () => {
+    await datahub.register(address, dataset, 1, newCommitment1);
+    const _commitment = await datahub.getDataCommitment(address, dataset, 1);
+    assert.strictEqual(_commitment, newCommitment1);
+    const event: DataRegisteredEvent | null = stream.read();
+    assert.strictEqual(event?.name, dataset);
+    assert.strictEqual(event?.index, 1);
+    assert.strictEqual(event?.commitment, newCommitment1);
+  });
+
+  it("reject update block 3", async () => {
+    assert.isRejected(datahub.register(address, dataset, 3, commitment0));
   });
 });

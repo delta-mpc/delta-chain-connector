@@ -62,7 +62,9 @@ export interface HLRImpl {
     taskID: string,
     weightSize: number,
     proof: string,
-    pubSignals: string[]
+    pubSignals: string[],
+    blockIndex: number,
+    samples: number
   ): Promise<[string, boolean]>;
   getVerifierState(taskID: string): Promise<VerifierState>;
   subscribe(address: string, timeout: number): Readable;

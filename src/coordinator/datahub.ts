@@ -14,18 +14,31 @@ class DataHub implements DataHubImpl {
     await db.init(cfg);
   }
 
-  async register(address: string, name: string, commitment: string): Promise<string> {
+  async register(address: string, name: string, index: number, commitment: string): Promise<string> {
     const em = db.getEntityManager();
 
     await identity.getNodeInfo(address);
 
-    let record = await em.findOne(entity.DataRecord, { owner: address, name: name });
-    if (record) {
-      record.commitment = commitment;
-      record.version += 1;
-    } else {
-      record = new entity.DataRecord(address, name, commitment);
+    let record = await em.findOne(
+      entity.DataRecord,
+      { owner: address, name: name },
+      { orderBy: { index: "DESC" } }
+    );
+    if (!record) {
+      if (index !== 0) {
+        throw new Error("First data block index should be 0");
+      }
+      record = new entity.DataRecord(address, name, index, commitment);
       em.persist(record);
+    } else {
+      if (index === record.index) {
+        record.commitment = commitment;
+      } else if (index === record.index + 1) {
+        record = new entity.DataRecord(address, name, index, commitment);
+        em.persist(record);
+      } else {
+        throw new Error("You can only update the last block or create a new block after it");
+      }
     }
 
     await em.flush();
@@ -33,30 +46,20 @@ class DataHub implements DataHubImpl {
       type: "DataRegistered",
       owner: address,
       name: name,
+      index: index,
       commitment: commitment,
-      version: record.version,
     });
     return randomHex(32);
   }
 
-  async getDataCommitment(address: string, name: string): Promise<string> {
+  async getDataCommitment(address: string, name: string, index: number): Promise<string> {
     const em = db.getEntityManager();
 
-    const record = await em.findOne(entity.DataRecord, { owner: address, name: name });
+    const record = await em.findOne(entity.DataRecord, { owner: address, name: name, index: index });
     if (!record) {
       throw new Error(`${address} doesn't have dataset ${name}`);
     }
     return record.commitment;
-  }
-
-  async getDataVersion(address: string, name: string): Promise<number> {
-    const em = db.getEntityManager();
-
-    const record = await em.findOne(entity.DataRecord, { owner: address, name: name });
-    if (!record) {
-      throw new Error(`${address} doesn't have dataset ${name}`);
-    }
-    return record.version;
   }
 
   subscribe(address: string, timeout: number): Readable {
