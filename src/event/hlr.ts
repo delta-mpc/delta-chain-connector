@@ -1,7 +1,7 @@
 import { HorizontalEvent } from "./horizontal";
 
-interface TaskCreated {
-  type: "TaskCreated";
+interface TaskCreatedEvent {
+  type: "HLRTaskCreated";
   address: string;
   taskID: string;
   dataset: string;
@@ -25,4 +25,4 @@ interface TaskVerifiedEvent {
   verified: boolean;
 }
 
-export type HLREvent = HorizontalEvent | TaskMemberVerifiedEvent | TaskVerifiedEvent | TaskCreated;
+export type HLREvent = HorizontalEvent | TaskMemberVerifiedEvent | TaskVerifiedEvent | TaskCreatedEvent;

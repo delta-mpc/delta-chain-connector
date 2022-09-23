@@ -38,7 +38,7 @@ class HLR implements HLRImpl {
     await this.contract.init();
   }
 
-  subscribe(address: string, timeout: number): Readable {
+  subscribe(address: string): Readable {
     const src = this.contract.subscribe();
     src.on("data", (event: EventData) => {
       const res = event.returnValues;
@@ -83,7 +83,7 @@ class HLR implements HLRImpl {
           break;
         case "TaskCreated":
           this.subscriber.publish({
-            type: "TaskCreated",
+            type: "HLRTaskCreated",
             address: res.creator,
             taskID: res.taskId,
             dataset: res.dataSet,
@@ -117,7 +117,7 @@ class HLR implements HLRImpl {
           break;
       }
     });
-    const res = this.subscriber.subscribe(address, timeout);
+    const res = this.subscriber.subscribe(address);
     this.subscribeMap.set(res, src);
     return res;
   }

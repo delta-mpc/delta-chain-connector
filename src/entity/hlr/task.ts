@@ -42,7 +42,7 @@ export class HLRTask {
     dataset: string,
     commitment: string,
     enableVerify: boolean,
-    tolerance: number,
+    tolerance: number
   ) {
     this.address = address;
     this.dataset = dataset;

@@ -9,7 +9,6 @@ export enum RoundStatus {
   Finished,
 }
 
-
 @Entity()
 export class Round {
   @PrimaryKey()

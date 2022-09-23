@@ -29,7 +29,7 @@ describe("Subscriber", function () {
       },
     ];
 
-    const stream = subscriber.subscribe(address, 0);
+    const stream = subscriber.subscribe(address);
     const subEvents: Event[] = [];
     stream.on("data", (e: Event) => {
       subEvents.push(e);
@@ -43,20 +43,5 @@ describe("Subscriber", function () {
       assert.deepStrictEqual(subEvents[i], events[i]);
     }
     subscriber.unsubscribe(stream);
-  });
-
-  it("heartbeat", function (done) {
-    this.timeout(3000);
-    const subscriber = new Subscriber();
-    const events: Event[] = [];
-    const stream = subscriber.subscribe(address, 1);
-    stream.on("data", (e: Event) => {
-      events.push(e);
-    });
-    setTimeout(() => {
-      assert.isAtLeast(events.length, 1);
-      subscriber.unsubscribe(stream);
-      done();
-    }, 2000);
   });
 });

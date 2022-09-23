@@ -84,7 +84,7 @@ describe("ethereum hlr", function () {
       throw new Error("verifier3Opt is undifined");
     }
     await hlr.init(hflOpt);
-    stream = hlr.subscribe(nodeAddress, 0);
+    stream = hlr.subscribe(nodeAddress);
     await identity.join(serverUrl, serverName);
     await datahub.register(
       nodeAddress,

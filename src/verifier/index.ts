@@ -9,7 +9,11 @@ export async function getVk(weightSize: number): Promise<snarkjs.plonk.Verifier>
   return vk;
 }
 
-export async function verify(vk: snarkjs.plonk.Verifier, proof: string, pubSignals: string[]): Promise<boolean> {
+export async function verify(
+  vk: snarkjs.plonk.Verifier,
+  proof: string,
+  pubSignals: string[]
+): Promise<boolean> {
   const proofStruct: snarkjs.plonk.Proof = JSON.parse(proof);
   return await snarkjs.plonk.verify(vk, pubSignals, proofStruct);
 }
@@ -32,5 +36,5 @@ export async function exportCallData(proof: string, pubSignals: string[]): Promi
   const sep = calldata.search(",");
   const _proof = calldata.slice(0, sep);
   const _pubSignals: string[] = JSON.parse(calldata.slice(sep + 1));
-  return [_proof, _pubSignals]; 
+  return [_proof, _pubSignals];
 }

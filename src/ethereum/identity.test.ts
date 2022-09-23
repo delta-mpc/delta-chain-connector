@@ -17,7 +17,7 @@ describe("ethereum identity", function () {
   const opt: ContractOption = {
     nodeAddress: nodeAddress,
     privateKey: privateKey,
-    provider: ganache.provider({wallet: {seed: "delta"}}),
+    provider: ganache.provider({ wallet: { seed: "delta" } }),
     gasPrice: 20000000000,
     gasLimit: 6721975,
     chainParam: {

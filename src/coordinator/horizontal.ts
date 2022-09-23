@@ -701,8 +701,8 @@ class Horizontal implements HorizontalImpl {
     return randomHex(32);
   }
 
-  subscribe(address: string, timeout: number): Readable {
-    return this.subscriber.subscribe(address, timeout);
+  subscribe(address: string): Readable {
+    return this.subscriber.subscribe(address);
   }
 
   unsubscribe(stream: Readable): void {

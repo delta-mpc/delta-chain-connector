@@ -30,7 +30,7 @@ class Horizontal implements HorizontalImpl {
     await this.contract.init();
   }
 
-  subscribe(address: string, timeout: number): Readable {
+  subscribe(address: string): Readable {
     const src = this.contract.subscribe();
     src.on("data", (event: EventData) => {
       const res = event.returnValues;
@@ -92,7 +92,7 @@ class Horizontal implements HorizontalImpl {
           break;
       }
     });
-    const res = this.subscriber.subscribe(address, timeout);
+    const res = this.subscriber.subscribe(address);
     this.subscribeMap.set(res, src);
     return res;
   }
@@ -207,12 +207,7 @@ class Horizontal implements HorizontalImpl {
       throw new Error(`chain connector node address is not ${address}`);
     }
 
-    const hash = await this.contract.method("uploadSeedCommitment", [
-      taskID,
-      round,
-      receivers,
-      commitments,
-    ]);
+    const hash = await this.contract.method("uploadSeedCommitment", [taskID, round, receivers, commitments]);
     await this.contract.waitForReceipt(hash);
     return hash;
   }

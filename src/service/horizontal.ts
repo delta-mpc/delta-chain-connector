@@ -1,6 +1,5 @@
 import * as grpc from "@grpc/grpc-js";
 import * as protoloader from "@grpc/proto-loader";
-import { HeartBeatEvent, HorizontalEvent } from "~/event";
 import { getHorizontal } from "~/impl";
 import log from "~/log";
 import { ProtoGrpcType } from "~/proto/horizontal";
@@ -10,8 +9,6 @@ import { CandidatesReq__Output } from "~/proto/horizontal/CandidatesReq";
 import { CreateTaskReq__Output } from "~/proto/horizontal/CreateTaskReq";
 import { CreateTaskResp } from "~/proto/horizontal/CreateTaskResp";
 import { EndRoundReq__Output } from "~/proto/horizontal/EndRoundReq";
-import { Event } from "~/proto/horizontal/Event";
-import { EventReq__Output } from "~/proto/horizontal/EventReq";
 import { FinishTaskReq__Output } from "~/proto/horizontal/FinishTaskReq";
 import { HorizontalHandlers } from "~/proto/horizontal/Horizontal";
 import { JoinRoundReq__Output } from "~/proto/horizontal/JoinRoundReq";
@@ -369,92 +366,6 @@ const service: HorizontalHandlers = {
         log.error(err);
         callback(err, null);
       });
-  },
-
-  Subscribe(call: grpc.ServerWritableStream<EventReq__Output, Event>) {
-    const address = call.request.address;
-    const timeout = call.request.timeout;
-    log.info(`node ${address} subscribe`);
-    const stream = getHorizontal().subscribe(address, timeout);
-    stream.on("data", (event: HorizontalEvent | HeartBeatEvent) => {
-      switch (event.type) {
-        case "TaskCreated":
-          call.write({
-            taskCreated: {
-              address: event.address,
-              url: event.url,
-              taskId: event.taskID,
-              dataset: event.dataset,
-              commitment: event.commitment,
-              taskType: event.taskType,
-            },
-          });
-          break;
-        case "RoundStarted":
-          call.write({
-            roundStarted: {
-              taskId: event.taskID,
-              round: event.round,
-            },
-          });
-          break;
-        case "RoundEnded":
-          call.write({
-            roundEnded: {
-              taskId: event.taskID,
-              round: event.round,
-            },
-          });
-          break;
-        case "PartnerSelected":
-          call.write({
-            partnerSelected: {
-              taskId: event.taskID,
-              round: event.round,
-              addrs: event.addrs,
-            },
-          });
-          break;
-        case "CalculationStarted":
-          call.write({
-            calculationStarted: {
-              taskId: event.taskID,
-              round: event.round,
-              addrs: event.addrs,
-            },
-          });
-          break;
-        case "AggregationStarted":
-          call.write({
-            aggregationStarted: {
-              taskId: event.taskID,
-              round: event.round,
-              addrs: event.addrs,
-            },
-          });
-          break;
-        case "TaskFinished":
-          call.write({
-            taskFinished: {
-              taskId: event.taskID,
-            },
-          });
-        case "Heartbeat":
-          call.write({
-            heartbeat: {},
-          });
-      }
-    });
-    call.on("error", () => {
-      log.info(`node ${address} unsubscribe`);
-      getHorizontal().unsubscribe(stream);
-      call.end();
-    });
-    call.on("cancelled", () => {
-      log.info(`node ${address} unsubscribe`);
-      getHorizontal().unsubscribe(stream);
-      call.end();
-    });
   },
 };
 

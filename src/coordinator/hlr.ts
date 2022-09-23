@@ -33,7 +33,7 @@ class HLR implements HLRImpl {
     const task = new entity.HLRTask(address, dataset, commitment, enableVerify, tolerance);
     await em.persistAndFlush(task);
     this.subscriber.publish({
-      type: "TaskCreated",
+      type: "HLRTaskCreated",
       address: task.address,
       taskID: task.outID,
       dataset: task.dataset,
@@ -962,8 +962,8 @@ class HLR implements HLRImpl {
     };
   }
 
-  subscribe(address: string, timeout: number): Readable {
-    return this.subscriber.subscribe(address, timeout);
+  subscribe(address: string): Readable {
+    return this.subscriber.subscribe(address);
   }
 
   unsubscribe(stream: Readable): void {

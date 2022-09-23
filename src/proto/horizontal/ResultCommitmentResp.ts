@@ -1,10 +1,9 @@
 // Original file: src/proto/horizontal.proto
 
-
 export interface ResultCommitmentResp {
-  'commitment'?: (string);
+  commitment?: string;
 }
 
 export interface ResultCommitmentResp__Output {
-  'commitment': (string);
+  commitment: string;
 }

@@ -161,69 +161,6 @@ message EndRoundReq {
     int32 round = 3;
 }
 
-message EventReq {
-    string address = 1;
-    int32 timeout = 2;
-}
-
-message Event {
-    oneof event {
-        TaskCreateEvent task_created = 1;
-        RoundStartedEvent round_started = 2;
-        PartnerSelectedEvent partner_selected = 3;
-        CalculationStartedEvent calculation_started = 4;
-        AggregationStartedEvent aggregation_started = 5;
-        RoundEndedEvent round_ended = 6;
-        TaskFinishEvent task_finished = 7;
-        HeartBeatEvent heartbeat = 8;
-    }
-}
-
-message TaskCreateEvent {
-    string address = 1;
-    string task_id = 2;
-    string dataset = 3;
-    string url = 4;
-    string commitment = 5;
-    string task_type = 6;
-}
-
-message RoundStartedEvent {
-    string task_id = 1;
-    int32 round = 2;  
-}
-
-message PartnerSelectedEvent {
-    string task_id = 1;
-    int32 round = 2;
-    repeated string addrs = 3;
-}
-
-message CalculationStartedEvent {
-    string task_id = 1;
-    int32 round = 2;
-    repeated string addrs = 3;
-}
-
-message AggregationStartedEvent {
-    string task_id = 1;
-    int32 round = 2;
-    repeated string addrs = 3;
-}
-
-message RoundEndedEvent {
-    string task_id = 1;
-    int32 round = 2;
-}
-
-message TaskFinishEvent {
-    string task_id = 1;
-}
-
-message HeartBeatEvent {
-
-}
-
 service Horizontal {
     rpc CreateTask(CreateTaskReq) returns (CreateTaskResp) {}
     rpc FinishTask(FinishTaskReq) returns (transaction.Transaction) {}
@@ -243,6 +180,5 @@ service Horizontal {
     rpc UploadSecretKey(Share) returns (transaction.Transaction) {}
     rpc GetSecretShareDatas(SecretShareReq) returns (SecretShareResp) {}
     rpc EndRound(EndRoundReq) returns (transaction.Transaction) {}
-    rpc Subscribe(EventReq) returns (stream Event) {}
 }
 

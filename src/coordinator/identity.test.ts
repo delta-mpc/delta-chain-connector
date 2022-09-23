@@ -24,7 +24,7 @@ describe("coordinator identity", function () {
     const orm = db.getORM();
     const generator = orm.getSchemaGenerator();
     await generator.dropSchema();
-    await orm.close(true);
+    await db.close();
   });
 
   let address1: string;

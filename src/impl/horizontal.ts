@@ -58,7 +58,7 @@ export interface HorizontalImpl {
     receiver: string
   ): Promise<SecretShareData[]>;
   endRound(address: string, taskID: string, round: number): Promise<string>;
-  subscribe(address: string, timeout: number): Readable;
+  subscribe(address: string): Readable;
   unsubscribe(stream: Readable): void;
 }
 

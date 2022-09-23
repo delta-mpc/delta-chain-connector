@@ -80,8 +80,8 @@ const defaultConfig: Config = {
     hlr: {
       contractAddress: "",
       verifiers: {
-        3: ""
-      }
+        3: "",
+      },
     },
   },
 };

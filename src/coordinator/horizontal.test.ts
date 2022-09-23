@@ -45,7 +45,7 @@ describe("coordinator horizontal", function () {
     const orm = db.getORM();
     const generator = orm.getSchemaGenerator();
     await generator.dropSchema();
-    await orm.close(true);
+    await db.close();
   });
 
   let taskID: string;

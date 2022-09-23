@@ -1,10 +1,9 @@
 // Original file: src/proto/transaction.proto
 
-
 export interface Transaction {
-  'txHash'?: (string);
+  txHash?: string;
 }
 
 export interface Transaction__Output {
-  'txHash': (string);
+  txHash: string;
 }

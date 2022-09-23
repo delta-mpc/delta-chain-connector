@@ -62,8 +62,8 @@ class DataHub implements DataHubImpl {
     return record.commitment;
   }
 
-  subscribe(address: string, timeout: number): Readable {
-    return this.subscriber.subscribe(address, timeout);
+  subscribe(address: string): Readable {
+    return this.subscriber.subscribe(address);
   }
 
   unsubscribe(stream: Readable): void {
