@@ -1,5 +1,6 @@
 import * as grpc from "@grpc/grpc-js";
 import * as protoloader from "@grpc/proto-loader";
+import log from "~/log";
 import { PassThrough } from "stream";
 import { DataRegisteredEvent, HLREvent, HorizontalEvent } from "~/event";
 import { getDataHub, getHLR } from "~/impl";
@@ -215,6 +216,7 @@ const service: SubscribeHandlers = {
             type: "Heartbeat",
           },
         });
+        log.debug("write heartbeat");
       }, timeout * 1000);
     }
     call.on("error", () => {
