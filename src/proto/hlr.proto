@@ -8,7 +8,7 @@ message CreateTaskReq {
     string address = 1;
     string dataset = 2;
     string commitment = 3;
-    bool enableVerify = 4;
+    bool enable_verify = 4;
     int32 tolerance = 5;
 }
 
@@ -34,7 +34,7 @@ message TaskResp {
     string commitment = 5;
     string task_type = 6;
     bool finished = 7;
-    bool enableVerify = 8;
+    bool enable_verify = 8;
     int32 tolerance = 9;
 }
 
@@ -42,7 +42,7 @@ message StartRoundReq {
     string address = 1;
     string task_id = 2;
     int32 round = 3;
-    string weightCommitment = 4;
+    string weight_commitment = 4;
 }
 
 message WeightCommitmentReq {
@@ -78,7 +78,8 @@ enum RoundStatus {
 message TaskRoundResp {
     int32 round = 1;
     RoundStatus status = 2;
-    repeated string clients = 3;
+    repeated string joined_clients = 3;
+    repeated string finished_clients = 4;
 }
 
 message CandidatesReq {
