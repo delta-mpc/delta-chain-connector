@@ -8,6 +8,8 @@ export interface TaskResp {
   commitment?: string;
   taskType?: string;
   finished?: boolean;
+  enableVerify?: boolean;
+  tolerance?: number;
 }
 
 export interface TaskResp__Output {
@@ -18,4 +20,6 @@ export interface TaskResp__Output {
   commitment: string;
   taskType: string;
   finished: boolean;
+  enableVerify: boolean;
+  tolerance: number;
 }

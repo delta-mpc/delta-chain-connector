@@ -34,6 +34,8 @@ message TaskResp {
     string commitment = 5;
     string task_type = 6;
     bool finished = 7;
+    bool enableVerify = 8;
+    int32 tolerance = 9;
 }
 
 message StartRoundReq {
