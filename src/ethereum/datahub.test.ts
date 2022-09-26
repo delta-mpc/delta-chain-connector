@@ -32,7 +32,7 @@ describe("ethereum datahub", function () {
 
   before(async function () {
     await datahub.init(opt);
-    stream = datahub.subscribe(nodeAddress, 0);
+    stream = datahub.subscribe(nodeAddress);
   });
 
   const dataset = "mnist";

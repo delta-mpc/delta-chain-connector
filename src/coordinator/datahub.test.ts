@@ -26,7 +26,7 @@ describe("datahub coordinator", () => {
 
     address = (await identity.join("127.0.0.1:6700", "node1"))[1];
 
-    stream = datahub.subscribe(address, 0);
+    stream = datahub.subscribe(address);
   });
 
   after(async function () {
