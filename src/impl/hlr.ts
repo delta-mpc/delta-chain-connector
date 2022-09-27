@@ -70,6 +70,7 @@ export interface HLRImpl {
     samples: number
   ): Promise<[string, boolean]>;
   getVerifierState(taskID: string): Promise<VerifierState>;
+  confirmVerification(address: string, taskID: string): Promise<string>;
   subscribe(address: string): Readable;
   unsubscribe(stream: Readable): void;
 }

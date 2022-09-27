@@ -10,6 +10,9 @@ export class HLRVerifier {
   @Property({ default: false, type: "boolean" })
   valid = true;
 
+  @Property({ default: false, type: "boolean" })
+  confirmed = false;
+
   @Property()
   gradients!: string[];
 
@@ -50,4 +53,5 @@ export interface VerifierState {
   unfinishedClients: string[];
   invalidClients: string[];
   valid: boolean;
+  confirmed: boolean;
 }

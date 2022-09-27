@@ -15,6 +15,10 @@ import type {
   CandidatesReq__Output as _hlr_CandidatesReq__Output,
 } from "../hlr/CandidatesReq";
 import type {
+  ConfirmReq as _hlr_ConfirmReq,
+  ConfirmReq__Output as _hlr_ConfirmReq__Output,
+} from "../hlr/ConfirmReq";
+import type {
   CreateTaskReq as _hlr_CreateTaskReq,
   CreateTaskReq__Output as _hlr_CreateTaskReq__Output,
 } from "../hlr/CreateTaskReq";
@@ -107,6 +111,47 @@ import type {
 } from "../hlr/WeightCommitmentResp";
 
 export interface HLRClient extends grpc.Client {
+  ConfirmVerification(
+    argument: _hlr_ConfirmReq,
+    metadata: grpc.Metadata,
+    options: grpc.CallOptions,
+    callback: grpc.requestCallback<_transaction_Transaction__Output>
+  ): grpc.ClientUnaryCall;
+  ConfirmVerification(
+    argument: _hlr_ConfirmReq,
+    metadata: grpc.Metadata,
+    callback: grpc.requestCallback<_transaction_Transaction__Output>
+  ): grpc.ClientUnaryCall;
+  ConfirmVerification(
+    argument: _hlr_ConfirmReq,
+    options: grpc.CallOptions,
+    callback: grpc.requestCallback<_transaction_Transaction__Output>
+  ): grpc.ClientUnaryCall;
+  ConfirmVerification(
+    argument: _hlr_ConfirmReq,
+    callback: grpc.requestCallback<_transaction_Transaction__Output>
+  ): grpc.ClientUnaryCall;
+  confirmVerification(
+    argument: _hlr_ConfirmReq,
+    metadata: grpc.Metadata,
+    options: grpc.CallOptions,
+    callback: grpc.requestCallback<_transaction_Transaction__Output>
+  ): grpc.ClientUnaryCall;
+  confirmVerification(
+    argument: _hlr_ConfirmReq,
+    metadata: grpc.Metadata,
+    callback: grpc.requestCallback<_transaction_Transaction__Output>
+  ): grpc.ClientUnaryCall;
+  confirmVerification(
+    argument: _hlr_ConfirmReq,
+    options: grpc.CallOptions,
+    callback: grpc.requestCallback<_transaction_Transaction__Output>
+  ): grpc.ClientUnaryCall;
+  confirmVerification(
+    argument: _hlr_ConfirmReq,
+    callback: grpc.requestCallback<_transaction_Transaction__Output>
+  ): grpc.ClientUnaryCall;
+
   CreateTask(
     argument: _hlr_CreateTaskReq,
     metadata: grpc.Metadata,
@@ -970,6 +1015,8 @@ export interface HLRClient extends grpc.Client {
 }
 
 export interface HLRHandlers extends grpc.UntypedServiceImplementation {
+  ConfirmVerification: grpc.handleUnaryCall<_hlr_ConfirmReq__Output, _transaction_Transaction>;
+
   CreateTask: grpc.handleUnaryCall<_hlr_CreateTaskReq__Output, _hlr_CreateTaskResp>;
 
   EndRound: grpc.handleUnaryCall<_hlr_EndRoundReq__Output, _transaction_Transaction>;
@@ -1014,6 +1061,12 @@ export interface HLRHandlers extends grpc.UntypedServiceImplementation {
 }
 
 export interface HLRDefinition extends grpc.ServiceDefinition {
+  ConfirmVerification: MethodDefinition<
+    _hlr_ConfirmReq,
+    _transaction_Transaction,
+    _hlr_ConfirmReq__Output,
+    _transaction_Transaction__Output
+  >;
   CreateTask: MethodDefinition<
     _hlr_CreateTaskReq,
     _hlr_CreateTaskResp,

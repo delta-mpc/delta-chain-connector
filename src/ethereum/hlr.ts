@@ -108,11 +108,10 @@ class HLR implements HLRImpl {
             verified: Boolean(res.verified),
           });
           break;
-        case "TaskVerified":
+        case "TaskVerificationConfirmed":
           this.subscriber.publish({
-            type: "TaskVerified",
-            taskID: res.taskID,
-            verified: Boolean(res.verified),
+            type: "TaskVerificationConfirmed",
+            taskID: res.taskId,
           });
           break;
       }
@@ -432,7 +431,17 @@ class HLR implements HLRImpl {
       unfinishedClients: res.unfinishedClients,
       invalidClients: res.invalidClients,
       valid: Boolean(res.valid),
+      confirmed: Boolean(res.confirmed),
     };
+  }
+
+  async confirmVerification(address: string, taskID: string): Promise<string> {
+    if (address !== this.option.nodeAddress) {
+      throw new Error(`chain connector node address is not ${address}`);
+    }
+    const hash = await this.contract.method("confirmVerification", [taskID]);
+    await this.contract.waitForReceipt(hash);
+    return hash;
   }
 }
 

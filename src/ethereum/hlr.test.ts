@@ -297,5 +297,15 @@ describe("ethereum hlr", function () {
     assert.lengthOf(state.invalidClients, 0);
     assert.lengthOf(state.unfinishedClients, 0);
     assert.isTrue(state.valid);
+    assert.isNotTrue(state.confirmed);
+  });
+
+  it("confirm verification", async () => {
+    await hlr.confirmVerification(nodeAddress, taskID);
+    const event = stream.read();
+    assert.strictEqual(event.taskID, taskID);
+
+    const state = await hlr.getVerifierState(taskID);
+    assert.isTrue(state.confirmed);
   });
 });

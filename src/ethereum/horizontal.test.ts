@@ -50,7 +50,7 @@ describe("ethereum horizontal", function () {
     await identity.init(identityOpt);
     hflOpt.deployArgs = [identity.contract.option.contractAddress];
     await horizontal.init(hflOpt);
-    stream = horizontal.subscribe(nodeAddress, 0);
+    stream = horizontal.subscribe(nodeAddress);
     await identity.join(serverUrl, serverName);
   });
 

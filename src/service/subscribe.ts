@@ -1,10 +1,10 @@
 import * as grpc from "@grpc/grpc-js";
 import * as protoloader from "@grpc/proto-loader";
-import log from "~/log";
 import { PassThrough } from "stream";
 import { DataRegisteredEvent, HLREvent, HorizontalEvent } from "~/event";
 import { getDataHub, getHLR } from "~/impl";
 import { getHorizontal } from "~/impl/horizontal";
+import log from "~/log";
 import { ProtoGrpcType } from "~/proto/subscribe";
 import { Event } from "~/proto/subscribe/Event";
 import { EventReq__Output } from "~/proto/subscribe/EventReq";
@@ -176,11 +176,10 @@ function hlrSubscribe(address: string) {
           },
         });
         break;
-      case "TaskVerified":
+      case "TaskVerificationConfirmed":
         dst.write({
-          taskVerified: {
+          taskVerificationConfirmed: {
             taskId: event.taskID,
-            verified: event.verified,
           },
         });
     }

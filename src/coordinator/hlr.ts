@@ -797,11 +797,6 @@ class HLR implements HLRImpl {
         address: address,
         verified: false,
       });
-      this.subscriber.publish({
-        type: "TaskVerified",
-        taskID: taskID,
-        verified: false,
-      });
       return [txHash, false];
     }
     // check gradients
@@ -850,11 +845,6 @@ class HLR implements HLRImpl {
           address: address,
           verified: false,
         });
-        this.subscriber.publish({
-          type: "TaskVerified",
-          taskID: taskID,
-          verified: false,
-        });
         return [txHash, false];
       }
     }
@@ -869,11 +859,6 @@ class HLR implements HLRImpl {
         type: "TaskMemberVerified",
         taskID: taskID,
         address: address,
-        verified: false,
-      });
-      this.subscriber.publish({
-        type: "TaskVerified",
-        taskID: taskID,
         verified: false,
       });
       return [txHash, false];
@@ -892,11 +877,6 @@ class HLR implements HLRImpl {
         address: address,
         verified: false,
       });
-      this.subscriber.publish({
-        type: "TaskVerified",
-        taskID: taskID,
-        verified: false,
-      });
       return [txHash, false];
     }
 
@@ -907,13 +887,7 @@ class HLR implements HLRImpl {
       address: address,
       verified: true,
     });
-    if (finishedCount + 1 === finalMembers.length) {
-      this.subscriber.publish({
-        type: "TaskVerified",
-        taskID: taskID,
-        verified: true,
-      });
-    }
+
     return [txHash, true];
   }
 
@@ -947,6 +921,7 @@ class HLR implements HLRImpl {
         unfinishedClients: addresses,
         invalidClients: [],
         valid: true,
+        confirmed: false,
       };
     }
 
@@ -959,7 +934,54 @@ class HLR implements HLRImpl {
       unfinishedClients: unfinishedClients,
       invalidClients: invalidClients,
       valid: state.valid,
+      confirmed: state.confirmed,
     };
+  }
+
+  async confirmVerification(address: string, taskID: string): Promise<string> {
+    const em = db.getEntityManager();
+    const task = await em.findOne(entity.HLRTask, { outID: taskID, address: address });
+    if (!task) {
+      throw new Error(`task ${taskID} doesn't exist`);
+    }
+    if (!task.finished) {
+      throw new Error(`task ${taskID} is not finished`);
+    }
+    const state = await em.findOne(entity.HLRVerifier, { task: task });
+    if (!state) {
+      throw new Error(`task ${taskID} verification is not finished`);
+    }
+    if (!state.valid) {
+      throw new Error(`task ${taskID} verification is already failed`);
+    }
+    if (state.confirmed) {
+      throw new Error(`task ${taskID} verification has already been confirmed`);
+    }
+    const finalRound = await em.findOne(entity.HLRRound, { task: task }, { orderBy: { round: "DESC" } });
+    if (!finalRound) {
+      throw new Error(`task ${taskID} final round doesn't exist`);
+    }
+    if (finalRound.status != entity.RoundStatus.Finished) {
+      throw new Error(`task ${taskID} final round is not finished`);
+    }
+    const finalMembers = await em.find(entity.HLRRoundMember, {
+      round: finalRound,
+      status: entity.RoundStatus.Aggregating,
+    });
+    const finishedCount = await em.count(entity.HLRMemberVerifier, { member: { $in: finalMembers } });
+    if (finishedCount !== finalMembers.length) {
+      throw new Error(`task ${taskID} verification is not finished`);
+    }
+
+    state.confirmed = true;
+    await em.flush();
+
+    this.subscriber.publish({
+      type: "TaskVerificationConfirmed",
+      taskID: taskID,
+    });
+
+    return randomHex(32);
   }
 
   subscribe(address: string): Readable {

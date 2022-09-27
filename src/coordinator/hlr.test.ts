@@ -427,17 +427,22 @@ describe("hlr coordinator verify", () => {
     assert.lengthOf(state1.invalidClients, 0);
     assert.lengthOf(state1.unfinishedClients, 3);
     assert.includeMembers(state1.unfinishedClients, [address1, address2, address3]);
+    assert.isNotTrue(state1.confirmed);
 
     const [, valid1] = await hlr.verify(address1, taskID, 3, proofs[0], pubSignals[0], 0, 10);
+    await assert.isRejected(hlr.confirmVerification(address1, taskID));
     const [, valid2] = await hlr.verify(address2, taskID, 3, proofs[1], pubSignals[1], 0, 10);
     const [, valid3] = await hlr.verify(address3, taskID, 3, proofs[2], pubSignals[2], 0, 10);
     assert.isTrue(valid1);
     assert.isTrue(valid2);
     assert.isTrue(valid3);
 
+    await hlr.confirmVerification(address1, taskID);
+
     const state2 = await hlr.getVerifierState(taskID);
     assert.isTrue(state2.valid);
     assert.lengthOf(state2.invalidClients, 0);
     assert.lengthOf(state2.unfinishedClients, 0);
+    assert.isTrue(state2.confirmed);
   });
 });

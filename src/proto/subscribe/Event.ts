@@ -37,9 +37,9 @@ import type {
   TaskMemberVerifiedEvent__Output as _subscribe_TaskMemberVerifiedEvent__Output,
 } from "../subscribe/TaskMemberVerifiedEvent";
 import type {
-  TaskVerifiedEvent as _subscribe_TaskVerifiedEvent,
-  TaskVerifiedEvent__Output as _subscribe_TaskVerifiedEvent__Output,
-} from "../subscribe/TaskVerifiedEvent";
+  TaskVerificationConfirmedEvent as _subscribe_TaskVerificationConfirmedEvent,
+  TaskVerificationConfirmedEvent__Output as _subscribe_TaskVerificationConfirmedEvent__Output,
+} from "../subscribe/TaskVerificationConfirmedEvent";
 import type {
   DataRegisteredEvent as _subscribe_DataRegisteredEvent,
   DataRegisteredEvent__Output as _subscribe_DataRegisteredEvent__Output,
@@ -55,7 +55,7 @@ export interface Event {
   taskFinished?: _subscribe_TaskFinishEvent | null;
   heartbeat?: _subscribe_HeartBeatEvent | null;
   taskMemberVerified?: _subscribe_TaskMemberVerifiedEvent | null;
-  taskVerified?: _subscribe_TaskVerifiedEvent | null;
+  taskVerificationConfirmed?: _subscribe_TaskVerificationConfirmedEvent | null;
   dataRegistered?: _subscribe_DataRegisteredEvent | null;
   event?:
     | "taskCreated"
@@ -67,7 +67,7 @@ export interface Event {
     | "taskFinished"
     | "heartbeat"
     | "taskMemberVerified"
-    | "taskVerified"
+    | "taskVerificationConfirmed"
     | "dataRegistered";
 }
 
@@ -81,7 +81,7 @@ export interface Event__Output {
   taskFinished?: _subscribe_TaskFinishEvent__Output | null;
   heartbeat?: _subscribe_HeartBeatEvent__Output | null;
   taskMemberVerified?: _subscribe_TaskMemberVerifiedEvent__Output | null;
-  taskVerified?: _subscribe_TaskVerifiedEvent__Output | null;
+  taskVerificationConfirmed?: _subscribe_TaskVerificationConfirmedEvent__Output | null;
   dataRegistered?: _subscribe_DataRegisteredEvent__Output | null;
   event:
     | "taskCreated"
@@ -93,6 +93,6 @@ export interface Event__Output {
     | "taskFinished"
     | "heartbeat"
     | "taskMemberVerified"
-    | "taskVerified"
+    | "taskVerificationConfirmed"
     | "dataRegistered";
 }

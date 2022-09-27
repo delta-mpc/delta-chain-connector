@@ -19,10 +19,13 @@ interface TaskMemberVerifiedEvent {
   verified: boolean;
 }
 
-interface TaskVerifiedEvent {
-  type: "TaskVerified";
+interface TaskVerificationConfirmedEvent {
+  type: "TaskVerificationConfirmed";
   taskID: string;
-  verified: boolean;
 }
 
-export type HLREvent = HorizontalEvent | TaskMemberVerifiedEvent | TaskVerifiedEvent | TaskCreatedEvent;
+export type HLREvent =
+  | HorizontalEvent
+  | TaskMemberVerifiedEvent
+  | TaskVerificationConfirmedEvent
+  | TaskCreatedEvent;

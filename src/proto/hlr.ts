@@ -12,6 +12,7 @@ export interface ProtoGrpcType {
     AggregationReq: MessageTypeDefinition;
     CalculationReq: MessageTypeDefinition;
     CandidatesReq: MessageTypeDefinition;
+    ConfirmReq: MessageTypeDefinition;
     CreateTaskReq: MessageTypeDefinition;
     CreateTaskResp: MessageTypeDefinition;
     EndRoundReq: MessageTypeDefinition;

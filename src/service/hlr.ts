@@ -6,6 +6,7 @@ import { ProtoGrpcType } from "~/proto/hlr";
 import { AggregationReq__Output } from "~/proto/hlr/AggregationReq";
 import { CalculationReq__Output } from "~/proto/hlr/CalculationReq";
 import { CandidatesReq__Output } from "~/proto/hlr/CandidatesReq";
+import { ConfirmReq__Output } from "~/proto/hlr/ConfirmReq";
 import { CreateTaskReq__Output } from "~/proto/hlr/CreateTaskReq";
 import { CreateTaskResp } from "~/proto/hlr/CreateTaskResp";
 import { EndRoundReq__Output } from "~/proto/hlr/EndRoundReq";
@@ -439,6 +440,22 @@ const service: HLRHandlers = {
         callback(err, null);
       });
   },
+
+  ConfirmVerification(
+    call: grpc.ServerUnaryCall<ConfirmReq__Output, Transaction>,
+    callback: grpc.sendUnaryData<Transaction>
+  ) {
+    getHLR()
+      .confirmVerification(call.request.address, call.request.taskId)
+      .then((txHash) => {
+        log.info(`task ${call.request.taskId} verification confirmed`);
+        callback(null, { txHash: txHash });
+      })
+      .catch((err: Error) => {
+        log.error(err);
+        callback(err, null);
+      });
+  }
 };
 
 export function addService(server: grpc.Server): void {

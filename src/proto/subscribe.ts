@@ -27,6 +27,6 @@ export interface ProtoGrpcType {
     TaskCreateEvent: MessageTypeDefinition;
     TaskFinishEvent: MessageTypeDefinition;
     TaskMemberVerifiedEvent: MessageTypeDefinition;
-    TaskVerifiedEvent: MessageTypeDefinition;
+    TaskVerificationConfirmedEvent: MessageTypeDefinition;
   };
 }
