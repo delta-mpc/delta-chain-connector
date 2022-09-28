@@ -38,10 +38,6 @@ describe("ethereum datahub", function () {
   const dataset = "mnist";
   const commitment0 = "0x1230000000000000000000000000000000000000000000000000000000000000";
 
-  // it("reject block 1", async () => {
-  //   assert.isRejected(datahub.register(nodeAddress, dataset, 1, commitment0));
-  // });
-
   it("register block 0", async () => {
     await datahub.register(nodeAddress, dataset, 0, commitment0);
 
@@ -76,7 +72,4 @@ describe("ethereum datahub", function () {
     assert.strictEqual(event?.commitment, newCommitment1);
   });
 
-  it("reject update block 3", async () => {
-    assert.isRejected(datahub.register(nodeAddress, dataset, 3, commitment0));
-  });
 });

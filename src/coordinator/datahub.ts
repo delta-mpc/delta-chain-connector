@@ -19,26 +19,12 @@ class DataHub implements DataHubImpl {
 
     await identity.getNodeInfo(address);
 
-    let record = await em.findOne(
-      entity.DataRecord,
-      { owner: address, name: name },
-      { orderBy: { index: "DESC" } }
-    );
+    let record = await em.findOne(entity.DataRecord, { owner: address, name: name, index: index });
     if (!record) {
-      if (index !== 0) {
-        throw new Error("First data block index should be 0");
-      }
       record = new entity.DataRecord(address, name, index, commitment);
       em.persist(record);
     } else {
-      if (index === record.index) {
-        record.commitment = commitment;
-      } else if (index === record.index + 1) {
-        record = new entity.DataRecord(address, name, index, commitment);
-        em.persist(record);
-      } else {
-        throw new Error("You can only update the last block or create a new block after it");
-      }
+      record.commitment = commitment;
     }
 
     await em.flush();

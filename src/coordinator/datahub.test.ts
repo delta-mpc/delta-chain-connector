@@ -41,10 +41,6 @@ describe("datahub coordinator", () => {
   const dataset = "mnist";
   const commitment0 = "0x1230000000000000000000000000000000000000000000000000000000000000";
 
-  it("reject block 1", async () => {
-    assert.isRejected(datahub.register(address, dataset, 1, commitment0));
-  });
-
   it("register block 0", async () => {
     await datahub.register(address, dataset, 0, commitment0);
 
@@ -77,9 +73,5 @@ describe("datahub coordinator", () => {
     assert.strictEqual(event?.name, dataset);
     assert.strictEqual(event?.index, 1);
     assert.strictEqual(event?.commitment, newCommitment1);
-  });
-
-  it("reject update block 3", async () => {
-    assert.isRejected(datahub.register(address, dataset, 3, commitment0));
   });
 });
