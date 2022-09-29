@@ -1,6 +1,6 @@
 {
   "name": "delta-chain-connector",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "The centralized replacement of Blockchain to run Delta tasks faster and easier for demonstration purposes or in the environment where decentralized trust is not required..",
   "main": "./lib/index.js",
   "bin": {
