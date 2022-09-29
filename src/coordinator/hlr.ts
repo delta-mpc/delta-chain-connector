@@ -31,7 +31,12 @@ class HLR implements HLRImpl {
     }
 
     const task = new entity.HLRTask(address, dataset, commitment, enableVerify, tolerance);
-    await em.persistAndFlush(task);
+    em.persist(task);
+    if (enableVerify) {
+      const verifier = new entity.HLRVerifier(task);
+      em.persist(verifier);
+    }
+    await em.flush();
     this.subscriber.publish({
       type: "HLRTaskCreated",
       address: task.address,
@@ -766,23 +771,39 @@ class HLR implements HLRImpl {
       throw new Error(`${address} is not allowed to verify`);
     }
 
+    const state = await em.findOne(entity.HLRVerifier, { task: task });
+    if (!state) {
+      throw new Error(`task ${taskID} verification is forbidden`);
+    } else if (!state.valid) {
+      throw new Error(`task ${taskID} verfication is already failed`);
+    }
+
     const member = finalMembers.filter((e) => e.address === address)[0];
     let memberState = await em.findOne(entity.HLRMemberVerifier, { member: member });
     if (memberState) {
       throw new Error(`${address} has already verified`);
     }
-    memberState = new entity.HLRMemberVerifier(member);
-    em.persist(memberState);
-
-    let state = await em.findOne(entity.HLRVerifier, { task: task });
-    if (!state) {
-      state = new entity.HLRVerifier(task, new Array((pubSignals.length - 2) / 2).fill("0"), 0);
-      em.persist(state);
-    } else if (!state.valid) {
-      throw new Error(`task ${taskID} verfication is already failed`);
+    const gradients = new Array(0);
+    let precision = 0;
+    for (const [i, v] of pubSignals.slice(0, -2).entries()) {
+      if (i % 2 == 0) {
+        gradients.push(v);
+      } else {
+        const p = Number(v);
+        if (precision == 0) {
+          precision = p;
+          if (precision < task.tolerance) {
+            throw new Error(`${taskID} gradient precision is lower than tolerance`);
+          } else if (precision !== p) {
+            throw new Error(`${taskID} gradient precision is not consistent`);
+          }
+        }
+      }
     }
-
-    const finishedCount = await em.count(entity.HLRMemberVerifier, { member: { $in: finalMembers } });
+    // store samples, gradients, precision
+    memberState = new entity.HLRMemberVerifier(state, member, samples, gradients, precision);
+    em.persist(memberState);
+    await em.flush();
 
     // check zk proof
     const vk = await verifier.getVk(weightSize);
@@ -799,33 +820,27 @@ class HLR implements HLRImpl {
       });
       return [txHash, false];
     }
-    // check gradients
-    const gradients = state.gradients.map((g) => new BN(g, 10));
-    const q = verifier.getQ(vk.curve);
-    state.samples += samples;
 
-    for (const [i, v] of pubSignals.slice(0, -2).entries()) {
-      if (i % 2 == 0) {
-        const gradient = new BN(v, 10);
-        const idx = i / 2;
-        gradients[idx] = gradients[idx].add(gradient).mod(q);
-      } else {
-        const precision = Number(v);
-        if (state.precision === 0) {
-          state.precision = precision;
-          if (precision < task.tolerance) {
-            throw new Error(`${taskID} gradient precision is lower than tolerance`);
-          }
-        } else if (state.precision !== precision) {
+    // check gradients when all members verify
+    const q = verifier.getQ(vk.curve);
+    const memberVerifiers = await em.find(entity.HLRMemberVerifier, {verifier: state, valid: true});
+    if (memberVerifiers.length === finalMembers.length) {
+      let precision = 0;
+      let samples = 0;
+      const finalGradients: BN[] = new Array(gradients.length).fill(new BN(0, 10));
+      for (const mv of memberVerifiers) {
+        if (precision === 0) {
+          precision = mv.precision;
+        } else if (precision !== mv.precision) {
           throw new Error(`${taskID} gradient precision is not consistent`);
         }
+        samples += mv.samples;
+        for (const [i, g] of mv.gradients.entries()) {
+          finalGradients[i] = finalGradients[i].add(new BN(g, 10)).mod(q);
+        }
       }
-    }
-    state.gradients = gradients.map((v) => v.toString(10));
 
-    // the last member
-    if (finishedCount + 1 === finalMembers.length) {
-      const absGradients = gradients.map((g) => {
+      const absGradients = finalGradients.map((g) => {
         return BN.min(g, q.sub(g));
       });
       let norm = q;
@@ -834,7 +849,7 @@ class HLR implements HLRImpl {
           norm = g;
         }
       }
-      const threshold = new BN(10, 10).pow(new BN(state.precision - task.tolerance, 10)).muln(state.samples);
+      const threshold = new BN(10, 10).pow(new BN(precision - task.tolerance, 10)).muln(samples);
       if (norm.gte(threshold)) {
         memberState.valid = false;
         state.valid = false;
@@ -968,7 +983,7 @@ class HLR implements HLRImpl {
       round: finalRound,
       status: entity.RoundStatus.Aggregating,
     });
-    const finishedCount = await em.count(entity.HLRMemberVerifier, { member: { $in: finalMembers } });
+    const finishedCount = await em.count(entity.HLRMemberVerifier, { verifier: state, valid: true });
     if (finishedCount !== finalMembers.length) {
       throw new Error(`task ${taskID} verification is not finished`);
     }

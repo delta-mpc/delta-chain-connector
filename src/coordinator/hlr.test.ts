@@ -429,10 +429,11 @@ describe("hlr coordinator verify", () => {
     assert.includeMembers(state1.unfinishedClients, [address1, address2, address3]);
     assert.isNotTrue(state1.confirmed);
 
-    const [, valid1] = await hlr.verify(address1, taskID, 3, proofs[0], pubSignals[0], 0, 10);
     await assert.isRejected(hlr.confirmVerification(address1, taskID));
-    const [, valid2] = await hlr.verify(address2, taskID, 3, proofs[1], pubSignals[1], 0, 10);
-    const [, valid3] = await hlr.verify(address3, taskID, 3, proofs[2], pubSignals[2], 0, 10);
+    const fut1 = hlr.verify(address1, taskID, 3, proofs[0], pubSignals[0], 0, 10);
+    const fut2 = hlr.verify(address2, taskID, 3, proofs[1], pubSignals[1], 0, 10);
+    const fut3 = hlr.verify(address3, taskID, 3, proofs[2], pubSignals[2], 0, 10);
+    const [[, valid1], [, valid2], [, valid3]] = await Promise.all([fut1, fut2, fut3]);
     assert.isTrue(valid1);
     assert.isTrue(valid2);
     assert.isTrue(valid3);

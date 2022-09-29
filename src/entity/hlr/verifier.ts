@@ -1,4 +1,4 @@
-import { Entity, OneToOne, PrimaryKey, Property } from "@mikro-orm/core";
+import { Entity, ManyToOne, OneToOne, PrimaryKey, Property } from "@mikro-orm/core";
 import { HLRRoundMember } from "./roundMember";
 import { HLRTask } from "./task";
 
@@ -13,23 +13,11 @@ export class HLRVerifier {
   @Property({ default: false, type: "boolean" })
   confirmed = false;
 
-  @Property()
-  gradients!: string[];
-
-  @Property()
-  precision!: number;
-
-  @Property()
-  samples!: number;
-
   @OneToOne(() => HLRTask)
   task!: HLRTask;
 
-  constructor(task: HLRTask, gradients: string[], precision: number) {
+  constructor(task: HLRTask) {
     this.task = task;
-    this.gradients = gradients;
-    this.precision = precision;
-    this.samples = 0;
   }
 }
 
@@ -38,14 +26,36 @@ export class HLRMemberVerifier {
   @PrimaryKey()
   id!: number;
 
+  @ManyToOne(() => HLRVerifier)
+  verifier!: HLRVerifier;
+
   @OneToOne(() => HLRRoundMember)
   member!: HLRRoundMember;
 
   @Property()
   valid = true;
 
-  constructor(member: HLRRoundMember) {
+  @Property()
+  samples!: number;
+
+  @Property()
+  gradients!: string[];
+
+  @Property()
+  precision!: number;
+
+  constructor(
+    verifier: HLRVerifier,
+    member: HLRRoundMember,
+    samples: number,
+    gradients: string[],
+    precision: number
+  ) {
+    this.verifier = verifier;
     this.member = member;
+    this.samples = samples;
+    this.gradients = gradients;
+    this.precision = precision;
   }
 }
 
