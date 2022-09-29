@@ -12,13 +12,13 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "outDir": "lib",
-    "baseUrl": "src",
+    "baseUrl": "./",
     "paths": {
-      "~/*": ["./*"]
+      "~/*": ["./src/*"]
     }
   },
   "include": ["src"],
-  "exclude": ["node_modules", "**/*.spec.ts", "**/*.test.ts"],
+  "exclude": ["node_modules"],
   "ts-node": {
     "require": ["tsconfig-paths/register"],
     "transpileOnly": true,

@@ -9,6 +9,7 @@ type DatabaseType = "mysql" | "sqlite";
 interface ContractOption {
   contractAddress: string;
 }
+type Verifiers = { [key: number]: string };
 
 interface Config {
   log: {
@@ -36,6 +37,11 @@ interface Config {
 
     identity: ContractOption;
     hfl: ContractOption;
+    datahub: ContractOption;
+    hlr: {
+      contractAddress: string;
+      verifiers: Verifiers;
+    };
   };
 }
 
@@ -67,6 +73,15 @@ const defaultConfig: Config = {
     },
     hfl: {
       contractAddress: "0x3830C82700B050dA87F1D1A60104Fb667227B686",
+    },
+    datahub: {
+      contractAddress: "",
+    },
+    hlr: {
+      contractAddress: "",
+      verifiers: {
+        3: "",
+      },
     },
   },
 };
