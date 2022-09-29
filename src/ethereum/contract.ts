@@ -71,6 +71,7 @@ export class ContractHelper {
       this.web3 = new Web3(provider);
       this.contract = new this.web3.eth.Contract(this.abis, this.option.contractAddress);
     } else {
+      // @ts-ignore
       this.web3 = new Web3(this.option.provider);
       this.contract = new this.web3.eth.Contract(this.abis);
       this.option.contractAddress = await this.deployContract(jsonInterface.bytecode);
