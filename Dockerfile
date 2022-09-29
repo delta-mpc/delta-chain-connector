@@ -6,6 +6,7 @@ COPY src /dcc/src
 COPY package*.json /dcc/
 COPY bin /dcc/bin
 COPY tsconfig.json /dcc/
+COPY tsconfig-build.json /dcc/
 
 RUN npm install && npm run build:ts && npm install . -g
 
