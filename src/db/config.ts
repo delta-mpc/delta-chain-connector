@@ -7,8 +7,9 @@ if (config.coordinator.db.type == "sqlite") {
   dbConfig = {
     type: "sqlite",
     dbName: config.coordinator.db.url,
-    entities: ["./lib/entity/**/*.js"],
-    entitiesTs: ["./src/entity/**/*.ts"],
+    entities: ["../entity/**/*.js"],
+    entitiesTs: ["../entity/**/*.ts"],
+    baseDir: __dirname
   };
 } else if (config.coordinator.db.type == "mysql") {
   const rawUrl = config.coordinator.db.url;
@@ -19,8 +20,9 @@ if (config.coordinator.db.type == "sqlite") {
     type: "mysql",
     dbName: dbName,
     clientUrl: clientUrl,
-    entities: ["./lib/entity/**/*.js"],
-    entitiesTs: ["./src/entity/**/*.ts"],
+    entities: ["../entity/**/*.js"],
+    entitiesTs: ["../entity/**/*.ts"],
+    baseDir: __dirname
   };
 }
 
