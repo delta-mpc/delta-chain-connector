@@ -3,6 +3,13 @@ import * as crypto from "crypto";
 
 export const NodeAliveTimeout = 60 * 2;
 
+function generateAddress(url: string, name: string) {
+  const hash = crypto.createHash("sha256");
+  hash.update(url);
+  hash.update(name);
+  return "0x" + hash.digest("hex").slice(0, 20);
+}
+
 @Entity()
 export class Node {
   @PrimaryKey()
@@ -25,7 +32,7 @@ export class Node {
     this.name = name;
     const timestamp = Math.floor(Date.now() / 1000);
     this.timeout = timestamp + NodeAliveTimeout;
-    this.address = crypto.randomBytes(48).toString("hex");
+    this.address = generateAddress(url, name);
   }
 
   refresh() {
