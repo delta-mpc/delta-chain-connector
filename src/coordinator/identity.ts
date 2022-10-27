@@ -11,12 +11,11 @@ class Identity implements IdentityImpl {
 
   async join(url: string, name: string): Promise<[string, string]> {
     const em = db.getEntityManager();
-    const node = await em.findOne(entity.Node, { url: url });
+    let node = await em.findOne(entity.Node, { url: url });
 
     if (!node) {
-      const node = new entity.Node(url, name);
+      node = new entity.Node(url, name);
       em.persist(node);
-      return [randomHex(32), node.address];
     } else {
       node.refresh();
     }
@@ -73,6 +72,9 @@ class Identity implements IdentityImpl {
     const node = await em.findOne(entity.Node, { address: address });
     if (!node) {
       throw new Error(`node of address ${address} doesn't exist`);
+    }
+    if (!node.isAlive()) {
+      throw new Error(`node of address ${address} is not alive`);
     }
     return node;
   }

@@ -7,7 +7,7 @@ function generateAddress(url: string, name: string) {
   const hash = crypto.createHash("sha256");
   hash.update(url);
   hash.update(name);
-  return "0x" + hash.digest("hex").slice(0, 20);
+  return "0x" + hash.digest("hex").slice(0, 40);
 }
 
 @Entity()
