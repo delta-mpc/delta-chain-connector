@@ -62,7 +62,7 @@ class Identity implements IdentityImpl {
   async getNodeInfo(address: string): Promise<entity.NodeInfo> {
     const res = await this.contract.call("getNodeInfo", [address]);
     if (typeof res === "string") {
-      throw new Error("getNodeInfo return type error");
+      throw new Error(`getNodeInfo return type error ${res}`);
     }
     return {
       address: address,
@@ -74,7 +74,7 @@ class Identity implements IdentityImpl {
   async getNodes(page: number, pageSize: number): Promise<entity.NodeInfosPage> {
     const res = await this.contract.call("getNodes", [page, pageSize]);
     if (typeof res === "string") {
-      throw new Error("getNodeInfo return type error");
+      throw new Error(`getNodeInfo return type error ${res}`);
     }
     const nodes = res[0].map((node: any) => {
       return {

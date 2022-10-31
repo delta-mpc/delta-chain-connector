@@ -40,7 +40,7 @@ class DataHub implements DataHubImpl {
   async getDataCommitment(address: string, name: string, index: number): Promise<string> {
     const res = await this.contract.call("getDataCommitment", [address, name, index]);
     if (typeof res === "object") {
-      throw new Error("getDataCommitment return type error");
+      throw new Error(`getDataCommitment return type error ${res}`);
     }
     return res;
   }
