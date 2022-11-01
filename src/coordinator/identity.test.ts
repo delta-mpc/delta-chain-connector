@@ -4,13 +4,15 @@ import { identity } from "./identity";
 import { Options } from "@mikro-orm/core";
 import * as db from "~/db";
 import * as entity from "~/entity/identity";
+import * as sinon from "sinon";
 
 chai.use(chaiAsPromised);
 
 const assert = chai.assert;
 
 describe("coordinator identity", function () {
-  before(async function () {
+  let clock: sinon.SinonFakeTimers;
+  before(async () => {
     const dbConfig: Options = {
       type: "sqlite",
       dbName: ":memory:",
@@ -18,13 +20,15 @@ describe("coordinator identity", function () {
       entitiesTs: ["src/entity/**/*.ts"],
     };
     await identity.init(dbConfig);
+    clock = sinon.useFakeTimers(new Date());
   });
 
-  after(async function () {
+  after(async () => {
     const orm = db.getORM();
     const generator = orm.getSchemaGenerator();
     await generator.dropSchema();
     await db.close();
+    clock.restore();
   });
 
   let address1: string;
@@ -32,86 +36,87 @@ describe("coordinator identity", function () {
   let address3: string;
   let address4: string;
 
-  describe("join", function () {
-    it("join four nodes", async function () {
-      address1 = (await identity.join("127.0.0.1:6700", "1"))[1];
-      address2 = (await identity.join("127.0.0.1:6800", "2"))[1];
-      address3 = (await identity.join("127.0.0.1:6900", "3"))[1];
-      address4 = (await identity.join("127.0.0.1:7000", "4"))[1];
+  it("join four nodes", async () => {
+    address1 = (await identity.join("127.0.0.1:6700", "1"))[1];
+    address2 = (await identity.join("127.0.0.1:6800", "2"))[1];
+    address3 = (await identity.join("127.0.0.1:6900", "3"))[1];
+    address4 = (await identity.join("127.0.0.1:7000", "4"))[1];
 
-      assert.lengthOf(address1, 96);
-      assert.lengthOf(address2, 96);
-      assert.lengthOf(address3, 96);
+    assert.lengthOf(address1, 42);
+    assert.lengthOf(address2, 42);
+    assert.lengthOf(address3, 42);
 
-      const em = db.getEntityManager();
-      const node1 = await em.findOne(entity.Node, { address: address1 });
-      assert.strictEqual(node1?.name, "1");
-      assert.strictEqual(node1?.url, "127.0.0.1:6700");
+    const em = db.getEntityManager();
+    const node1 = await em.findOne(entity.Node, { address: address1 });
+    assert.strictEqual(node1?.name, "1");
+    assert.strictEqual(node1?.url, "127.0.0.1:6700");
 
-      const node2 = await em.findOne(entity.Node, { address: address2 });
-      assert.strictEqual(node2?.name, "2");
-      assert.strictEqual(node2?.url, "127.0.0.1:6800");
+    const node2 = await em.findOne(entity.Node, { address: address2 });
+    assert.strictEqual(node2?.name, "2");
+    assert.strictEqual(node2?.url, "127.0.0.1:6800");
 
-      const node3 = await em.findOne(entity.Node, { address: address3 });
-      assert.strictEqual(node3?.name, "3");
-      assert.strictEqual(node3?.url, "127.0.0.1:6900");
+    const node3 = await em.findOne(entity.Node, { address: address3 });
+    assert.strictEqual(node3?.name, "3");
+    assert.strictEqual(node3?.url, "127.0.0.1:6900");
 
-      const node4 = await em.findOne(entity.Node, { address: address4 });
-      assert.strictEqual(node4?.name, "4");
-      assert.strictEqual(node4?.url, "127.0.0.1:7000");
-    });
+    const node4 = await em.findOne(entity.Node, { address: address4 });
+    assert.strictEqual(node4?.name, "4");
+    assert.strictEqual(node4?.url, "127.0.0.1:7000");
   });
 
-  describe("updateUrl", function () {
-    it("update node4 url", async function () {
-      await identity.updateUrl(address4, "127.0.0.1:7001");
+  it("leave node4", async () => {
+    await identity.leave(address4);
 
-      const em = db.getEntityManager();
-      const node = await em.findOne(entity.Node, { address: address4 });
+    const em = db.getEntityManager();
+    const node = await em.findOne(entity.Node, { address: address4 });
 
-      assert.strictEqual(node?.url, "127.0.0.1:7001");
-    });
+    assert.isNotTrue(node?.isAlive());
   });
 
-  describe("updateName", function () {
-    it("update node4 name", async function () {
-      await identity.updateName(address4, "44");
+  it("get node1 info", async () => {
+    const info = await identity.getNodeInfo(address1);
 
-      const em = db.getEntityManager();
-      const node = await em.findOne(entity.Node, { address: address4 });
-
-      assert.strictEqual(node?.name, "44");
-    });
+    assert.strictEqual(info.name, "1");
+    assert.strictEqual(info.url, "127.0.0.1:6700");
   });
 
-  describe("getNodeInfo", function () {
-    it("get node1 info", async function () {
-      const info = await identity.getNodeInfo(address1);
+  it("update url", async () => {
+    const url = "127.0.0.1:6701";
+    await identity.updateUrl(address1, url);
 
-      assert.strictEqual(info.name, "1");
-      assert.strictEqual(info.url, "127.0.0.1:6700");
-    });
+    const info = await identity.getNodeInfo(address1);
+    assert.strictEqual(info.url, url);
+
+    assert.isRejected(identity.updateUrl(address4, url));
   });
 
-  describe("getNodes", function () {
-    it("get nodes", async function () {
-      const nodes = await identity.getNodes(1, 20);
-      assert.strictEqual(nodes.totalCount, 4);
-      assert.strictEqual(nodes.nodes[0].address, address1);
-      assert.strictEqual(nodes.nodes[1].address, address2);
-      assert.strictEqual(nodes.nodes[2].address, address3);
-      assert.strictEqual(nodes.nodes[3].address, address4);
-    });
+  it("update name", async () => {
+    const name = "11";
+    await identity.updateName(address1, name);
+
+    const info = await identity.getNodeInfo(address1);
+    assert.strictEqual(info.name, name);
+
+    assert.isRejected(identity.updateName(address4, name));
   });
 
-  describe("leave", function () {
-    it("leave node4", async function () {
-      await identity.leave(address4);
+  it("get nodes", async () => {
+    const nodes = await identity.getNodes(1, 20);
+    assert.strictEqual(nodes.totalCount, 3);
+    assert.strictEqual(nodes.nodes[0].address, address1);
+    assert.strictEqual(nodes.nodes[1].address, address2);
+    assert.strictEqual(nodes.nodes[2].address, address3);
+  });
 
-      const em = db.getEntityManager();
-      const node = await em.findOne(entity.Node, { address: address4, joined: true });
+  it("auto leave", async () => {
+    await clock.tickAsync(2 * 60 * 1000);
 
-      assert.notExists(node);
-    });
+    const em = db.getEntityManager();
+    for (const address of [address1, address2, address3]) {
+      const node = await em.findOne(entity.Node, { address: address });
+
+      assert.isNotNull(node);
+      assert.isFalse(node?.isAlive());
+    }
   });
 });

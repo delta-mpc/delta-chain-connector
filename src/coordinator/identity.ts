@@ -11,20 +11,16 @@ class Identity implements IdentityImpl {
 
   async join(url: string, name: string): Promise<[string, string]> {
     const em = db.getEntityManager();
-    const node = await em.findOne(entity.Node, { url: url });
+    let node = await em.findOne(entity.Node, { url: url });
+
     if (!node) {
-      const node = new entity.Node(url, name);
-      node.joined = true;
-      await em.persistAndFlush(node);
-      return [randomHex(32), node.address];
-    } else if (node.joined == false) {
-      // check node.joined explictly. Note: node.joined is a integer in database, so we should use == instead of === to check it.
-      node.joined = true;
-      await em.flush();
-      return [randomHex(32), node.address];
+      node = new entity.Node(url, name);
+      em.persist(node);
     } else {
-      throw new Error(`node ${node.address} has already joined`);
+      node.refresh();
     }
+    await em.flush();
+    return [randomHex(32), node.address];
   }
 
   async updateUrl(address: string, url: string): Promise<string> {
@@ -33,6 +29,9 @@ class Identity implements IdentityImpl {
 
     if (!node) {
       throw new Error(`node of address ${address} doesn't exist`);
+    }
+    if (!node.isAlive()) {
+      throw new Error(`node of address ${address} is not alive`);
     }
     node.url = url;
     await em.persistAndFlush(node);
@@ -45,6 +44,9 @@ class Identity implements IdentityImpl {
     if (!node) {
       throw new Error(`node of address ${address} doesn't exist`);
     }
+    if (!node.isAlive()) {
+      throw new Error(`node of address ${address} is not alive`);
+    }
     node.name = name;
     await em.persistAndFlush(node);
     return randomHex(32);
@@ -56,7 +58,11 @@ class Identity implements IdentityImpl {
     if (!node) {
       throw new Error(`node of address ${address} doesn't exist`);
     }
-    node.joined = false;
+    if (!node.isAlive()) {
+      throw new Error(`node of address ${address} is not alive`);
+    }
+
+    node.leave();
     await em.flush();
     return randomHex(32);
   }
@@ -67,14 +73,18 @@ class Identity implements IdentityImpl {
     if (!node) {
       throw new Error(`node of address ${address} doesn't exist`);
     }
+    if (!node.isAlive()) {
+      throw new Error(`node of address ${address} is not alive`);
+    }
     return node;
   }
 
   async getNodes(page: number, pageSize: number): Promise<entity.NodeInfosPage> {
     const em = db.getEntityManager();
+    const timestamp = Math.floor(Date.now() / 1000);
     const [nodes, count] = await em.findAndCount(
       entity.Node,
-      { joined: true },
+      { timeout: { $gte: timestamp} },
       { orderBy: { id: "ASC" }, limit: pageSize, offset: (page - 1) * pageSize }
     );
     return {

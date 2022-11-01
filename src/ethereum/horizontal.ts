@@ -139,7 +139,7 @@ class Horizontal implements HorizontalImpl {
   async getTask(taskID: string): Promise<entity.TaskInfo> {
     const res = await this.contract.call("getTask", [taskID]);
     if (typeof res === "string") {
-      throw new Error("getTask return type error");
+      throw new Error(`getTask return type error ${res}`);
     }
 
     return {
@@ -176,7 +176,7 @@ class Horizontal implements HorizontalImpl {
   async getTaskRound(taskID: string, round: number): Promise<entity.TaskRoundInfo> {
     const res = await this.contract.call("getTaskRound", [taskID, round]);
     if (typeof res === "string") {
-      throw new Error("getTaskRound return type error");
+      throw new Error(`getTaskRound return type error ${res}`);
     }
 
     return {
@@ -236,7 +236,7 @@ class Horizontal implements HorizontalImpl {
   async getClientPublicKeys(taskID: string, round: number, clients: string[]): Promise<[string, string][]> {
     const res = await this.contract.call("getClientPublickeys", [taskID, round, clients]);
     if (typeof res === "string") {
-      throw new Error("getClientPublickeys return type error");
+      throw new Error(`getClientPublickeys return type error ${res}`);
     }
 
     return res.map((item: any) => [item.pk1, item.pk2]);
@@ -270,7 +270,7 @@ class Horizontal implements HorizontalImpl {
   async getResultCommitment(taskID: string, round: number, client: string): Promise<string> {
     const res = await this.contract.call("getResultCommitment", [taskID, client, round]);
     if (typeof res === "object") {
-      throw new Error("getClientPublickeys return type error");
+      throw new Error(`getClientPublickeys return type error ${res}`);
     }
 
     return res;
@@ -326,7 +326,7 @@ class Horizontal implements HorizontalImpl {
   ): Promise<entity.SecretShareData[]> {
     const res = await this.contract.call("getSecretSharingDatas", [taskID, round, senders, receiver]);
     if (typeof res === "string") {
-      throw new Error("getSecretShareDatas return type error");
+      throw new Error(`getSecretShareDatas return type error ${res}`);
     }
 
     return res.map((item: any) => {

@@ -1,5 +1,6 @@
 import common from "@ethereumjs/common";
 import { TransactionFactory } from "@ethereumjs/tx";
+import { Mutex } from "async-mutex";
 import * as fs from "fs/promises";
 import { EthereumProvider } from "ganache";
 import { EventEmitter, PassThrough, Readable } from "stream";
@@ -36,6 +37,17 @@ interface gasOption {
 type Result = { [key: string]: string };
 type Mixed = { [key: string | number]: string | any } | string;
 
+const accountMutexs = new Map<string, Mutex>();
+
+function getAccountMutex(address: string): Mutex {
+  let res = accountMutexs.get(address);
+  if (!res) {
+    res = new Mutex();
+    accountMutexs.set(address, res);
+  }
+  return res;
+}
+
 export class ContractHelper {
   private web3!: Web3;
   private abis!: Abi[];
@@ -45,11 +57,14 @@ export class ContractHelper {
 
   private unsubscribeMap: Map<Readable, () => void> = new Map();
 
+  private mutex: Mutex;
+
   constructor(option: ContractOption) {
     this.option = option;
     if (typeof option.provider === "string" && option.contractAddress === undefined) {
       throw new Error("When provider is a url, contractAddress can't be undefined");
     }
+    this.mutex = getAccountMutex(this.option.nodeAddress);
   }
 
   async init(): Promise<void> {
@@ -111,25 +126,28 @@ export class ContractHelper {
         arguments: this.option.deployArgs,
       })
       .encodeABI();
-    const nonce = await this.web3.eth.getTransactionCount(this.option.nodeAddress, "pending");
-    const tra = {
-      data: abiData,
-      from: this.option.nodeAddress,
-      gasPrice: "0x" + this.option.gasPrice.toString(16),
-      gasLimit: "0x" + this.option.gasLimit.toString(16),
-      nonce: this.web3.utils.toHex(nonce),
-    };
-    const key = Buffer.from(this.option.privateKey, "hex");
-    const tx = TransactionFactory.fromTxData(tra, {
-      common: common.custom({ chainId: 1337 }),
+    return await this.mutex.runExclusive(async () => {
+      const nonce = await this.web3.eth.getTransactionCount(this.option.nodeAddress, "pending");
+      const tra = {
+        data: abiData,
+        from: this.option.nodeAddress,
+        gasPrice: "0x" + this.option.gasPrice.toString(16),
+        gasLimit: "0x" + this.option.gasLimit.toString(16),
+        nonce: this.web3.utils.toHex(nonce),
+      };
+      const key = Buffer.from(this.option.privateKey, "hex");
+      const tx = TransactionFactory.fromTxData(tra, {
+        common: common.custom({ chainId: 1337 }),
+      });
+      const serializedTx = "0x" + tx.sign(key).serialize().toString("hex");
+      const receipt = await this.web3.eth.sendSignedTransaction(serializedTx);
+      const finalReceipt = await this.web3.eth.getTransactionReceipt(receipt.transactionHash);
+      if (finalReceipt.status == true && finalReceipt.contractAddress) {
+        return finalReceipt.contractAddress;
+      } else {
+        throw new Error("deploy contract failed");
+      }
     });
-    const serializedTx = "0x" + tx.sign(key).serialize().toString("hex");
-    const receipt = await this.web3.eth.sendSignedTransaction(serializedTx);
-    if (receipt.contractAddress) {
-      return receipt.contractAddress;
-    } else {
-      throw new Error("deploy contract failed");
-    }
   }
 
   async method(
@@ -144,30 +162,32 @@ export class ContractHelper {
     const gasPrice = gasOpt?.gasPrice || this.option.gasPrice;
     const gasLimit = gasOpt?.gasLimit || this.option.gasLimit;
 
-    if (nonce === 0) {
-      nonce = await this.web3.eth.getTransactionCount(this.option.nodeAddress, "pending");
-    }
+    return await this.mutex.runExclusive(async () => {
+      if (nonce === 0) {
+        nonce = await this.web3.eth.getTransactionCount(this.option.nodeAddress, "pending");
+      }
 
-    const tra = {
-      data: data,
-      from: this.option.nodeAddress,
-      to: this.option.contractAddress,
-      gasPrice: "0x" + gasPrice.toString(16),
-      gasLimit: "0x" + gasLimit.toString(16),
-      nonce: this.web3.utils.toHex(nonce),
-    };
+      const tra = {
+        data: data,
+        from: this.option.nodeAddress,
+        to: this.option.contractAddress,
+        gasPrice: "0x" + gasPrice.toString(16),
+        gasLimit: "0x" + gasLimit.toString(16),
+        nonce: this.web3.utils.toHex(nonce),
+      };
 
-    let privateKey = this.option.privateKey;
-    if (privateKey.startsWith("0x")) {
-      privateKey = privateKey.slice(2);
-    }
-    const key = Buffer.from(privateKey, "hex");
-    const tx = TransactionFactory.fromTxData(tra, {
-      common: common.custom(this.option.chainParam),
+      let privateKey = this.option.privateKey;
+      if (privateKey.startsWith("0x")) {
+        privateKey = privateKey.slice(2);
+      }
+      const key = Buffer.from(privateKey, "hex");
+      const tx = TransactionFactory.fromTxData(tra, {
+        common: common.custom(this.option.chainParam),
+      });
+      const serializedTx = "0x" + tx.sign(key).serialize().toString("hex");
+      const receipt = await this.web3.eth.sendSignedTransaction(serializedTx);
+      return receipt.transactionHash;
     });
-    const serializedTx = "0x" + tx.sign(key).serialize().toString("hex");
-    const receipt = await this.web3.eth.sendSignedTransaction(serializedTx);
-    return receipt.transactionHash;
   }
 
   async waitForReceipt(hash: string, retry: number = 3): Promise<TransactionReceipt> {
