@@ -17,6 +17,7 @@ class Identity implements IdentityImpl {
       node = new entity.Node(url, name);
       em.persist(node);
     } else {
+      node.name = name;
       node.refresh();
     }
     await em.flush();
